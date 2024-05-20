@@ -12,9 +12,19 @@ contract EventCreation {
 		string logoUrl;
 		address admin;
 		uint256 numberOfTickets;
+		bool isActive;
 	}
 
-	event EventCreated(Event createdEvent);
+	event EventCreated(uint256 indexed eventId, Event createdEvent);
+	event DescriptionChanged(uint256 indexed eventId, string newDescription);
+	event LocationChanged(uint256 indexed eventId, string newLocation);
+	event LogoUrlChanged(uint256 indexed eventId, string newLogoUrl);
+	event NumberOfTicketsChanged(
+		uint256 indexed eventId,
+		uint256 newNumberOfTickets
+	);
+	event EventDeleted(uint256 indexed eventId);
+	event EventReactivated(uint256 indexed eventId);
 
 	mapping(uint256 => Event) public events;
 
@@ -24,9 +34,9 @@ contract EventCreation {
 	//the key represents the id of an event, while the address array represents all the wallets allowed to redeem an Extra
 	mapping(uint256 => mapping(address => bool)) public allowedList;
 
-	uint256 public eventCounter;
+	mapping(uint256 => uint256) public mintedTickets;
 
-	uint256 mintedTickets;
+	uint256 public eventCounter;
 
 	modifier isSenderAdmin(uint256 eventId) {
 		if (events[eventId].admin != msg.sender) {
@@ -57,21 +67,18 @@ contract EventCreation {
 			location,
 			logoUrl,
 			msg.sender,
-			numberOfTickets
+			numberOfTickets,
+			true
 		);
-		emit EventCreated(events[eventId]);
+		emit EventCreated(eventId, events[eventId]);
 	}
 
 	function addExtra(
 		address deployedExtraAddress,
 		uint256 eventId,
-		uint256 extraType,
 		address caller
 	) public isCallerAdmin(eventId, caller) {
 		extras[eventId].push(deployedExtraAddress);
-		if (extraType == 0) {
-			mintedTickets++;
-		}
 	}
 
 	function addAllowedAddress(
@@ -86,6 +93,7 @@ contract EventCreation {
 		uint256 eventId
 	) public isSenderAdmin(eventId) {
 		events[eventId].description = newDescription;
+		emit DescriptionChanged(eventId, newDescription);
 	}
 
 	function changeLocation(
@@ -93,6 +101,7 @@ contract EventCreation {
 		uint256 eventId
 	) public isSenderAdmin(eventId) {
 		events[eventId].location = newLocation;
+		emit LocationChanged(eventId, newLocation);
 	}
 
 	function changeLogo(
@@ -100,6 +109,7 @@ contract EventCreation {
 		uint256 eventId
 	) public isSenderAdmin(eventId) {
 		events[eventId].logoUrl = newLogoUrl;
+		emit LogoUrlChanged(eventId, newLogoUrl);
 	}
 
 	function changeNumberOfTickets(
@@ -107,10 +117,32 @@ contract EventCreation {
 		uint256 eventId
 	) public isSenderAdmin(eventId) {
 		events[eventId].numberOfTickets = newNumberOfTickets;
+		emit NumberOfTicketsChanged(eventId, newNumberOfTickets);
+	}
+
+	function deleteEvent(uint256 eventId) public isSenderAdmin(eventId) {
+		events[eventId].isActive = false;
+		emit EventDeleted(eventId);
+	}
+
+	function reactivateEvent(uint256 eventId) public isSenderAdmin(eventId) {
+		events[eventId].isActive = true;
+		emit EventReactivated(eventId);
+	}
+
+	function increaseMintedTickets(uint256 eventId) external {
+		mintedTickets[eventId]++;
+	}
+
+	function getMintedTickets(uint256 eventId) public view returns (uint256) {
+		return mintedTickets[eventId];
+	}
+
+	function getNumberOfTickets(uint256 eventId) public view returns (uint256) {
+		return events[eventId].numberOfTickets;
 	}
 
 	function getExtras(uint256 eventId) public view returns (address[] memory) {
-		//TODO check that it doesnt exist already
 		return extras[eventId];
 	}
 
@@ -118,7 +150,6 @@ contract EventCreation {
 		uint256 eventId,
 		address addressToCheck
 	) public view returns (bool) {
-		//TODO check that it doesnt exist already
 		return allowedList[eventId][addressToCheck];
 	}
 }
