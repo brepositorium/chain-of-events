@@ -46,19 +46,19 @@ contract ExtraNft is ERC721, ERC721URIStorage, ERC721Pausable, Ownable {
 		_;
 	}
 
-	modifier isTokenMinted(uint256 tokenId) {
-		if (_exists(tokenId) == false) {
-			revert ExtraNonexistent(tokenId);
+	modifier isTokenMinted(uint256 _tokenId) {
+		if (_exists(_tokenId) == false) {
+			revert ExtraNonexistent(_tokenId);
 		}
 		_;
 	}
 
-	modifier checkTicketsLimitNotReached(uint256 eventId) {
+	modifier checkTicketsLimitNotReached(uint256 _eventId) {
 		if (
-			eventCreation.getMintedTickets(eventId) >=
-			eventCreation.getNumberOfTickets(eventId)
+			eventCreation.getMintedTickets(_eventId) >=
+			eventCreation.getNumberOfTickets(_eventId)
 		) {
-			revert NumberOfTicketsLimitReached(eventId);
+			revert NumberOfTicketsLimitReached(_eventId);
 		}
 		_;
 	}
@@ -71,20 +71,20 @@ contract ExtraNft is ERC721, ERC721URIStorage, ERC721Pausable, Ownable {
 	}
 
 	constructor(
-		string memory name,
-		string memory symbol,
+		string memory _name,
+		string memory _symbol,
 		string memory _uri,
-		uint256 extraType,
+		uint256 _extraType,
 		uint256 _price,
 		address _eventCreationAddress,
 		uint256 _eventId
-	) ERC721(name, symbol) Ownable() {
+	) ERC721(_name, _symbol) Ownable() {
 		eventCreation = EventCreation(_eventCreationAddress);
 		eventCreation.addExtra(address(this), _eventId, msg.sender);
 		eventId = _eventId;
 		price = _price;
 		uri = _uri;
-		EXTRA_TYPE = extraType;
+		EXTRA_TYPE = _extraType;
 	}
 
 	function safeMint(
@@ -123,8 +123,8 @@ contract ExtraNft is ERC721, ERC721URIStorage, ERC721Pausable, Ownable {
 		uri = updatedUri;
 	}
 
-	function updateMintLimit(uint256 newLimit) public onlyOwner {
-		mintLimit = newLimit;
+	function updateMintLimit(uint256 updatedLimit) public onlyOwner {
+		mintLimit = updatedLimit;
 	}
 
 	function pause() public onlyOwner {
