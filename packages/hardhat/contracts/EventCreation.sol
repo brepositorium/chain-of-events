@@ -15,7 +15,7 @@ contract EventCreation {
 		bool isActive;
 	}
 
-	event EventCreated(uint256 indexed eventId, Event createdEvent);
+	event EventCreated(Event createdEvent);
 	event DescriptionChanged(uint256 indexed eventId, string newDescription);
 	event LocationChanged(uint256 indexed eventId, string newLocation);
 	event LogoUrlChanged(uint256 indexed eventId, string newLogoUrl);
@@ -70,7 +70,7 @@ contract EventCreation {
 			numberOfTickets,
 			true
 		);
-		emit EventCreated(eventId, events[eventId]);
+		emit EventCreated(events[eventId]);
 	}
 
 	function addExtra(
