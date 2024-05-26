@@ -6,6 +6,8 @@ import { get, ref, runTransaction } from "firebase/database";
 import { useAccount } from 'wagmi'
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import EventCard from "~~/components/EventCard";
+import { SocketEventSubscriber } from "ethers";
 
 //TODO: move from here
 const client = new ApolloClient({
@@ -19,6 +21,7 @@ interface EventDetail {
     createdEvent_name: string,
     createdEvent_description: string,
     createdEvent_location: string
+    createdEvent_logoUrl: string
 }
 
 const EventsPage = () => {
@@ -52,9 +55,17 @@ const EventsPage = () => {
       if (loading) return <p>Loading...</p>;
       if (error) return <p>Error: {error.message}</p>;
 
+    const toggleBookmark = (eventId: number) => {
+        if (bookmarkedEvents.includes(eventId)) {
+            deleteEventIdForAddress(eventId); 
+        } else {
+            bookmarkEvent(eventId);
+        }
+    };
+
     const bookmarkEvent = (eventId: number) => {
         const bookmarksRef = ref(database, 'bookmarks/' + address);
-
+        
         runTransaction(bookmarksRef, (currentEvents: any) => {
             if (currentEvents === null) {
             return [eventId];
@@ -133,16 +144,17 @@ const EventsPage = () => {
                 <p>No bookmarked events found.</p>
             )}
             {data.eventCreateds.map((event: EventDetail) => (
-                <div key={event.id} style={{ margin: '20px', padding: '10px', border: '1px solid #ccc' }}>
-                    <h3>{event.createdEvent_name}</h3>
-                    <p>{event.createdEvent_description}</p>
-                    <p>{event.createdEvent_location}</p>
-                    <div className="flex flex row">
-                        <Link href={"/event-info/" + event.createdEvent_id} className="btn">See more</Link>
-                        <button className="btn" onClick={() => bookmarkEvent(event.createdEvent_id)}>Bookmark</button>
-                        <button className="btn" onClick={() => deleteEventIdForAddress(event.createdEvent_id)}>Delete Bookmark</button>
-                    </div>
-                </div>
+                <EventCard 
+                key={event.id} 
+                eventId={event.createdEvent_id} 
+                logoUrl={event.createdEvent_logoUrl}
+                eventName={event.createdEvent_name} 
+                eventDescription={event.createdEvent_description}
+                eventLocation={event.createdEvent_location} 
+                manageUrl={"/event-info/" + Number(event.createdEvent_id)}
+                onToggleBookmark={() => toggleBookmark(event.createdEvent_id)}
+                isBookmarked={bookmarkedEvents?.includes(event.createdEvent_id)}
+                />
             ))}
             <button className="btn" onClick={handleLoadMore}>Load more</button>
         </div>

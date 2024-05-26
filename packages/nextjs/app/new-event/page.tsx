@@ -34,54 +34,57 @@ const NewEvent: NextPage = () => {
     }
 
     return (
-        <div>
-        <form>
-                <div className="mt-4">
+        <div className="bg-circles bg-contain bg-center bg-no-repeat">
+            
+        <form className="flex flex-col items-center gap-6 mt-8">
+            <div className="mr-28 mt-4 text-xl font-bold justify-center px-4">
+                <h1>Create your own event</h1>
+            </div>
+                <div className="">
                     <input
                         type="text"
                         placeholder="Name"
                         value={name}
                         onChange={e => setName(e.target.value)}
-                        className="input input-bordered w-full max-w-md"
+                        className="input input-md input-bordered w-80 bg-base-content rounded text-black"
                     />
                 </div>
-                <div className="mt-4">
-                    <input
-                        type="text"
+                <div className="">
+                    <textarea
                         placeholder="Description"
                         value={description}
                         onChange={e => setDescription(e.target.value)}
-                        className="input input-bordered w-full max-w-md"
+                        className="textarea textarea-bordered w-80 bg-base-content rounded text-black"
                     />
                 </div>
-                <div className="mt-4">
+                <div className="">
                     <input
                         type="text"
                         placeholder="Location"
                         value={location}
                         onChange={e => setLocation(e.target.value)}
-                        className="input input-bordered w-full max-w-md"
+                        className="input input-md input-bordered w-80 bg-base-content rounded text-black"
                     />
                 </div>
-                <div className="mt-4">
+                <div className="">
                     <input
                         type="number"
                         placeholder="Number of Tickets"
                         value={numberOfTickets}
                         onChange={e => setNumberOfTickets(parseInt(e.target.value))}
-                        className="input input-bordered w-full max-w-md"
+                        className="input input-md input-bordered w-80 bg-base-content rounded text-black"
                     />
                 </div>
-                <div className="mt-4">
+                <div className="">
                     <input
                         type="file"
                         accept="image/*"
                         onChange={handleImageChange}
-                        className="input input-bordered w-full max-w-md"
+                        className="file-input file-input-bordered w-80 rounded bg-base-content text-black"
                     />
                 </div>
-                <div className="py-4">
-                    <button type="button" className="btn" onClick={handleSubmit}>Submit</button>
+                <div className="ml-36">
+                    <button type="button" className="btn btn-gradient-primary rounded-xl w-36" onClick={handleSubmit}>Create event</button>
                 </div>
             </form>
         </div>

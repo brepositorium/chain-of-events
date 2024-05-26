@@ -30,3 +30,8 @@ p {
 .btn.btn-ghost {
   @apply shadow-none;
 }
+
+.btn-gradient-primary {
+  background: linear-gradient(10deg, #6262D9 0%, #9D62D9 100%);
+}
+
