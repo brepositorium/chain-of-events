@@ -15,7 +15,6 @@ error NotOnAllowList(uint256 eventId, address sendersAddress);
 error ExtraNonexistent(uint256 tokenId);
 error NumberOfTicketsLimitReached(uint256 eventId);
 error MintLimitReached(uint256 currentMintCount);
-error NotEnoughTokensOwned();
 error NotEnoughUnredeemedTokens(address _ticketOwner);
 
 contract ExtraNft is
@@ -95,13 +94,6 @@ contract ExtraNft is
 			approvedChainlinkContracts[msg.sender] != true
 		) {
 			revert OwnableUnauthorizedAccount(_msgSender());
-		}
-		_;
-	}
-
-	modifier ownsEnoughTokens(uint256 _amount) {
-		if (balanceOf(msg.sender) < _amount) {
-			revert NotEnoughTokensOwned();
 		}
 		_;
 	}
@@ -221,12 +213,19 @@ contract ExtraNft is
 		return unredeemedBalance;
 	}
 
-	function bulkTransfer(
+	function bulkTransferUnredeemedTokens(
 		address _to,
 		uint256 _amount
-	) public ownsEnoughTokens(_amount) {
+	) public hasEnoughUnredeemedTokens(msg.sender, _amount) {
 		for (uint256 i; i < _amount; i++) {
-			transferFrom(msg.sender, _to, tokenOfOwnerByIndex(msg.sender, i));
+			uint256 _tokenId = tokenOfOwnerByIndex(msg.sender, i);
+			if (redemptionMap[_tokenId] == false) {
+				transferFrom(
+					msg.sender,
+					_to,
+					tokenOfOwnerByIndex(msg.sender, i)
+				);
+			}
 		}
 	}
 
