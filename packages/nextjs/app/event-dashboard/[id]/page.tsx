@@ -5,7 +5,8 @@ import { GET_EVENT_DETAILS_BY_ID } from "~~/utils/chain-of-events/queries";
 import SimpleModal from '~~/components/SimpleModal';
 import AddExtraModal from '~~/components/AddExtraModal';
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
-import { fetchExtraDetails, pauseSellingForExtra, unpauseSellingForExtra } from "~~/utils/chain-of-events/deployContract";
+import { fetchExtraDetails } from "~~/utils/chain-of-events/deployContract";
+import ExtraCard from "~~/components/ExtraCard";
 
 
 //TODO: move from here
@@ -23,6 +24,8 @@ interface ExtraDetail {
     extraType: bigint;
     name: string;
     symbol: string;
+    description: string;
+    imageUrl: string;
     price: bigint;
     uri: string;
 }
@@ -100,86 +103,76 @@ const EditDashboardPage = ({ params }: PageProps) => {
         setIsSimpleModalOpen(false);
     };
 
-    const handlePause = (address: string) => {
-
-        if(!sellingPaused) {
-            pauseSellingForExtra(address);
-            setSellingPaused(true);
-        } else {
-            unpauseSellingForExtra(address);
-            setSellingPaused(false);
-        }
-    }
-
     if (loadingEvents) return <div className="flex justify-center loading loading-spinner loading-lg"></div>;
     if (errorEvents) return <p>Error loading events</p>;
 
     const eventData = dataEvents.eventCreateds[0];
 
-    //TODO: improve logic here
   return (
-    <div>
-      <div>
-        <label>Name: {eventData.createdEvent_name}</label>
-      </div>
-      <div>
-        <label>Description: {eventData.createdEvent_description}</label>
-        <button className="btn" onClick={() => handleEditClick('createdEvent_description')}>Edit</button>
-      </div>
-      <div>
-        <label>Location: {eventData.createdEvent_location}</label>
-        <button className="btn" onClick={() => handleEditClick('createdEvent_location')}>Edit</button>
-      </div>
-      <div>
-        <label>Logo URL: {eventData.createdEvent_logoUrl}</label>
-        <button className="btn" onClick={() => handleEditClick('createdEvent_logoUrl')}>Edit</button>
-      </div>
-      <div>
-        <label>Number of tickets: {eventData.createdEvent_numberOfTickets}</label>
-        <button className="btn" onClick={() => handleEditClick('createdEvent_numberOfTickets')}>Edit</button>
-      </div>
-      <div>
-        <button className="btn" onClick={() => handleAddModalOpen(0)}>Add ticket type</button>
-      </div>
-      <div>
-        <button className="btn" onClick={() => handleAddModalOpen(1)}>Add consumable</button>
-      </div>
-      <div>
-            <div>
-                <h2>Ticket Types</h2>
-                {ticketTypes.map((item, index) => (
-                    <>
-                        <div key={index} className="box">
-                            <p>Name: {item.name}</p>
-                            <p>Symbol: {item.symbol}</p>
-                            <p>Price: {item.price.toString()}</p>
-                            <p>URI: {item.uri}</p>
-                        </div>
-                        <div>
-                            <button className="btn" onClick={() => handleEditClick('createdEvent_price')}>Change price</button>
-                            <button className="btn" onClick={() => {handlePause(item.address)}}>Pause selling</button>
-                        </div>
-                    </>    
-                ))}
-            </div>
-            <div>
-                <h2>Consumables</h2>
-                {consumables.map((item, index) => (
-                    <>
-                    <div key={index} className="box">
-                        <p>Name: {item.name}</p>
-                        <p>Symbol: {item.symbol}</p>
-                        <p>Price: {item.price.toString()}</p>
-                        <p>URI: {item.uri}</p>
-                    </div>
-                    <div>
-                        <button className="btn" onClick={() => handleEditClick('createdEvent_price')}>Change price</button>
-                        <button className="btn" onClick={() => {handlePause(item.address)}}>Pause selling</button>
-                    </div>
-                </>   
-                ))}
-            </div>
+    <div className="h-[650px] bg-circles bg-no-repeat">
+      <div className="flex flex-col items-center mt-12 gap-4">
+        <div className="text-2xl font-extrabold mb-6">
+          {eventData.createdEvent_name}
         </div>
+        <div className="flex">
+          <div className="text-lg w-96 border p-2">
+            {eventData.createdEvent_description}
+          </div>
+          <button className="btn btn-gradient-primary rounded btn-sm ml-8" onClick={() => handleEditClick('createdEvent_description')}>Edit description</button>
+        </div>
+        <div className="flex">
+          <div className="text-lg w-96 border p-2 mr-6">
+            {eventData.createdEvent_location}
+          </div>
+          <button className="btn btn-gradient-primary rounded btn-sm ml-8" onClick={() => handleEditClick('createdEvent_location')}>Edit location</button>
+        </div>
+        <div className="text-lg mt-6">
+          No. of tickets: &nbsp; &nbsp; {eventData.createdEvent_numberOfTickets}
+          <button className="btn btn-gradient-primary rounded btn-sm ml-8" onClick={() => handleEditClick('createdEvent_numberOfTickets')}>Edit number of tickets</button>
+        </div>
+        <div className="mt-8">
+          <button className="btn btn-gradient-primary rounded btn-md ml-8" onClick={() => handleAddModalOpen(0)}>Add ticket type</button>
+        </div>
+        <div>
+          <button className="btn btn-gradient-primary rounded btn-md ml-8" onClick={() => handleAddModalOpen(1)}>Add consumable</button>
+        </div>
+      </div>
+      <div className="container mx-auto px-40">
+        <h1 className="text-2xl font-bold my-4">Ticket types</h1>
+        <div className="grid grid-cols-3 gap-4">
+            {ticketTypes.map((item, index) => (
+              <ExtraCard
+              extraName={item.name}
+              description={item.description}
+              imageUrl={item.imageUrl}
+              price={Number(item.price)}
+              hasQuantity={false}
+              actions={[
+                  { label: 'Manage', url: "/extra/" + item.address}
+              ]}
+              extraType={Number(item.extraType)}
+              />
+            ))}
+        </div>
+      </div>
+      <div className="container mx-auto px-40">
+        <h1 className="text-2xl font-bold my-4">Consumables</h1>
+        <div className="grid grid-cols-3 gap-4 mt-4">
+            {consumables.map((item, index) => (
+                <ExtraCard
+                extraName={item.name}
+                description={item.description}
+                imageUrl={item.imageUrl}
+                price={Number(item.price)}
+                hasQuantity={false}
+                actions={[
+                    { label: 'Manage', url: "/extra/" + item.address}
+                ]}
+                extraType={Number(item.extraType)}
+                /> 
+            ))}
+        </div>
+      </div>
       <AddExtraModal
         isOpen={isAddModalOpen}
         onClose={handleAddModalClose}
