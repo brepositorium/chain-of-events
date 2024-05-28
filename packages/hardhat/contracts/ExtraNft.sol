@@ -5,6 +5,7 @@ pragma solidity ^0.8.20;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Pausable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./EventCreation.sol";
 import "./PriceFeedHandler.sol";
@@ -14,8 +15,16 @@ error NotOnAllowList(uint256 eventId, address sendersAddress);
 error ExtraNonexistent(uint256 tokenId);
 error NumberOfTicketsLimitReached(uint256 eventId);
 error MintLimitReached(uint256 currentMintCount);
+error NotEnoughTokensOwned();
+error NotEnoughUnredeemedTokens(address _ticketOwner);
 
-contract ExtraNft is ERC721, ERC721URIStorage, ERC721Pausable, Ownable {
+contract ExtraNft is
+	ERC721,
+	ERC721URIStorage,
+	ERC721Pausable,
+	ERC721Enumerable,
+	Ownable
+{
 	EventCreation eventCreation;
 	PriceFeedHandler public priceFeedHandler;
 
@@ -86,6 +95,20 @@ contract ExtraNft is ERC721, ERC721URIStorage, ERC721Pausable, Ownable {
 			approvedChainlinkContracts[msg.sender] != true
 		) {
 			revert OwnableUnauthorizedAccount(_msgSender());
+		}
+		_;
+	}
+
+	modifier ownsEnoughTokens(uint256 _amount) {
+		if (balanceOf(msg.sender) < _amount) {
+			revert NotEnoughTokensOwned();
+		}
+		_;
+	}
+
+	modifier hasEnoughUnredeemedTokens(address _ticketOwner, uint256 _amount) {
+		if (getUnredeemedBalance(_ticketOwner) < _amount) {
+			revert NotEnoughUnredeemedTokens(_ticketOwner);
 		}
 		_;
 	}
@@ -172,17 +195,67 @@ contract ExtraNft is ERC721, ERC721URIStorage, ERC721Pausable, Ownable {
 		_unpause();
 	}
 
+	function tokenOfOwnerByIndex(
+		address owner,
+		uint256 index
+	) public view override returns (uint256) {
+		return super.tokenOfOwnerByIndex(owner, index);
+	}
+
 	function ownerOf(
 		uint256 tokenId
 	) public view override(IERC721, ERC721) returns (address) {
 		return super._ownerOf(tokenId);
 	}
 
+	function getUnredeemedBalance(
+		address _ticketOwner
+	) public view returns (uint256) {
+		uint256 unredeemedBalance;
+		for (uint256 i; i < balanceOf(_ticketOwner); i++) {
+			uint256 _tokenId = tokenOfOwnerByIndex(_ticketOwner, i);
+			if (redemptionMap[_tokenId] == false) {
+				unredeemedBalance++;
+			}
+		}
+		return unredeemedBalance;
+	}
+
+	function bulkTransfer(
+		address _to,
+		uint256 _amount
+	) public ownsEnoughTokens(_amount) {
+		for (uint256 i; i < _amount; i++) {
+			transferFrom(msg.sender, _to, tokenOfOwnerByIndex(msg.sender, i));
+		}
+	}
+
+	function bulkRedeem(
+		address _ticketOwner,
+		uint256 _amount
+	)
+		public
+		onlyAllowList(eventId)
+		hasEnoughUnredeemedTokens(_ticketOwner, _amount)
+	{
+		for (uint256 i; i < _amount; i++) {
+			uint256 _tokenId = tokenOfOwnerByIndex(_ticketOwner, i);
+			if (redemptionMap[_tokenId] == false) {
+				redeem(_tokenId);
+			}
+		}
+	}
+
 	// The following functions are overrides required by Solidity.
 
 	function supportsInterface(
 		bytes4 interfaceId
-	) public view override(ERC721, ERC721URIStorage) returns (bool) {
+	)
+		public
+		view
+		override(ERC721, ERC721URIStorage, ERC721Enumerable)
+		returns (bool)
+	{
 		return super.supportsInterface(interfaceId);
 	}
 
@@ -190,8 +263,19 @@ contract ExtraNft is ERC721, ERC721URIStorage, ERC721Pausable, Ownable {
 		address to,
 		uint256 tokenId,
 		address auth
-	) internal override(ERC721, ERC721Pausable) returns (address) {
+	)
+		internal
+		override(ERC721, ERC721Pausable, ERC721Enumerable)
+		returns (address)
+	{
 		return super._update(to, tokenId, auth);
+	}
+
+	function _increaseBalance(
+		address account,
+		uint128 value
+	) internal override(ERC721, ERC721Enumerable) {
+		super._increaseBalance(account, value);
 	}
 
 	function tokenURI(
