@@ -17,7 +17,7 @@ const SimpleModal: React.FC<SimpleModalProps> = ({ isOpen, onClose, fieldName, e
     //TODO: could improve logic
     const handleSubmit = async(e: React.FormEvent) => {
         e.preventDefault();
-        console.log(fieldName);
+
         switch(fieldName) {
             case "description": {
                 try {
@@ -97,7 +97,7 @@ const SimpleModal: React.FC<SimpleModalProps> = ({ isOpen, onClose, fieldName, e
 
     return (
         <dialog open className="modal" onClose={onClose}>
-            <div className="modal-box">
+            <div className="modal-box bg-base-300">
                 <button type="button" className="btn btn-sm btn-circle absolute right-2 top-2" 
                 onClick={
                     () => {
@@ -106,41 +106,29 @@ const SimpleModal: React.FC<SimpleModalProps> = ({ isOpen, onClose, fieldName, e
                         ✕
                 </button>
                 <form onSubmit={handleSubmit}>
-                    <h3 className="font-bold text-lg">{`Edit ${fieldName}`}</h3>
-                    {
-                        fieldName === 'numberOfTickets' || fieldName === 'price' ? 
-                            <div className="mt-4">
+                    <h3 className="font-bold text-lg">{
+                                        fieldName === 'numberOfTickets' ? 'Edit number of tickets' 
+                                        : fieldName === 'logoUrl' ? 'Edit logo URL'
+                                        : `Edit ${fieldName}`}
+                                        </h3>
+                            <div className="mt-8">
                                 <input
-                                    type="number"
-                                    placeholder={`Enter ${fieldName}`}
+                                    type={
+                                        fieldName === 'numberOfTickets' || fieldName === 'price' ? "number" 
+                                        : fieldName === 'logoUrl' ? "url" 
+                                        : "text"}
+                                    placeholder={
+                                        fieldName === 'numberOfTickets' ? 'Enter new number of tickets' 
+                                        : fieldName === 'logoUrl' ? 'Enter new logo URL'
+                                        : `Enter new ${fieldName}`}
                                     value={inputValue}
                                     onChange={e => setInputValue(e.target.value)}
-                                    className="input input-bordered w-full max-w-xs"
+                                    className="input input-md input-bordered w-80 bg-base-content rounded text-black"
                                 />
                             </div>
-                            : fieldName === 'logoUrl' ? 
-                            <div className="mt-4">
-                                <input
-                                    type="url"
-                                    placeholder={`Enter ${fieldName}`}
-                                    value={inputValue}
-                                    onChange={e => setInputValue(e.target.value)}
-                                    className="input input-bordered w-full max-w-xs"
-                                />
-                            </div>
-                            : <div className="mt-4">
-                                <input
-                                    type="text"
-                                    placeholder={`Enter ${fieldName}`}
-                                    value={inputValue}
-                                    onChange={e => setInputValue(e.target.value)}
-                                    className="input input-bordered w-full max-w-xs"
-                                    />
-                            </div>
-                    }
 
-                    <div className="mt-8">
-                        <button type="submit" className="btn btn-primary">Save</button>
+                    <div className="mt-4">
+                        <button type="submit" className="btn btn-gradient-primary rounded-xl w-18 border-0">Save</button>
                     </div>
                 </form>
             </div>

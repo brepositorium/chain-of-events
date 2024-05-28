@@ -30,21 +30,25 @@ const AdminDashboard: NextPage = () => {
   return (
     <div className="h-[650px] bg-circles bg-no-repeat">
       <div className="container mx-auto px-40">
-          <h1 className="text-2xl font-bold my-4">Events created by you</h1>
+          <h1 className="text-2xl font-bold my-8">Events created by you</h1>
           <div className="grid grid-cols-3 gap-4">
               {dataEvents && dataEvents.eventCreateds.slice(0, visibleEvents).map((event: any) => (
                   <EventCard 
                   key={event.id}
                   eventId={event.createdEvent_id} 
-                  eventName={event.createdEvent_name} 
-                  manageUrl={"/event-dashboard/" + Number(event.createdEvent_id)}
+                  eventName={event.createdEvent_name}
+                  actionUrl={"/event-dashboard/" + Number(event.createdEvent_id)}
+                  actionLabel='Manage'
+                  hasBookmark={false}
                   />
               ))}
           </div>
           {visibleEvents < dataEvents.eventCreateds.length && (
-              <button className="btn btn-gradient-primary rounded-xl mt-4" onClick={loadMoreEvents}>
+            <div className='flex items-center justify-center mr-4'>
+              <button className="btn btn-gradient-primary btn-sm rounded-xl mt-4" onClick={loadMoreEvents}>
                   Load more
               </button>
+            </div>
           )}
       </div>
     </div>

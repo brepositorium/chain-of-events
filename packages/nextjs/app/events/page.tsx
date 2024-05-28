@@ -28,6 +28,7 @@ const EventsPage = () => {
 
     const { address } = useAccount();
     const [bookmarkedEvents, setBookmarkedEvents] = useState<number[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
 
     const { data: dataEventsDetails, loading: loadingEventsDetails, error: errorEventsDetails } = useQuery(GET_EVENTS_DETAILS_BY_IDS, {
         variables: { ids: bookmarkedEvents },
@@ -56,7 +57,7 @@ const EventsPage = () => {
       if (error) return <p>Error: {error.message}</p>;
 
     const toggleBookmark = (eventId: number) => {
-        if (bookmarkedEvents.includes(eventId)) {
+        if (bookmarkedEvents?.includes(eventId)) {
             deleteEventIdForAddress(eventId); 
         } else {
             bookmarkEvent(eventId);
@@ -128,34 +129,80 @@ const EventsPage = () => {
     });
     };
 
+    const handleSearchChange = (event: { target: { value: string; }; }) => {
+        setSearchTerm(event.target.value.toLowerCase());
+    };
+
+    const filteredEvents = data.eventCreateds.filter((event: EventDetail) =>
+        event.createdEvent_name.toLowerCase().includes(searchTerm)
+    );
+
     return (
         <div>
-            <h1>Bookmarked Events</h1>
-            {dataEventsDetails && dataEventsDetails.eventCreateds.length > 0 ? (
-                dataEventsDetails.eventCreateds.map((event: any) => (
-                    <div key={event.createdEvent_id} style={{ margin: '20px', padding: '10px', border: '1px solid #ccc' }}>
-                        <h3>{event.createdEvent_name}</h3>
-                        <p>{event.createdEvent_description}</p>
-                        <p>{event.createdEvent_location}</p>
-                        <Link href={`/event-info/${event.createdEvent_id}`} className="btn">See more</Link>
+            <div className="container mx-auto px-40">
+                <div className="flex flex-col justify-between my-8">
+                    <h1 className="text-2xl font-bold mb-4">Bookmarked events</h1>
+                    <div className="grid grid-cols-3 gap-4">
+                    {dataEventsDetails && dataEventsDetails.eventCreateds.length > 0 ? (
+                        dataEventsDetails.eventCreateds.map((event: any) => (
+                            <EventCard 
+                        key={event.id} 
+                        eventId={event.createdEvent_id} 
+                        logoUrl={event.createdEvent_logoUrl}
+                        eventName={event.createdEvent_name} 
+                        eventDescription={event.createdEvent_description}
+                        eventLocation={event.createdEvent_location} 
+                        actionUrl={"/event-info/" + Number(event.createdEvent_id)}
+                        actionLabel="See more"
+                        hasBookmark={true}
+                        onToggleBookmark={() => toggleBookmark(event.createdEvent_id)}
+                        isBookmarked={bookmarkedEvents?.includes(event.createdEvent_id)}
+                        />
+                        ))
+                    ) : (
+                        <p>No bookmarked events found.</p>
+                    )}
                     </div>
-                ))
-            ) : (
-                <p>No bookmarked events found.</p>
-            )}
-            {data.eventCreateds.map((event: EventDetail) => (
-                <EventCard 
-                key={event.id} 
-                eventId={event.createdEvent_id} 
-                logoUrl={event.createdEvent_logoUrl}
-                eventName={event.createdEvent_name} 
-                eventDescription={event.createdEvent_description}
-                eventLocation={event.createdEvent_location} 
-                manageUrl={"/event-info/" + Number(event.createdEvent_id)}
-                onToggleBookmark={() => toggleBookmark(event.createdEvent_id)}
-                isBookmarked={bookmarkedEvents?.includes(event.createdEvent_id)}
-                />
-            ))}
+                </div>
+            </div>
+
+            <div className="container mx-auto px-40">
+                <div className="flex items-center justify-between mb-4">
+                    <h1 className="text-2xl font-bold">Find events</h1>
+                    <div className="relative w-50">
+                    <input
+                        type="text"
+                        placeholder="Search events"
+                        className="input input-md input-bordered w-full bg-base-content rounded-lg text-black pl-10"
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                    />
+                    <div className="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                </div>
+
+            </div>
+            <div className="grid grid-cols-3 gap-4">
+                {filteredEvents.map((event: EventDetail) => (
+                    <EventCard 
+                    key={event.id} 
+                    eventId={event.createdEvent_id} 
+                    logoUrl={event.createdEvent_logoUrl}
+                    eventName={event.createdEvent_name} 
+                    eventDescription={event.createdEvent_description}
+                    eventLocation={event.createdEvent_location} 
+                    actionUrl={"/event-info/" + Number(event.createdEvent_id)}
+                    actionLabel="See more"
+                    hasBookmark={true}
+                    onToggleBookmark={() => toggleBookmark(event.createdEvent_id)}
+                    isBookmarked={bookmarkedEvents?.includes(event.createdEvent_id)}
+                    />
+                ))}
+            </div>
+            </div>
             <button className="btn" onClick={handleLoadMore}>Load more</button>
         </div>
     )

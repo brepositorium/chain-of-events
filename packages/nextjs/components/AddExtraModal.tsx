@@ -38,73 +38,73 @@ const AddExtraModal: React.FC<AddExtraModalProps> = ({ isOpen, onClose, extraTyp
 
     return (
         <dialog open className="modal" onClose={onClose}>
-            <div className="modal-box">
+            <div className="modal-box bg-base-300">
                 <button type="button" className="btn btn-sm btn-circle absolute right-2 top-2" onClick={onClose}>✕</button>
                 <form onSubmit={handleSubmit}>
                     { 
                     extraType === 0 ? <h3 className="font-bold text-lg">Add Ticket Type</h3> 
                         : <h3 className="font-bold text-lg">Add Consumable</h3>
                     }
-                    <div className="mt-4">
-                        <label>Name:</label>
+                    <div className="mt-4 flex flex-col">
+                        <label>Name</label>
                         <input
                             type="text"
                             placeholder="Enter name"
                             value={name}
                             onChange={e => setName(e.target.value)}
-                            className="input input-bordered w-full max-w-xs"
+                            className="input input-md input-bordered w-80 bg-base-content rounded text-black"
                         />
                     </div>
-                    <div className="mt-4">
-                        <label>Symbol:</label>
+                    <div className="mt-4 flex flex-col">
+                        <label>Symbol</label>
                         <input
                             type="text"
                             placeholder="Enter symbol"
                             value={symbol}
                             onChange={e => setSymbol(e.target.value)}
-                            className="input input-bordered w-full max-w-xs"
+                            className="input input-md input-bordered w-80 bg-base-content rounded text-black"
                         />
                     </div>
-                    <div className="mt-4">
-                        <label>Description:</label>
-                        <input
-                            type="text"
+                    <div className="mt-4 flex flex-col">
+                        <label>Description</label>
+                        <textarea
                             placeholder="Enter description"
                             value={description}
                             onChange={e => setDescription(e.target.value)}
-                            className="input input-bordered w-full max-w-xs"
+                            className="textarea textarea-bordered w-80 bg-base-content rounded text-black"
                         />
                     </div>
-                    <div className="mt-4">
-                        <label>External URL:</label>
+                    <div className="mt-4 flex flex-col">
+                        <label>External URL</label>
                         <input
                             type="url"
                             placeholder="Enter an URL to your event"
                             value={externalUrl}
                             onChange={e => setExternalUrl(e.target.value)}
-                            className="input input-bordered w-full max-w-xs"
+                            className="input input-md input-bordered w-80 bg-base-content rounded text-black"
                         />
                     </div>
-                    <div className="mt-4">
-                        <label>Image:</label>
+                    <div className="mt-4 flex flex-col">
+                        <label>Image</label>
                         <input
                             type="file"
+                            accept="image/*"
                             onChange={e => setImage(e.target.files ? e.target.files[0] : null)}
-                            className="input input-bordered w-full max-w-xs"
+                            className="file-input file-input-bordered w-80 rounded bg-base-content text-black"
                         />
                     </div>
-                    <div className="mt-4">
-                        <label>Price:</label>
+                    <div className="mt-4 flex flex-col">
+                        <label>Price</label>
                         <input
                             type="number"
                             placeholder="Enter price"
                             value={price}
                             onChange={e => setPrice(Number(e.target.value))}
-                            className="input input-bordered w-full max-w-xs"
+                            className="input input-md input-bordered w-80 bg-base-content rounded text-black"
                         />
                     </div>
                     <div className="mt-8">
-                        <button type="submit" className="btn btn-primary">Add</button>
+                        <button type="submit" className="btn btn-gradient-primary rounded-xl w-24 border-0">Add</button>
                     </div>
                 </form>
             </div>

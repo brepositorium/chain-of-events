@@ -8,9 +8,11 @@ interface EventCardProps {
     eventDescription?: string;
     eventLocation?: string;
     logoUrl?: string;
+    hasBookmark: boolean;
     onToggleBookmark?: () => void;
     isBookmarked?: boolean;
-    manageUrl: string;
+    actionUrl: string;
+    actionLabel: string;
 }
 
 const EventCard: React.FC<EventCardProps> = ({
@@ -19,29 +21,34 @@ const EventCard: React.FC<EventCardProps> = ({
     eventDescription,
     eventLocation,
     logoUrl,
+    hasBookmark,
     onToggleBookmark,
     isBookmarked,
-    manageUrl 
+    actionUrl,
+    actionLabel
 }) => {
     return (
-        <Card className="w-72 bg-red-pattern bg-cover">
+        <Card className={
+            hasBookmark 
+            ? "w-72 bg-red-pattern bg-cover bg-no-repeat min-h-[400px] flex flex-col"
+            : "w-72 bg-red-pattern bg-cover bg-no-repeat min-h-[200px] flex flex-col"
+        }>
             {logoUrl && <img src={logoUrl} alt={eventName} className="w-full h-48 object-cover rounded-t-lg" />}
-            <div className="flex flex-col h-full">
+            <div className="flex flex-col items-center h-full pt-2 justify-between">
                 <div className="overflow-hidden" style={{ maxHeight: '4rem' }}>
-                    <h2 className="text-center text-ellipsis">{eventName}</h2>
+                    <h2 className="text-center text-lg font-bold text-ellipsis">{eventName}</h2>
                 </div>
                 {eventDescription && <p>{eventDescription}</p>}
-                {eventLocation && <p className="text-sm text-gray-600">{eventLocation}</p>}
-                <div className='flex-grow'></div>
-                <div className="flex justify-center mt-4">
-                    <div className='shadow-xl'>
-                        <Link href={manageUrl} className="btn btn-gradient-primary rounded-xl w-36 border-0">
-                            Manage
+                {eventLocation && <p className="text-sm text-center">{eventLocation}</p>}
+                <div className="flex gap-2 flex-wrap justify-evenly mt-4">
+                    <div className='shadow hover:shadow-xl'>
+                        <Link href={actionUrl} className="btn btn-gradient-primary rounded-xl w-36 border-0">
+                            {actionLabel}
                         </Link>
                     </div>
-                    {isBookmarked ? 
+                    {hasBookmark ? 
                     <button
-                        className={`btn ${isBookmarked ? 'bg-red-500' : 'bg-green-500'} hover:bg-red-700 transition-colors text-sm py-2 px-4 rounded-full`}
+                        className={`btn btn-gradient-primary rounded-xl w-36 border-0`}
                         onClick={onToggleBookmark}
                     >
                         {isBookmarked ? 'Unbookmark' : 'Bookmark'}

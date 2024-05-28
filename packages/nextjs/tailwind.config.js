@@ -48,9 +48,11 @@ module.exports = {
         'hero-pattern': "url('/background.png')",
         'circles': "url('/circles-bg.png')",
         'red-pattern': "url('/red-pattern.png')",
+        'green-pattern': "url('/green-pattern.png')",
+        'blue-pattern': "url('/blue-pattern.png')",
       },
       boxShadow: {
-        center: "0 0 12px -2px rgb(0 0 0 / 0.05)",
+        center: "0 0 12px -2px rgb(255 255 255)",
       },
       animation: {
         "pulse-fast": "pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite",
