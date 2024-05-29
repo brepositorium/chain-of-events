@@ -1,6 +1,7 @@
 import ExtraNft from '../../../hardhat/artifacts/contracts/ExtraNft.sol/ExtraNft.json';
+import PriceFeedHandler from '../../../hardhat/artifacts/contracts/PriceFeedHandler.sol/PriceFeedHandler.json';
 import axios from "axios";
-import { ContractRunner, ethers, parseEther, parseUnits } from 'ethers';
+import { ethers } from 'ethers';
 
 type PinataResponse = {
     IpfsHash: string;
@@ -12,6 +13,8 @@ const privateKey = process.env.NEXT_PUBLIC_WALLET_PRIVATE_KEY;
 if (!privateKey) {
     throw new Error('Private key not found in environment variables');
 }
+
+const priceFeedHandlerAddress = process.env.NEXT_PUBLIC_PRICE_FEED_HANDLER_ADDRESS;
 
 const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
 if (!rpcUrl) {
@@ -36,19 +39,22 @@ export const fetchExtraDetails = async (address: string) => {
     const price = await contract.price();
     const extraType = await contract.EXTRA_TYPE();
     const uri = await contract.uri();
-    console.log(extraType)
-    return { name, symbol, price, extraType, uri };
+    
+    const response = await fetch(uri);
+    const jsonData = await response.json();
+    
+    return { name, symbol, price, extraType, uri, description: jsonData.description, imageUrl: jsonData.image };
   } catch (error) {
     console.error("Failed to fetch contract data:", error);
     return null;
   }
 };
 
-export const getBalanceOf = async (contractAddress:string, callerAddress: string) => {
+  export const getUnredeemedBalanceOf = async (contractAddress:string, callerAddress: string) => {
     const contract = new ethers.Contract(contractAddress, ExtraNft.abi, provider);
     try {
-      const balance = await contract.balanceOf(callerAddress);
-      console.log(balance);
+      const balance = await contract.getUnredeemedBalance(callerAddress);
+      
       return balance;
     } catch (error) {
       console.error("Failed to fetch balance:", error);
@@ -56,10 +62,39 @@ export const getBalanceOf = async (contractAddress:string, callerAddress: string
     }
   };
 
-export const mintNft = async (address: string, to: string, ticketPrice: string) => {
-    const contract = new ethers.Contract(address, ExtraNft.abi, wallet);
+  export const transferExtra = async (extraAddress:string, to: string, amount: BigInt) => {
+    const contract = new ethers.Contract(extraAddress, ExtraNft.abi, provider);
     try {
-        const txResponse = await contract.safeMint(to, { value: ethers.parseUnits(ticketPrice, 0) });
+      const tx = await contract.bulkTransferUnredeemedTokens(to, amount);
+      console.log('Transaction sent! Hash:', tx.hash);
+      
+      await tx.wait();
+      console.log('Transaction confirmed!');
+    } catch (error) {
+      console.error('Error sending transaction:', error);
+    }
+  };
+
+  const getEthPriceFromUsd = async (usdAmount: BigInt) => {
+    
+    const contract = new ethers.Contract(priceFeedHandlerAddress!, PriceFeedHandler.abi, provider);
+    try {
+      const valueInEth: BigInt = await contract.calculateEthAmount(usdAmount);
+      console.log(valueInEth)
+      return valueInEth;
+    } catch (error) {
+      console.error("Failed to fetch value in ETH:", error);
+      return null;
+    }
+  };
+
+  export const mintNft = async (extraAddress: string, to: string, ticketPrice: number, amount: number) => {
+    const contract = new ethers.Contract(extraAddress, ExtraNft.abi, wallet);
+    try {
+        const totalPrice = ticketPrice * amount;
+        const valueInEth = await getEthPriceFromUsd(BigInt(totalPrice * 100));
+
+        const txResponse = await contract.safeMint(to, amount, { value: valueInEth });
         console.log('Transaction response:', txResponse);
         const receipt = await txResponse.wait();
         console.log('Transaction receipt:', receipt);
