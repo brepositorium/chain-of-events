@@ -2,14 +2,17 @@
 import { useEffect, useState } from "react";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 import { fetchExtraDetails, mintNft } from "~~/utils/chain-of-events/deployContract";
-import { useAccount } from 'wagmi'
+import { ACTIONS } from "~~/utils/chain-of-events/Actions";
+import ExtraCard from "~~/components/ExtraCard";
 
 type PageProps = {
     params: { id: number, extraType: number }
   };
 
   interface ExtraDetail {
-    address: string;
+    address?: string;
+    description: string;
+    imageUrl: string;
     extraType: bigint;
     name: string;
     symbol: string;
@@ -21,9 +24,7 @@ const ShopPage = ({ params }: PageProps) => {
     const id = params.id;
     const extraType = params.extraType;
 
-    const { address } = useAccount();
-
-    const [ticketTypes, setTicketTypes] = useState<ExtraDetail[]>([]);
+    const [filteredExtras, setFilteredExtras] = useState<ExtraDetail[]>([]);
 
     const { data } = useScaffoldReadContract({
         contractName: "EventCreation",
@@ -34,7 +35,7 @@ const ShopPage = ({ params }: PageProps) => {
     useEffect(() => {
         const fetchExtras = async () => {
             if (!data || data.length === 0) {
-                setTicketTypes([]);
+                setFilteredExtras([]);
                 return;
             }
             const promises = data.map(address =>
@@ -44,40 +45,31 @@ const ShopPage = ({ params }: PageProps) => {
             );
     
             const results = await Promise.all(promises);
-            const filteredTickets = results.filter(item => item !== null) as ExtraDetail[];
+            const filteredExtras = results.filter(item => item !== null) as ExtraDetail[];
             
-            setTicketTypes(filteredTickets);
+            setFilteredExtras(filteredExtras);
         };
         fetchExtras();
     }, [data]);
 
-    const handleBuy = async (ticketAddress: string, ticketPrice: BigInt) => {
-        if(address) {
-            try {
-                await mintNft(ticketAddress, address, ticketPrice.toString());
-                console.log("Minting successful");
-            } catch (e) {
-                console.error("Error setting greeting:", e);
-            }
-        }
-    };
-    
-
     return (
-        <div>
-            <h1>Available Tickets</h1>
-            <div className="ticket-list">
-                {ticketTypes.length > 0 ? ticketTypes.map((ticket, index) => (
-                    <div key={index} className="ticket-item">
-                        <p>Name: {ticket.name}</p>
-                        <p>Symbol: {ticket.symbol}</p>
-                        <p>Price: {Number(ticket?.price)} Wei</p>
-                        <p>URI: {ticket.uri}</p>
-                        <button className="btn" onClick={() => handleBuy(ticket.address, ticket.price)}>Buy</button>
-                    </div>
-                )) : <p>No tickets available.</p>}
-            </div>
+    <div className="container mx-auto px-40">
+        <h1 className="text-2xl font-bold my-4">Available extras</h1>
+        <div className="grid grid-cols-3 gap-4">
+            {filteredExtras.length > 0 ? filteredExtras.map((extra, index) => (
+                <ExtraCard
+                extraName={extra.name}
+                description={extra.description}
+                imageUrl={extra.imageUrl}
+                extraAddress={extra.address}
+                price={Number(extra.price)}
+                hasQuantity={true}
+                action={ACTIONS.BUY}
+                extraType={Number(extra.extraType)}
+                />
+            )) : <p>No extras available.</p>}
         </div>
+    </div>
     );
     
 }

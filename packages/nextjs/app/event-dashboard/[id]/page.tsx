@@ -7,6 +7,7 @@ import AddExtraModal from '~~/components/AddExtraModal';
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 import { fetchExtraDetails } from "~~/utils/chain-of-events/deployContract";
 import ExtraCard from "~~/components/ExtraCard";
+import { ACTIONS } from "~~/utils/chain-of-events/Actions";
 
 
 //TODO: move from here
@@ -41,7 +42,6 @@ const EditDashboardPage = ({ params }: PageProps) => {
     const [extraType, setExtraType] = useState<number>();
     const [ticketTypes, setTicketTypes] = useState<ExtraDetail[]>([]);
     const [consumables, setConsumables] = useState<ExtraDetail[]>([]);
-    const [sellingPaused, setSellingPaused] = useState(false);
     
     const { data } = useScaffoldReadContract({
         contractName: "EventCreation",
@@ -147,9 +147,8 @@ const EditDashboardPage = ({ params }: PageProps) => {
               imageUrl={item.imageUrl}
               price={Number(item.price)}
               hasQuantity={false}
-              actions={[
-                  { label: 'Manage', url: "/extra/" + item.address}
-              ]}
+              action={ACTIONS.MANAGE}
+              manageUrl={"/extra/" + item.address}
               extraType={Number(item.extraType)}
               />
             ))}
@@ -165,9 +164,8 @@ const EditDashboardPage = ({ params }: PageProps) => {
                 imageUrl={item.imageUrl}
                 price={Number(item.price)}
                 hasQuantity={false}
-                actions={[
-                    { label: 'Manage', url: "/extra/" + item.address}
-                ]}
+                action={ACTIONS.MANAGE}
+                manageUrl={"/extra/" + item.address}
                 extraType={Number(item.extraType)}
                 /> 
             ))}
