@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import Card from './BaseCard';
 import Link from 'next/link';
-
-interface ActionButton {
-    label: string; // Display text like 'Manage', 'Redeem', 'Transfer', 'Buy'
-    onClick?: () => void; // Function to call on click
-    url?: string;
-}
+import { ACTIONS } from '~~/utils/chain-of-events/Actions';
+import SimpleModal from './SimpleModal';
+import { mintNft } from '~~/utils/chain-of-events/deployContract';
+import { useAccount } from 'wagmi';
 
 interface ExtraCardProps {
     extraName?: string;
@@ -16,7 +14,9 @@ interface ExtraCardProps {
     noOfItems?: number;
     hasQuantity:boolean;
     extraType: number;
-    actions: ActionButton[];
+    action: ACTIONS;
+    manageUrl?: string;
+    extraAddress?: string;
 }
 
 const ExtraCard: React.FC<ExtraCardProps> = ({
@@ -27,9 +27,15 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
     noOfItems,
     hasQuantity,
     extraType,
-    actions
+    action,
+    manageUrl,
+    extraAddress
 }) => {
     const [quantity, setQuantity] = useState(0); // Initialize quantity with 0
+    const [isSimpleModalOpen, setIsSimpleModalOpen] = useState(false);
+    const [currentField, setCurrentField] = useState('');
+
+    const { address } = useAccount();
 
     const handleIncrease = () => {
         setQuantity(prevQuantity => prevQuantity + 1);
@@ -39,6 +45,31 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
         setQuantity(prevQuantity => Math.max(0, prevQuantity - 1)); // Prevent negative values
     };
 
+    function handleTransfer(): void {
+        setCurrentField("transfer");
+        setIsSimpleModalOpen(true);
+    }
+
+    async function handleBuy(extraAddress: string, extraPrice: number, quantity: number): Promise<void> { 
+        
+        if(address) {
+            try {
+                await mintNft(extraAddress, address, extraPrice, quantity);
+                console.log("Minting successful");
+            } catch (e) {
+                console.error("Error minting:", e);
+            }
+        }
+    }
+
+    function handleRedeem(): void {
+        throw new Error('Function not implemented.');
+    }
+
+    const handleSimpleModalClose = () => {
+        setIsSimpleModalOpen(false);
+    };
+
     return (
         <Card className={extraType === 0 
                         ? "w-72 bg-blue-pattern bg-cover bg-no-repeat rounded-lg" 
@@ -46,7 +77,7 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
             <img src={imageUrl} alt={extraName} className="w-full h-48 object-cover rounded-t-lg" />
             {noOfItems ? 
             <div className="indicator">
-                <span className='indicator-item badge'>{`x${noOfItems}`}</span>
+                <span className='indicator-item badge badge-warning'>{`x${noOfItems}`}</span>
             </div>
             :<div></div>}
             <div className="flex flex-col h-full p-2">
@@ -61,18 +92,32 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
                 </div>
                 : <div></div>}
                 <div className="flex flex-wrap justify-evenly mt-4">
-                    {actions.map((action, index) => (
-                        action.url ? (
-                            <Link href={action.url} key={index} className={`btn btn-gradient-primary rounded-xl w-36 border-0`}>
-                                    {action.label}
-                            </Link>
-                        ) : (
-                            <button key={index} className={`btn btn-gradient-primary rounded-xl w-36 border-0`} onClick={action.onClick}>
-                                {action.label}
-                            </button>
-                        )
-                    ))}
+                    {action === ACTIONS.MANAGE && manageUrl ? (
+                        <Link href={manageUrl} className={`btn btn-gradient-primary rounded-xl w-36 border-0`}>
+                                Manage
+                        </Link>
+                    ) : action === ACTIONS.TRANSFER ? (
+                        <button className={`btn btn-gradient-primary rounded-xl w-36 border-0`} onClick={handleTransfer}>
+                            Transfer
+                        </button>
+                    ) : action === ACTIONS.BUY ? (
+                        <button className={`btn btn-gradient-primary rounded-xl w-36 border-0`} onClick={() => handleBuy(extraAddress!, price!, quantity)}>
+                            Buy
+                        </button>
+                    ) : action === ACTIONS.REDEEM ? (
+                        <button className={`btn btn-gradient-primary rounded-xl w-36 border-0`} onClick={() => handleRedeem()}>
+                            Redeem
+                        </button>
+                    ) : <div></div>
+                    }
                 </div>
+                <SimpleModal
+                    isOpen={isSimpleModalOpen}
+                    onClose={handleSimpleModalClose}
+                    fieldName={currentField}
+                    quantity={quantity}
+                    extraAddress={extraAddress}
+                />
             </div>
         </Card>
     );
