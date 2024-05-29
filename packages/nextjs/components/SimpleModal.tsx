@@ -1,15 +1,18 @@
 // components/SimpleModal.tsx
 import React, { useState } from 'react';
 import { useScaffoldWriteContract } from '~~/hooks/scaffold-eth';
+import { transferExtra } from '~~/utils/chain-of-events/deployContract';
 
 interface SimpleModalProps {
     isOpen: boolean;
     onClose: () => void;
     fieldName: string;
-    eventId: bigint;
+    quantity?: number;
+    extraAddress?: string;
+    eventId?: bigint;
 }
 
-const SimpleModal: React.FC<SimpleModalProps> = ({ isOpen, onClose, fieldName, eventId }) => {
+const SimpleModal: React.FC<SimpleModalProps> = ({ isOpen, onClose, fieldName, eventId, quantity, extraAddress }) => {
     const [inputValue, setInputValue] = useState("");
     const { writeContractAsync: writeEventCreationAsync } = useScaffoldWriteContract("EventCreation");
     const { writeContractAsync: writeExtraNftAsync } = useScaffoldWriteContract("ExtraNft");
@@ -84,6 +87,20 @@ const SimpleModal: React.FC<SimpleModalProps> = ({ isOpen, onClose, fieldName, e
                     }
                     break;
             }
+            case "transfer": {
+                try {
+                    if(quantity! > 0){
+                        console.log("Transfer extra function called");
+                        transferExtra(extraAddress!, inputValue, BigInt(quantity!));                        
+                    } else {
+                        console.error("Quantity needs to be bigger than 0")
+                    }
+                    }
+                    catch (e) {
+                    console.error("Error sending extra:", e);
+                    }
+                    break;
+            }
             default: {
                 console.log("Wrong fieldName");
                 break;
@@ -109,6 +126,7 @@ const SimpleModal: React.FC<SimpleModalProps> = ({ isOpen, onClose, fieldName, e
                     <h3 className="font-bold text-lg">{
                                         fieldName === 'numberOfTickets' ? 'Edit number of tickets' 
                                         : fieldName === 'logoUrl' ? 'Edit logo URL'
+                                        : fieldName === 'transfer' ? 'Send to address'
                                         : `Edit ${fieldName}`}
                                         </h3>
                             <div className="mt-8">
@@ -120,6 +138,7 @@ const SimpleModal: React.FC<SimpleModalProps> = ({ isOpen, onClose, fieldName, e
                                     placeholder={
                                         fieldName === 'numberOfTickets' ? 'Enter new number of tickets' 
                                         : fieldName === 'logoUrl' ? 'Enter new logo URL'
+                                        : fieldName === 'transfer' ? 'Enter address'
                                         : `Enter new ${fieldName}`}
                                     value={inputValue}
                                     onChange={e => setInputValue(e.target.value)}
@@ -128,7 +147,7 @@ const SimpleModal: React.FC<SimpleModalProps> = ({ isOpen, onClose, fieldName, e
                             </div>
 
                     <div className="mt-4">
-                        <button type="submit" className="btn btn-gradient-primary rounded-xl w-18 border-0">Save</button>
+                        <button type="submit" className="btn btn-gradient-primary rounded-xl w-18 border-0">{fieldName === 'transfer' ? "Send" : "Save"}</button>
                     </div>
                 </form>
             </div>
