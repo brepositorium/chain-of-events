@@ -47,12 +47,19 @@ module.exports = {
       backgroundImage: {
         'hero-pattern': "url('/background.png')",
         'circles': "url('/circles-bg.png')",
+        'spirals': "url('/spirals-bg.png')",
         'red-pattern': "url('/red-pattern.png')",
         'green-pattern': "url('/green-pattern.png')",
         'blue-pattern': "url('/blue-pattern.png')",
       },
+      fontFamily: {
+        cubano: ["cubano", "sans-serif"],
+        outfit: ["Outfit", "cursive"],
+        sans: ["Roboto", "sans-serif"],
+      },
       boxShadow: {
         center: "0 0 12px -2px rgb(255 255 255)",
+        '3xl': '0 35px 60px -15px rgba(0, 0, 0, 0.3)',
       },
       animation: {
         "pulse-fast": "pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite",
