@@ -21,15 +21,15 @@ export const menuLinks: HeaderMenuLink[] = [
   },
   {
     label: "How it works",
-    href: "/",
+    href: "/a",
   },
   {
     label: "Find events",
-    href: "/",
+    href: "/s",
   },
   {
     label: "Create event",
-    href: "/",
+    href: "/d",
   },
 ];
 
@@ -46,8 +46,8 @@ export const HeaderMenuLinks = () => {
               href={href}
               passHref
               className={`${
-                isActive ? "bg-secondary shadow-md" : ""
-              } hover:bg-secondary hover:shadow-md focus:!bg-secondary active:!text-neutral py-1.5 px-3 text-sm rounded-full gap-2 grid grid-flow-col`}
+                isActive ? "bg-secondary shadow-md font-outfit" : ""
+              } hover:bg-secondary hover:shadow-md focus:!bg-secondary active:!text-neutral py-1.5 px-3 text-sm rounded-full gap-2 grid grid-flow-col font-outfit`}
             >
               {icon}
               <span>{label}</span>

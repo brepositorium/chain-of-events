@@ -9,8 +9,6 @@ import { fetchExtraDetails } from "~~/utils/chain-of-events/deployContract";
 import ExtraCard from "~~/components/ExtraCard";
 import { ACTIONS } from "~~/utils/chain-of-events/Actions";
 
-
-//TODO: move from here
 const client = new ApolloClient({
   uri: "https://api.studio.thegraph.com/query/71641/test-coe/version/latest",
   cache: new InMemoryCache()
@@ -103,41 +101,44 @@ const EditDashboardPage = ({ params }: PageProps) => {
         setIsSimpleModalOpen(false);
     };
 
-    if (loadingEvents) return <div className="flex justify-center loading loading-spinner loading-lg"></div>;
+    if (loadingEvents) return(
+    <div className="flex items-center justify-center h-[650px]">
+      <div className="loading loading-ring loading-lg"></div>
+    </div>);
     if (errorEvents) return <p>Error loading events</p>;
 
     const eventData = dataEvents.eventCreateds[0];
 
   return (
-    <div className="h-[650px] bg-circles bg-no-repeat">
-      <div className="flex flex-col items-center mt-12 gap-4">
-        <div className="text-2xl font-extrabold mb-6">
+    <div className="h-[650px] bg-spirals bg-no-repeat">
+      <div className="flex flex-col gap-4 mt-12 items-center p-6 max-w-2xl mx-auto bg-gradient-to-b from-secondary via-primary to-secondary ... rounded-xl shadow-md space-x-4">
+        <div className="text-2xl font-extrabold mb-6 font-outfit">
           {eventData.createdEvent_name}
         </div>
         <div className="flex">
-          <div className="text-lg w-96 border p-2">
+          <div className="text-lg w-96 border p-2 font-outfit">
             {eventData.createdEvent_description}
           </div>
           <button className="btn btn-gradient-primary rounded btn-sm ml-8" onClick={() => handleEditClick('createdEvent_description')}>Edit description</button>
         </div>
         <div className="flex">
-          <div className="text-lg w-96 border p-2 mr-6">
+          <div className="text-lg w-96 border p-2 mr-6 font-outfit">
             {eventData.createdEvent_location}
           </div>
           <button className="btn btn-gradient-primary rounded btn-sm ml-8" onClick={() => handleEditClick('createdEvent_location')}>Edit location</button>
         </div>
-        <div className="text-lg mt-6">
+        <div className="text-lg mt-6 font-outfit">
           No. of tickets: &nbsp; &nbsp; {eventData.createdEvent_numberOfTickets}
-          <button className="btn btn-gradient-primary rounded btn-sm ml-8" onClick={() => handleEditClick('createdEvent_numberOfTickets')}>Edit number of tickets</button>
+          <button className="btn btn-gradient-primary rounded btn-sm ml-8 font-sans" onClick={() => handleEditClick('createdEvent_numberOfTickets')}>Edit number of tickets</button>
         </div>
         <div className="mt-8">
-          <button className="btn btn-gradient-primary rounded btn-md ml-8" onClick={() => handleAddModalOpen(0)}>Add ticket type</button>
+          <button className="btn btn-gradient-primary rounded btn-md" onClick={() => handleAddModalOpen(0)}>Add ticket type</button>
         </div>
         <div>
-          <button className="btn btn-gradient-primary rounded btn-md ml-8" onClick={() => handleAddModalOpen(1)}>Add consumable</button>
+          <button className="btn btn-gradient-primary rounded btn-md" onClick={() => handleAddModalOpen(1)}>Add consumable</button>
         </div>
       </div>
-      <div className="container mx-auto px-40">
+      <div className="container mx-auto px-40 mt-8">
         <h1 className="text-2xl font-bold my-4">Ticket types</h1>
         <div className="grid grid-cols-3 gap-4">
             {ticketTypes.map((item, index) => (

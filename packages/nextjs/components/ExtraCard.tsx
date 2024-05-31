@@ -74,16 +74,16 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
         <Card className={extraType === 0 
                         ? "w-72 bg-blue-pattern bg-cover bg-no-repeat rounded-lg" 
                         : "w-72 bg-green-pattern bg-cover bg-no-repeat rounded-lg"}>
-            <img src={imageUrl} alt={extraName} className="w-full h-48 object-cover rounded-t-lg" />
+            <img src={imageUrl} alt={extraName} className="w-full h-52 object-cover rounded-lg" />
             {noOfItems ? 
             <div className="indicator">
                 <span className='indicator-item badge badge-warning'>{`x${noOfItems}`}</span>
             </div>
             :<div></div>}
             <div className="flex flex-col h-full p-2">
-                <h2 className="text-center font-bold">{extraName}</h2>
-                <p className="text-sm">{description}</p>
-                <p className="text-sm text-center font-bold">{`$${price?.toFixed(2)}`}</p>
+                <h2 className="text-center font-bold font-outfit">{extraName}</h2>
+                <p className="text-sm font-outfit">{description}</p>
+                <p className="text-sm text-center font-bold font-outfit">{`$${price?.toFixed(2)}`}</p>
                 {hasQuantity ? 
                 <div className="flex items-center justify-center my-2">
                     <button className="btn text-xl" onClick={handleDecrease}>-</button>
@@ -91,7 +91,7 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
                     <button className="btn text-xl" onClick={handleIncrease}>+</button>
                 </div>
                 : <div></div>}
-                <div className="flex flex-wrap justify-evenly mt-4">
+                <div className="flex flex-wrap justify-evenly mt-4 ">
                     {action === ACTIONS.MANAGE && manageUrl ? (
                         <Link href={manageUrl} className={`btn btn-gradient-primary rounded-xl w-36 border-0`}>
                                 Manage

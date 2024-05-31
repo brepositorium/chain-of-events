@@ -3,7 +3,6 @@ import Card from './BaseCard';
 import Link from 'next/link';
 
 interface EventCardProps {
-    eventId: number;
     eventName: string;
     eventDescription?: string;
     eventLocation?: string;
@@ -16,7 +15,6 @@ interface EventCardProps {
 }
 
 const EventCard: React.FC<EventCardProps> = ({
-    eventId,
     eventName,
     eventDescription,
     eventLocation,
@@ -28,18 +26,14 @@ const EventCard: React.FC<EventCardProps> = ({
     actionLabel
 }) => {
     return (
-        <Card className={
-            hasBookmark 
-            ? "w-72 bg-red-pattern bg-cover bg-no-repeat min-h-[400px] flex flex-col"
-            : "w-72 bg-red-pattern bg-cover bg-no-repeat min-h-[200px] flex flex-col"
-        }>
-            {logoUrl && <img src={logoUrl} alt={eventName} className="w-full h-48 object-cover rounded-t-lg" />}
+        <Card className="w-72 bg-red-pattern bg-cover bg-no-repeat rounded-lg flex flex-col">
+            {logoUrl && <img src={logoUrl} alt={eventName} className="w-full h-48 object-cover rounded-lg" />}
             <div className="flex flex-col items-center h-full pt-2 justify-between">
                 <div className="overflow-hidden" style={{ maxHeight: '4rem' }}>
-                    <h2 className="text-center text-lg font-bold text-ellipsis">{eventName}</h2>
+                    <h2 className="text-center text-lg font-bold text-ellipsis font-outfit">{eventName}</h2>
                 </div>
-                {eventDescription && <p>{eventDescription}</p>}
-                {eventLocation && <p className="text-sm text-center">{eventLocation}</p>}
+                {eventDescription && <p className='font-outfit'>{eventDescription}</p>}
+                {eventLocation && <p className="text-sm text-center font-outfit">@{eventLocation}</p>}
                 <div className="flex gap-2 flex-wrap justify-evenly mt-4">
                     <div className='shadow hover:shadow-xl'>
                         <Link href={actionUrl} className="btn btn-gradient-primary rounded-xl w-36 border-0">
@@ -48,7 +42,7 @@ const EventCard: React.FC<EventCardProps> = ({
                     </div>
                     {hasBookmark ? 
                     <button
-                        className={`btn btn-gradient-primary rounded-xl w-36 border-0`}
+                        className={`btn btn-gradient-primary rounded-xl w-36 border-0 shadow hover:shadow-xl`}
                         onClick={onToggleBookmark}
                     >
                         {isBookmarked ? 'Unbookmark' : 'Bookmark'}

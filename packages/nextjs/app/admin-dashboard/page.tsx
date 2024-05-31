@@ -6,7 +6,6 @@ import { useAccount } from 'wagmi'
 import EventCard from '~~/components/EventCard';
 import { useState } from 'react';
 
-//TODO: move from here
 const client = new ApolloClient({
     uri: "https://api.studio.thegraph.com/query/71641/test-coe/version/latest",
   cache: new InMemoryCache()
@@ -20,7 +19,10 @@ const AdminDashboard: NextPage = () => {
     const { loading: loadingEvents, error: errorEvents, data: dataEvents } = useQuery(GET_PERSONS_EVENTS, {
         variables: { address }, client: client});
 
-    if (loadingEvents) return <div className="flex justify-center loading loading-spinner loading-lg"></div>;
+    if (loadingEvents) return(
+    <div className="flex items-center justify-center h-[650px]">
+      <div className="loading loading-ring loading-lg"></div>
+    </div>);
     if (errorEvents) return <p>Error loading events</p>;
 
     const loadMoreEvents = () => {
@@ -28,14 +30,13 @@ const AdminDashboard: NextPage = () => {
   };
 
   return (
-    <div className="h-[650px] bg-circles bg-no-repeat">
+    <div className="h-[650px] bg-spirals bg-no-repeat">
       <div className="container mx-auto px-40">
           <h1 className="text-2xl font-bold my-8">Events created by you</h1>
           <div className="grid grid-cols-3 gap-4">
               {dataEvents && dataEvents.eventCreateds.slice(0, visibleEvents).map((event: any) => (
                   <EventCard 
                   key={event.id}
-                  eventId={event.createdEvent_id} 
                   eventName={event.createdEvent_name}
                   actionUrl={"/event-dashboard/" + Number(event.createdEvent_id)}
                   actionLabel='Manage'

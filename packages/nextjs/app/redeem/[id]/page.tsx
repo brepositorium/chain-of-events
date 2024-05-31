@@ -49,7 +49,7 @@ const RedeemPage = ({ params }: PageProps) => {
             const balancePromises = data.map(extra => getUnredeemedBalanceOf(extra, extractAddress(qrResult)!));
             const balances = await Promise.all(balancePromises);
     
-            const nonZeroExtras = data.filter((extra, index) => BigInt(balances[index]) > 0);
+            const nonZeroExtras = data.filter((extra, index) => balances[index] > 0);
     
             const detailPromises = nonZeroExtras.map(extra => fetchExtraDetails(extra));
             const details = await Promise.all(detailPromises);
