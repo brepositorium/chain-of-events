@@ -47,7 +47,7 @@ contract PriceAutomatedUpdate is AutomationCompatibleInterface {
 		return i_link.balanceOf(address(this));
 	}
 
-	function schedulePriceUpdate(uint256 _newPrice, uint256 _time) external {
+	function scheduletUpdate(uint256 _newPrice, uint256 _time) external {
 		require(msg.sender == admin, "Unauthorized");
 		newPrice = _newPrice;
 		scheduledTime = _time;
@@ -55,8 +55,10 @@ contract PriceAutomatedUpdate is AutomationCompatibleInterface {
 
 	function checkUpkeep(
 		bytes calldata
-	) external view override returns (bool upkeepNeeded, bytes memory) {
+	) external view override returns (bool upkeepNeeded, bytes memory data) {
 		upkeepNeeded = (block.timestamp >= scheduledTime && scheduledTime != 0);
+		data = "";
+		return (upkeepNeeded, data);
 	}
 
 	function performUpkeep(bytes calldata) external override {

@@ -47,10 +47,7 @@ contract MintLimitAutomatedUpdate is AutomationCompatibleInterface {
 		return i_link.balanceOf(address(this));
 	}
 
-	function scheduleMintLimitUpdate(
-		uint256 _newMintLimit,
-		uint256 _time
-	) external {
+	function scheduletUpdate(uint256 _newMintLimit, uint256 _time) external {
 		require(msg.sender == admin, "Unauthorized");
 		newMintLimit = _newMintLimit;
 		scheduledTime = _time;
@@ -58,8 +55,10 @@ contract MintLimitAutomatedUpdate is AutomationCompatibleInterface {
 
 	function checkUpkeep(
 		bytes calldata
-	) external view override returns (bool upkeepNeeded, bytes memory) {
+	) external view override returns (bool upkeepNeeded, bytes memory data) {
 		upkeepNeeded = (block.timestamp >= scheduledTime && scheduledTime != 0);
+		data = "";
+		return (upkeepNeeded, data);
 	}
 
 	function performUpkeep(bytes calldata) external override {
