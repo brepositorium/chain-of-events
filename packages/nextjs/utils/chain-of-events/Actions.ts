@@ -1,6 +1,6 @@
 export enum ACTIONS {
-    TRANSFER,
-    MANAGE,
-    BUY,
-    REDEEM
+  TRANSFER,
+  MANAGE,
+  BUY,
+  REDEEM,
 }
