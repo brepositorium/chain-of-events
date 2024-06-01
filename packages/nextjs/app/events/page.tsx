@@ -1,15 +1,12 @@
 "use client"
 import { ApolloClient, InMemoryCache, useQuery } from "@apollo/client";
-import { GET_ALL_EVENTS_PAGINATED, GET_EVENTS_DETAILS_BY_IDS, GET_EVENT_DETAILS_BY_ID } from "~~/utils/chain-of-events/queries"
+import { GET_ALL_EVENTS_PAGINATED, GET_EVENTS_DETAILS_BY_IDS } from "~~/utils/chain-of-events/queries"
 import { database } from "~~/utils/chain-of-events/firebaseConfig"
 import { get, ref, runTransaction } from "firebase/database";
 import { useAccount } from 'wagmi'
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import EventCard from "~~/components/EventCard";
-import { SocketEventSubscriber } from "ethers";
 
-//TODO: move from here
 const client = new ApolloClient({
     uri: "https://api.studio.thegraph.com/query/71641/test-coe/version/latest",
     cache: new InMemoryCache()
@@ -50,7 +47,7 @@ const EventsPage = () => {
     }, [address]);
 
       const { data, fetchMore, loading, error } = useQuery(GET_ALL_EVENTS_PAGINATED, {
-        variables: { first: 2, after: 0 }, client: client
+        variables: { first: 3, after: 0 }, client: client
       });
 
       if (loading) return <p>Loading...</p>;
@@ -138,73 +135,72 @@ const EventsPage = () => {
     );
 
     return (
-        <div>
-            <div className="container mx-auto px-40">
-                <div className="flex flex-col justify-between my-8">
-                    <h1 className="text-2xl font-bold mb-4">Bookmarked events</h1>
+            <div className="h-[650px] bg-circles bg-no-repeat">
+                <div className="container mx-auto px-40">
+                    <div className="flex flex-col justify-between my-8">
+                        <h1 className="text-2xl font-bold mb-4">Bookmarked events</h1>
+                        <div className="grid grid-cols-3 gap-4">
+                        {dataEventsDetails && dataEventsDetails.eventCreateds.length > 0 ? (
+                            dataEventsDetails.eventCreateds.map((event: any) => (
+                                <EventCard 
+                            key={event.id}
+                            logoUrl={event.createdEvent_logoUrl}
+                            eventName={event.createdEvent_name} 
+                            eventDescription={event.createdEvent_description}
+                            eventLocation={event.createdEvent_location} 
+                            actionUrl={"/event-info/" + Number(event.createdEvent_id)}
+                            actionLabel="See more"
+                            hasBookmark={true}
+                            onToggleBookmark={() => toggleBookmark(event.createdEvent_id)}
+                            isBookmarked={bookmarkedEvents?.includes(event.createdEvent_id)}
+                            />
+                            ))
+                        ) : (
+                            <p>No bookmarked events found.</p>
+                        )}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="container mx-auto px-40">
+                    <div className="flex items-center justify-between mb-4">
+                        <h1 className="text-2xl font-bold">Find events</h1>
+                        <div className="relative w-50">
+                            <input
+                                type="text"
+                                placeholder="Search events"
+                                className="input input-md input-bordered w-full bg-base-content rounded-lg text-black pl-10 font-outfit"
+                                value={searchTerm}
+                                onChange={handleSearchChange}
+                            />
+                            <div className="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
                     <div className="grid grid-cols-3 gap-4">
-                    {dataEventsDetails && dataEventsDetails.eventCreateds.length > 0 ? (
-                        dataEventsDetails.eventCreateds.map((event: any) => (
+                        {filteredEvents.map((event: EventDetail) => (
                             <EventCard 
-                        key={event.id} 
-                        eventId={event.createdEvent_id} 
-                        logoUrl={event.createdEvent_logoUrl}
-                        eventName={event.createdEvent_name} 
-                        eventDescription={event.createdEvent_description}
-                        eventLocation={event.createdEvent_location} 
-                        actionUrl={"/event-info/" + Number(event.createdEvent_id)}
-                        actionLabel="See more"
-                        hasBookmark={true}
-                        onToggleBookmark={() => toggleBookmark(event.createdEvent_id)}
-                        isBookmarked={bookmarkedEvents?.includes(event.createdEvent_id)}
-                        />
-                        ))
-                    ) : (
-                        <p>No bookmarked events found.</p>
-                    )}
+                            key={event.id} 
+                            logoUrl={event.createdEvent_logoUrl}
+                            eventName={event.createdEvent_name} 
+                            eventDescription={event.createdEvent_description}
+                            eventLocation={event.createdEvent_location} 
+                            actionUrl={"/event-info/" + Number(event.createdEvent_id)}
+                            actionLabel="See more"
+                            hasBookmark={true}
+                            onToggleBookmark={() => toggleBookmark(event.createdEvent_id)}
+                            isBookmarked={bookmarkedEvents?.includes(event.createdEvent_id)}
+                            />
+                        ))}
+                    </div>
+                    <div className="flex items-center justify-center">
+                        <button className="btn btn-sm btn-primary rounded-xl w-36 border-0 my-8" onClick={handleLoadMore}>Load more</button>
                     </div>
                 </div>
             </div>
-
-            <div className="container mx-auto px-40">
-                <div className="flex items-center justify-between mb-4">
-                    <h1 className="text-2xl font-bold">Find events</h1>
-                    <div className="relative w-50">
-                    <input
-                        type="text"
-                        placeholder="Search events"
-                        className="input input-md input-bordered w-full bg-base-content rounded-lg text-black pl-10"
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                    />
-                    <div className="absolute inset-y-0 left-0 flex items-center pl-2 pointer-events-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
-                    </div>
-                </div>
-
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-                {filteredEvents.map((event: EventDetail) => (
-                    <EventCard 
-                    key={event.id} 
-                    eventId={event.createdEvent_id} 
-                    logoUrl={event.createdEvent_logoUrl}
-                    eventName={event.createdEvent_name} 
-                    eventDescription={event.createdEvent_description}
-                    eventLocation={event.createdEvent_location} 
-                    actionUrl={"/event-info/" + Number(event.createdEvent_id)}
-                    actionLabel="See more"
-                    hasBookmark={true}
-                    onToggleBookmark={() => toggleBookmark(event.createdEvent_id)}
-                    isBookmarked={bookmarkedEvents?.includes(event.createdEvent_id)}
-                    />
-                ))}
-            </div>
-            </div>
-            <button className="btn" onClick={handleLoadMore}>Load more</button>
-        </div>
     )
 }
 
