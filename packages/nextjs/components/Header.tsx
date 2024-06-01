@@ -20,16 +20,16 @@ export const menuLinks: HeaderMenuLink[] = [
     href: "/",
   },
   {
-    label: "How it works",
-    href: "/a",
-  },
-  {
     label: "Find events",
-    href: "/s",
+    href: "/events",
   },
   {
-    label: "Create event",
-    href: "/d",
+    label: "Manage events",
+    href: "/admin-dashboard",
+  },
+  {
+    label: "Templates",
+    href: "/templates",
   },
 ];
 

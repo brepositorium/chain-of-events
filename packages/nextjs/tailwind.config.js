@@ -60,6 +60,7 @@ module.exports = {
       boxShadow: {
         center: "0 0 12px -2px rgb(255 255 255)",
         '3xl': '0 35px 60px -15px rgba(0, 0, 0, 0.3)',
+        'white': '0 5px 10px -5px rgb(150 150 150)',
       },
       animation: {
         "pulse-fast": "pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite",
