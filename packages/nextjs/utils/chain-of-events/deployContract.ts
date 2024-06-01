@@ -1,5 +1,8 @@
 import ExtraNft from '../../../hardhat/artifacts/contracts/ExtraNft.sol/ExtraNft.json';
 import PriceFeedHandler from '../../../hardhat/artifacts/contracts/PriceFeedHandler.sol/PriceFeedHandler.json';
+import PriceAutomatedUpdate from '../../../hardhat/artifacts/contracts/PriceAutomatedUpdate.sol/PriceAutomatedUpdate.json';
+import MintLimitAutomatedUpdate from '../../../hardhat/artifacts/contracts/MintLimitAutomatedUpdate.sol/MintLimitAutomatedUpdate.json';
+import PauseAutomatedUpdate from '../../../hardhat/artifacts/contracts/PauseAutomatedUpdate.sol/PauseAutomatedUpdate.json';
 import axios from "axios";
 import { ethers } from 'ethers';
 
@@ -31,6 +34,37 @@ export const deployContract = async (name: string, symbol: string, uri: string, 
   return await contract.getAddress();
 };
 
+export const deployContractForType = async (extraAddress: string, updateType: string) => {
+  const contractFactory = new ethers.ContractFactory(`${updateType}AutomatedUpdate.abi`, `${updateType}AutomatedUpdate.bytecode`, wallet);
+  const contract = await contractFactory.deploy(extraAddress, process.env.NEXT_PUBLIC_LINK_TOKEN_INTERFACE, process.env.NEXT_PUBLIC_CHAINLINK_REGISTRAR);
+  console.log("Contract deployed at ", await contract.getAddress());
+  return await contract.getAddress();
+};
+
+export const registerUpkeepForType = async (chainlinkContractAddress: string, name: string, updateType: string) => {
+  const contract = new ethers.Contract(chainlinkContractAddress, `${updateType}AutomatedUpdate.abi`, wallet);
+  await contract.registerUpkeep(name, BigInt(500000), BigInt(2000000000000000000)); //2e18
+  console.log("Upkeep registration");
+};
+
+export const schedulePriceUpdate = async (chainlinkContractAddress: string, newValue: BigInt, scheduleTime: number) => {
+  const contract = new ethers.Contract(chainlinkContractAddress, PriceAutomatedUpdate.abi, wallet);
+  await contract.scheduleUpdate(newValue, BigInt(scheduleTime));
+  console.log("Schedule price update");
+};
+
+export const scheduleMintLimitUpdate = async (chainlinkContractAddress: string, newValue: BigInt, scheduleTime: number) => {
+  const contract = new ethers.Contract(chainlinkContractAddress, MintLimitAutomatedUpdate.abi, wallet);
+  await contract.scheduleUpdate(newValue, BigInt(scheduleTime));
+  console.log("Schedule mint limit update");
+};
+
+export const schedulePause = async (chainlinkContractAddress: string, scheduleTime: number) => {
+  const contract = new ethers.Contract(chainlinkContractAddress, PauseAutomatedUpdate.abi, wallet);
+  await contract.scheduleUpdate(BigInt(scheduleTime));
+  console.log("Schedule pause");
+};
+
 export const fetchExtraDetails = async (address: string) => {
   const contract = new ethers.Contract(address, ExtraNft.abi, provider);
   try {
@@ -54,7 +88,6 @@ export const fetchExtraDetails = async (address: string) => {
     const contract = new ethers.Contract(contractAddress, ExtraNft.abi, provider);
     try {
       const balance = await contract.getUnredeemedBalance(callerAddress);
-      
       return balance;
     } catch (error) {
       console.error("Failed to fetch balance:", error);
@@ -124,6 +157,18 @@ export const pauseSellingForExtra = async (address: string) => {
         console.log('Transaction receipt:', receipt);
     } catch (error) {
         console.error('Error pausing the contract:', error);
+    }
+  };
+
+  export const getPausedStatus = async (contractAddress:string) => {
+    const contract = new ethers.Contract(contractAddress, ExtraNft.abi, provider);
+    try {
+      const pausedStatus = await contract.paused();
+
+      return pausedStatus;
+    } catch (error) {
+      console.error("Failed to fetch paused status:", error);
+      return null;
     }
   };
 
