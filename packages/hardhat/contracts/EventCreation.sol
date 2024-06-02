@@ -3,6 +3,10 @@ pragma solidity ^0.8.20;
 
 error NotTheAdmin(uint256 eventId);
 
+/// @title Event Creation and Management for Chain of Events Platform
+/// @author radub.xyz
+/// @notice You can use this contract to manage event details and ticketing information on the blockchain
+/// @dev This contract includes functions for creating and managing events, adding extras, and handling allowed addresses for ticket redemption
 contract EventCreation {
 	struct Event {
 		uint256 id;
@@ -28,10 +32,12 @@ contract EventCreation {
 
 	mapping(uint256 => Event) public events;
 
-	//the key represents the id of an event, while the address array represents all the extras' addresses owned by that event
+	/// @notice Retrieves the list of extra addresses associated with an event
+	/// @dev Maps event IDs to their corresponding arrays of extra addresses
 	mapping(uint256 => address[]) public extras;
 
-	//the key represents the id of an event, while the address array represents all the wallets allowed to redeem an Extra
+	/// @notice Check if a specific address is allowed to redeem tickets for a particular event
+	/// @dev Maps event IDs to a mapping of addresses allowed to redeem tickets
 	mapping(uint256 => mapping(address => bool)) public allowedList;
 
 	mapping(uint256 => uint256) public mintedTickets;
@@ -52,6 +58,13 @@ contract EventCreation {
 		_;
 	}
 
+	/// @notice Creates a new event with given details
+	/// @dev Emits an EventCreated event upon success
+	/// @param name Name of the event
+	/// @param description Description of the event
+	/// @param location Location of the event
+	/// @param logoUrl URL of the event's logo
+	/// @param numberOfTickets Total number of tickets available for the event
 	function createEvent(
 		string calldata name,
 		string calldata description,
@@ -73,6 +86,10 @@ contract EventCreation {
 		emit EventCreated(events[eventId]);
 	}
 
+	/// @notice Adds an extra address for a specific event
+	/// @param deployedExtraAddress The contract address of the deployed extra (e.g., tickets, VIP passes)
+	/// @param eventId The ID of the event
+	/// @param caller The address attempting to add the extra
 	function addExtra(
 		address deployedExtraAddress,
 		uint256 eventId,
@@ -81,6 +98,9 @@ contract EventCreation {
 		extras[eventId].push(deployedExtraAddress);
 	}
 
+	/// @notice Allows an address to redeem tickets for an event
+	/// @param allowedAddress The address to allow
+	/// @param eventId The ID of the event
 	function addAllowedAddress(
 		address allowedAddress,
 		uint256 eventId
@@ -120,11 +140,19 @@ contract EventCreation {
 		emit NumberOfTicketsChanged(eventId, newNumberOfTickets);
 	}
 
+	/// @notice Marks an event as inactive and effectively deletes it from active listings
+	/// @dev Emits an EventDeleted event upon successfully marking the event as inactive
+	/// @param eventId The ID of the event to delete
+	/// @custom:security admin-only This function can only be called by the admin of the event
 	function deleteEvent(uint256 eventId) public isSenderAdmin(eventId) {
 		events[eventId].isActive = false;
 		emit EventDeleted(eventId);
 	}
 
+	/// @notice Reactivates a previously deactivated event, making it active and visible again
+	/// @dev Emits an EventReactivated event upon successfully reactivating the event
+	/// @param eventId The ID of the event to reactivate
+	/// @custom:security admin-only This function can only be called by the admin of the event
 	function reactivateEvent(uint256 eventId) public isSenderAdmin(eventId) {
 		events[eventId].isActive = true;
 		emit EventReactivated(eventId);

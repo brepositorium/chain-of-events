@@ -17,6 +17,10 @@ error NumberOfTicketsLimitReached(uint256 eventId);
 error MintLimitReached(uint256 currentMintCount);
 error NotEnoughUnredeemedTokens(address _ticketOwner);
 
+/// @title A contract for creating and managing ERC721 tokens for events
+/// @author radub.xyz
+/// @notice This contract allows for the minting and management of event-specific NFTs like tickets and consumables
+/// @dev Extends OpenZeppelin's ERC721, ERC721URIStorage, ERC721Pausable, and ERC721Enumerable for comprehensive NFT functionality
 contract ExtraNft is
 	ERC721,
 	ERC721URIStorage,
@@ -105,6 +109,16 @@ contract ExtraNft is
 		_;
 	}
 
+	/// @notice Creates a new ExtraNft contract
+	/// @dev Sets ownership to the creator and initializes connected contracts
+	/// @param _name Name of the token collection
+	/// @param _symbol Symbol of the token collection
+	/// @param _uri Base URI for token metadata
+	/// @param _extraType Type of the extra (0 for tickets, 1 for consumables)
+	/// @param _price Initial price of the tokens
+	/// @param _eventCreationAddress Address of the EventCreation contract
+	/// @param _eventId ID of the event related to these tokens
+	/// @param _priceFeedHandlerAddress Address of the PriceFeedHandler contract
 	constructor(
 		string memory _name,
 		string memory _symbol,
@@ -124,6 +138,10 @@ contract ExtraNft is
 		eventCreation.addExtra(address(this), _eventId, msg.sender);
 	}
 
+	/// @notice Mints new tokens
+	/// @dev Ensures not paused, checks tickets limit and mint limit before minting
+	/// @param to Address to mint tokens to
+	/// @param _amount Number of tokens to mint
 	function safeMint(
 		address to,
 		uint256 _amount
@@ -149,12 +167,18 @@ contract ExtraNft is
 		}
 	}
 
+	/// @notice Adds a Chainlink contract to the approved list for direct interactions
+	/// @dev This function is restricted to the contract owner
+	/// @param chainlinkContractAddress The address of the Chainlink contract to approve
 	function addApprovedChainlinkContract(
 		address chainlinkContractAddress
 	) public onlyOwner {
 		approvedChainlinkContracts[chainlinkContractAddress] = true;
 	}
 
+	/// @notice Redeems a token to mark it as used
+	/// @dev Can only be called by an address on the allow list for the event associated with the token
+	/// @param tokenId The ID of the token to redeem
 	function redeem(
 		uint256 tokenId
 	) public onlyAllowList(eventId) isTokenMinted(tokenId) {
@@ -207,6 +231,10 @@ contract ExtraNft is
 		return super._ownerOf(tokenId);
 	}
 
+	/// @notice Calculates the number of unredeemed tokens owned by a specific address
+	/// @dev Iterates over all tokens owned by the address and counts those not yet redeemed
+	/// @param _ticketOwner The owner of the tokens to check
+	/// @return The count of unredeemed tokens
 	function getUnredeemedBalance(
 		address _ticketOwner
 	) public view returns (uint256) {
@@ -220,6 +248,10 @@ contract ExtraNft is
 		return unredeemedBalance;
 	}
 
+	/// @notice Transfers a specified number of unredeemed tokens from the caller to another address
+	/// @dev Ensures the sender has enough unredeemed tokens before transferring
+	/// @param _to The recipient address
+	/// @param _amount The number of unredeemed tokens to transfer
 	function bulkTransferUnredeemedTokens(
 		address _to,
 		uint256 _amount
@@ -237,6 +269,10 @@ contract ExtraNft is
 		}
 	}
 
+	/// @notice Redeems multiple tokens for a given ticket owner
+	/// @dev This function ensures that enough unredeemed tokens are available before redeeming
+	/// @param _ticketOwner The owner of the tokens to be redeemed
+	/// @param _amount The number of tokens to redeem
 	function bulkRedeem(
 		address _ticketOwner,
 		uint256 _amount
