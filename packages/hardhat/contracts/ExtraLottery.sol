@@ -3,10 +3,10 @@ pragma solidity ^0.8.19;
 
 import { VRFConsumerBaseV2Plus } from "@chainlink/contracts/src/v0.8/vrf/dev/VRFConsumerBaseV2Plus.sol";
 import { VRFV2PlusClient } from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
-import "./ExtraNft.sol";
-import "./EventCreation.sol";
+import "https://github.com/brepositorium/chain-of-events/blob/main/packages/hardhat/contracts/ExtraNft.sol";
+import "https://github.com/brepositorium/chain-of-events/blob/main/packages/hardhat/contracts/EventCreation.sol";
 
-contract EventLottery is VRFConsumerBaseV2Plus {
+contract ExtraLottery is VRFConsumerBaseV2Plus {
 	bytes32 internal keyHash;
 	uint256 internal fee;
 
@@ -18,14 +18,10 @@ contract EventLottery is VRFConsumerBaseV2Plus {
 	uint256 public s_requestId;
 
 	address public eventAdmin;
-	ExtraNft public extraContract;
+	ExtraNft public ticketContract;
 	EventCreation public eventCreation;
 
 	uint256 public s_subscriptionId;
-
-	address vrfCoordinator = 0x5C210eF41CD1a72de73bF76eC39637bB0d3d7BEE;
-	bytes32 s_keyHash =
-		0xc799bd1e3bd4d1a41cd4968997a4e03dfd2a3c7c04b695881138580163f42887;
 
 	mapping(uint256 => address[]) public lotteryParticipants;
 	uint256 public currentLotteryId;
@@ -33,26 +29,29 @@ contract EventLottery is VRFConsumerBaseV2Plus {
 
 	constructor(
 		uint256 subscriptionId,
-		address _extraContractAddress,
+		address vrfCoordinator,
+		bytes32 s_keyHash,
+		address _ticketContractAddress,
 		address _eventCreationAddress
 	) VRFConsumerBaseV2Plus(vrfCoordinator) {
 		s_subscriptionId = subscriptionId;
 		keyHash = s_keyHash;
 
-		extraContract = ExtraNft(_extraContractAddress);
+		ticketContract = ExtraNft(_ticketContractAddress);
 		eventCreation = EventCreation(_eventCreationAddress);
+		eventAdmin = msg.sender;
 	}
 
-	function initiateLottery() public onlyOwnerOrCoordinator {
+	function initiateLottery() public {
 		currentLotteryId++;
 
 		uint256 totalTickets = eventCreation.getMintedTickets(
-			extraContract.eventId()
+			ticketContract.eventId()
 		);
 		for (uint256 i = 0; i < totalTickets; i++) {
-			if (extraContract.ownerOf(i) != address(0)) {
+			if (ticketContract.ownerOf(i) != address(0)) {
 				lotteryParticipants[currentLotteryId].push(
-					extraContract.ownerOf(i)
+					ticketContract.ownerOf(i)
 				);
 			}
 		}
@@ -60,7 +59,7 @@ contract EventLottery is VRFConsumerBaseV2Plus {
 		requestRandomWords();
 	}
 
-	function requestRandomWords() private returns (uint256 requestId) {
+	function requestRandomWords() public returns (uint256 requestId) {
 		s_requestId = s_vrfCoordinator.requestRandomWords(
 			VRFV2PlusClient.RandomWordsRequest({
 				keyHash: keyHash,
