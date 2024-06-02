@@ -1,21 +1,32 @@
-# 🏗 Scaffold-ETH 2
+# Chain of Events
 
-<h4 align="center">
-  <a href="https://docs.scaffoldeth.io">Documentation</a> |
-  <a href="https://scaffoldeth.io">Website</a>
-</h4>
+Chain of Events is a blockchain-based event management platform that leverages Ethereum smart contracts to provide a secure, transparent, and user-friendly experience for event organizers and attendees. This project utilizes Scaffold-ETH for rapid Ethereum dapp development, combining Hardhat for smart contract deployment and Next.js for the frontend.
 
-🧪 An open-source, up-to-date toolkit for building decentralized applications (dapps) on the Ethereum blockchain. It's designed to make it easier for developers to create and deploy smart contracts and build user interfaces that interact with those contracts.
+**For Participants**:<br>
 
-⚙️ Built using NextJS, RainbowKit, Hardhat, Wagmi, Viem, and Typescript.
+- We offer an easy to use application from which they can buy tickets and other consumables to an event.
+- All items are tokenized as ERC721 NFTs, granting full ownership and the freedom to transfer assets securely.<br>
+- Participants get to keep their NFTs after the event, maintaining the memory of the event forever, opening the door to future benefits and uses<br>
+- Users get to participate in unique activities set up by organizers, such as lotteries, artist interactions, and exclusive behind-the-scenes experiences, with the sky being the limit.<br><br>
 
-- ✅ **Contract Hot Reload**: Your frontend auto-adapts to your smart contract as you edit it.
-- 🪝 **[Custom hooks](https://docs.scaffoldeth.io/hooks/)**: Collection of React hooks wrapper around [wagmi](https://wagmi.sh/) to simplify interactions with smart contracts with typescript autocompletion.
-- 🧱 [**Components**](https://docs.scaffoldeth.io/components/): Collection of common web3 components to quickly build your frontend.
-- 🔥 **Burner Wallet & Local Faucet**: Quickly test your application with a burner wallet and local faucet.
-- 🔐 **Integration with Wallet Providers**: Connect to different wallet providers and interact with the Ethereum network.
+**For event organizers**:<br><br>
 
-![Debug Contracts tab](https://github.com/scaffold-eth/scaffold-eth-2/assets/55535804/b237af0c-5027-4849-a5c1-2e31495cccb1)
+- Easily set up and manage your event. Register events, add various ticket types, and bring all sales on-chain.<br>
+- Thanks to Chainlink Price Feeds, all prices are in USD to make the transition from Web2 smooth and intuitive.<br>
+- Freely adjust prices, set mint limits, pause selling, control the total number of tickets sold or many other features. Use Chainlink Automation to schedule these updates seamlessly.<br>
+  **The sky is the limit by using "Templates".**<br>
+- Templates are smart contracts that use Chainlink products, like Automations or Functions, that can be attached to any event or asset. They enable everything from lotteries to dynamic changes in NFT characteristics based on off-chain events. <br>
+- Anyone can create and share templates, expanding the functionality and versatility of events and opening the doors to limitless possibilities. Organizers can personalize their events to an unprecedented extent, providing unique experiences that were previously impossible.<br>
+  **How are tickets or other consumables checked and validated?** <br>
+  _Come Redeem function_<br>
+- At the event, an authorized staff member, known as an "allowed person," will scan your digital wallet to view your event-related NFTs, such as tickets and consumables. They will then redeem the necessary NFTs directly in your wallet, marking them as used. Each redemption is securely recorded on the blockchain, ensuring a transparent and fraud-proof process.<br><br>
+
+## Features
+
+- **Event Management**: Organizers can create, manage, and customize events using ERC-721 tokens for tickets and consumables.
+- **Chainlink Integration**: Utilizes Chainlink Price Feeds for real-time pricing and Chainlink VRF for verifiable randomness in event-related activities like lotteries.
+- **NFTs for Tickets**: Tickets and other event-related items are managed as NFTs, ensuring ownership and transferability.
+- **Templates System**: A flexible system allowing event organizers to attach customizable smart contract functionalities to events and tickets.
 
 ## Requirements
 
