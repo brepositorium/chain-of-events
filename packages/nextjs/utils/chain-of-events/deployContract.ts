@@ -5,6 +5,7 @@ import PriceAutomatedUpdate from "../../../hardhat/artifacts/contracts/PriceAuto
 import PriceFeedHandler from "../../../hardhat/artifacts/contracts/PriceFeedHandler.sol/PriceFeedHandler.json";
 import axios from "axios";
 import { ethers } from "ethers";
+import toast from "react-hot-toast";
 
 type PinataResponse = {
   IpfsHash: string;
@@ -26,6 +27,21 @@ if (!rpcUrl) {
 
 const provider = new ethers.JsonRpcProvider(rpcUrl);
 const wallet = new ethers.Wallet(privateKey, provider);
+const wprovider = new ethers.BrowserProvider(window.ethereum);
+
+const loadContractArtifacts = async (updateType: any) => {
+  if (
+    !"PriceAutomatedUpdate".includes(updateType.toString()) &&
+    !"MintLimitAutomatedUpdate".includes(updateType.toString()) &&
+    !"PauseAutomatedUpdate".includes(updateType.toString())
+  ) {
+    throw new Error("Unsupported update type");
+  }
+  const module = await import(
+    `../../../hardhat/artifacts/contracts/${updateType}AutomatedUpdate.sol/${updateType}AutomatedUpdate.json`
+  );
+  return module.default;
+};
 
 export const deployContract = async (
   name: string,
@@ -37,7 +53,8 @@ export const deployContract = async (
   eventId: BigInt,
   priceFeedHandlerAddress?: string,
 ) => {
-  const factory = new ethers.ContractFactory(ExtraNft.abi, ExtraNft.bytecode, wallet);
+  const signer = await wprovider.getSigner();
+  const factory = new ethers.ContractFactory(ExtraNft.abi, ExtraNft.bytecode, signer);
   const contract = await factory.deploy(
     name,
     symbol,
@@ -53,11 +70,9 @@ export const deployContract = async (
 };
 
 export const deployContractForType = async (extraAddress: string, updateType: string) => {
-  const contractFactory = new ethers.ContractFactory(
-    `${updateType}AutomatedUpdate.abi`,
-    `${updateType}AutomatedUpdate.bytecode`,
-    wallet,
-  );
+  const signer = await wprovider.getSigner();
+  const { abi, bytecode } = await loadContractArtifacts(updateType);
+  const contractFactory = new ethers.ContractFactory(abi, bytecode, signer);
   const contract = await contractFactory.deploy(
     extraAddress,
     process.env.NEXT_PUBLIC_LINK_TOKEN_INTERFACE,
@@ -68,31 +83,58 @@ export const deployContractForType = async (extraAddress: string, updateType: st
 };
 
 export const registerUpkeepForType = async (chainlinkContractAddress: string, name: string, updateType: string) => {
-  const contract = new ethers.Contract(chainlinkContractAddress, `${updateType}AutomatedUpdate.abi`, wallet);
+  const signer = await wprovider.getSigner();
+  const { abi } = await loadContractArtifacts(updateType);
+  const contract = new ethers.Contract(chainlinkContractAddress, abi, signer);
   await contract.registerUpkeep(name, BigInt(500000), BigInt(2000000000000000000)); //2e18
   console.log("Upkeep registration");
 };
 
-export const schedulePriceUpdate = async (chainlinkContractAddress: string, newValue: BigInt, scheduleTime: number) => {
-  const contract = new ethers.Contract(chainlinkContractAddress, PriceAutomatedUpdate.abi, wallet);
-  await contract.scheduleUpdate(newValue, BigInt(scheduleTime));
+export const schedulePriceUpdate = async (chainlinkContractAddress: string, newValue: number, scheduleTime: number) => {
+  const signer = await wprovider.getSigner();
+  const contract = new ethers.Contract(chainlinkContractAddress, PriceAutomatedUpdate.abi, signer);
+  console.log(chainlinkContractAddress);
+  await contract.scheduleUpdate(BigInt(newValue), BigInt(scheduleTime));
   console.log("Schedule price update");
 };
 
 export const scheduleMintLimitUpdate = async (
   chainlinkContractAddress: string,
-  newValue: BigInt,
+  newValue: number,
   scheduleTime: number,
 ) => {
-  const contract = new ethers.Contract(chainlinkContractAddress, MintLimitAutomatedUpdate.abi, wallet);
-  await contract.scheduleUpdate(newValue, BigInt(scheduleTime));
+  const signer = await wprovider.getSigner();
+  const contract = new ethers.Contract(chainlinkContractAddress, MintLimitAutomatedUpdate.abi, signer);
+  await contract.scheduleUpdate(BigInt(newValue), BigInt(scheduleTime));
   console.log("Schedule mint limit update");
 };
 
-export const schedulePause = async (chainlinkContractAddress: string, scheduleTime: number) => {
-  const contract = new ethers.Contract(chainlinkContractAddress, PauseAutomatedUpdate.abi, wallet);
+export const schedulePause = async (extraAddress: string, scheduleTime: number) => {
+  const signer = await wprovider.getSigner();
+  const contract = new ethers.Contract(extraAddress, PauseAutomatedUpdate.abi, signer);
   await contract.scheduleUpdate(BigInt(scheduleTime));
   console.log("Schedule pause");
+};
+
+export const updatePrice = async (extraAddress: string, newPrice: number) => {
+  const signer = await wprovider.getSigner();
+  const contract = new ethers.Contract(extraAddress, ExtraNft.abi, signer);
+  await contract.updatePrice(BigInt(newPrice * 100));
+  console.log("Update price");
+};
+
+export const updateMintLimit = async (extraAddress: string, newMintLimit: number) => {
+  const signer = await wprovider.getSigner();
+  const contract = new ethers.Contract(extraAddress, ExtraNft.abi, signer);
+  await contract.updateMintLimit(BigInt(newMintLimit));
+  console.log("Update price");
+};
+
+export const addApprovedChainlinkContract = async (chainlinkContractAddress: string, extraAddress: string) => {
+  const signer = await wprovider.getSigner();
+  const contract = new ethers.Contract(extraAddress, ExtraNft.abi, signer);
+  await contract.addApprovedChainlinkContract(chainlinkContractAddress);
+  console.log("Add approved Chainlink Contract");
 };
 
 export const fetchExtraDetails = async (address: string) => {
@@ -125,8 +167,20 @@ export const getUnredeemedBalanceOf = async (contractAddress: string, callerAddr
   }
 };
 
-export const transferExtra = async (extraAddress: string, to: string, amount: BigInt) => {
+export const getExtraOwner = async (extraAddress: string) => {
   const contract = new ethers.Contract(extraAddress, ExtraNft.abi, provider);
+  try {
+    const owner = await contract.owner();
+    return owner;
+  } catch (error) {
+    console.error("Failed to fetch owner:", error);
+    return null;
+  }
+};
+
+export const transferExtra = async (extraAddress: string, to: string, amount: BigInt) => {
+  const signer = await wprovider.getSigner();
+  const contract = new ethers.Contract(extraAddress, ExtraNft.abi, signer);
   try {
     const tx = await contract.bulkTransferUnredeemedTokens(to, amount);
     console.log("Transaction sent! Hash:", tx.hash);
@@ -138,11 +192,25 @@ export const transferExtra = async (extraAddress: string, to: string, amount: Bi
   }
 };
 
+export const redeemExtra = async (extraAddress: string, extraOwner: string, amount: BigInt) => {
+  const signer = await wprovider.getSigner();
+  const contract = new ethers.Contract(extraAddress, ExtraNft.abi, signer);
+  try {
+    const tx = await contract.bulkRedeem(extraOwner, amount);
+    console.log("Transaction sent! Hash:", tx.hash);
+
+    await tx.wait();
+    console.log("Transaction confirmed!");
+    toast.success("Redeemed");
+  } catch (error) {
+    console.error("Error sending transaction:", error);
+  }
+};
+
 const getEthPriceFromUsd = async (usdAmount: BigInt) => {
   const contract = new ethers.Contract(priceFeedHandlerAddress!, PriceFeedHandler.abi, provider);
   try {
     const valueInEth: BigInt = await contract.calculateEthAmount(usdAmount);
-    console.log(valueInEth);
     return valueInEth;
   } catch (error) {
     console.error("Failed to fetch value in ETH:", error);
@@ -151,11 +219,12 @@ const getEthPriceFromUsd = async (usdAmount: BigInt) => {
 };
 
 export const mintNft = async (extraAddress: string, to: string, ticketPrice: number, amount: number) => {
-  const contract = new ethers.Contract(extraAddress, ExtraNft.abi, wallet);
+  const signer = await wprovider.getSigner();
+  const contract = new ethers.Contract(extraAddress, ExtraNft.abi, signer);
   try {
     const totalPrice = ticketPrice * amount;
     const valueInEth = await getEthPriceFromUsd(BigInt(totalPrice * 100));
-
+    console.log(extraAddress);
     const txResponse = await contract.safeMint(to, amount, { value: valueInEth });
     console.log("Transaction response:", txResponse);
     const receipt = await txResponse.wait();
@@ -166,7 +235,8 @@ export const mintNft = async (extraAddress: string, to: string, ticketPrice: num
 };
 
 export const pauseSellingForExtra = async (address: string) => {
-  const contract = new ethers.Contract(address, ExtraNft.abi, wallet);
+  const signer = await wprovider.getSigner();
+  const contract = new ethers.Contract(address, ExtraNft.abi, signer);
   try {
     const txResponse = await contract.pause();
     console.log("Transaction response:", txResponse);
@@ -178,7 +248,8 @@ export const pauseSellingForExtra = async (address: string) => {
 };
 
 export const unpauseSellingForExtra = async (address: string) => {
-  const contract = new ethers.Contract(address, ExtraNft.abi, wallet);
+  const signer = await wprovider.getSigner();
+  const contract = new ethers.Contract(address, ExtraNft.abi, signer);
   try {
     const txResponse = await contract.unpause();
     console.log("Transaction response:", txResponse);
