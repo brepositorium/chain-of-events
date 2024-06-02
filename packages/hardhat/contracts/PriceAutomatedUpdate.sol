@@ -29,6 +29,7 @@ contract PriceAutomatedUpdate is AutomationCompatibleInterface {
 	ExtraNft public extraContract;
 	uint256 public scheduledTime;
 	uint256 public newPrice;
+	uint256 public _upkeepId;
 	LinkTokenInterface public immutable i_link;
 	AutomationRegistrarInterface public immutable i_registrar;
 
@@ -37,8 +38,8 @@ contract PriceAutomatedUpdate is AutomationCompatibleInterface {
 		LinkTokenInterface link,
 		AutomationRegistrarInterface registrar
 	) {
-		admin = msg.sender;
 		extraContract = ExtraNft(_extraContract);
+		admin = extraContract.owner();
 		i_link = link;
 		i_registrar = registrar;
 	}
@@ -47,7 +48,7 @@ contract PriceAutomatedUpdate is AutomationCompatibleInterface {
 		return i_link.balanceOf(address(this));
 	}
 
-	function scheduletUpdate(uint256 _newPrice, uint256 _time) external {
+	function scheduleUpdate(uint256 _newPrice, uint256 _time) external {
 		require(msg.sender == admin, "Unauthorized");
 		newPrice = _newPrice;
 		scheduledTime = _time;
@@ -67,13 +68,17 @@ contract PriceAutomatedUpdate is AutomationCompatibleInterface {
 		scheduledTime = 0;
 	}
 
-	function registerUpkeep(uint96 amount) external returns (uint256) {
+	function registerUpkeep(
+		string calldata name,
+		uint32 gasLimit,
+		uint96 amount
+	) external returns (uint256) {
 		RegistrationParams memory params = RegistrationParams({
-			name: extraContract.name(),
+			name: name,
 			encryptedEmail: "0x",
 			upkeepContract: address(this),
-			gasLimit: 500000,
-			adminAddress: msg.sender,
+			gasLimit: gasLimit,
+			adminAddress: admin,
 			triggerType: 0,
 			checkData: "0x",
 			triggerConfig: "0x",
@@ -82,7 +87,7 @@ contract PriceAutomatedUpdate is AutomationCompatibleInterface {
 		});
 
 		i_link.approve(address(i_registrar), params.amount);
-
-		return i_registrar.registerUpkeep(params);
+		_upkeepId = i_registrar.registerUpkeep(params);
+		return _upkeepId;
 	}
 }
