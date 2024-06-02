@@ -4,7 +4,12 @@ import { useEffect, useState } from "react";
 import ChainlinkContractManager from "~~/components/ChainlinkContractsManager";
 import ExtraTemplates from "~~/components/ExtraTemplates";
 import SimpleModal from "~~/components/SimpleModal";
-import { getPausedStatus, pauseSellingForExtra, unpauseSellingForExtra } from "~~/utils/chain-of-events/deployContract";
+import {
+  getPausedStatus,
+  pauseSellingForExtra,
+  unpauseSellingForExtra,
+  withdrawFundsFromExtra,
+} from "~~/utils/chain-of-events/deployContract";
 
 type PageProps = {
   params: { address: string };
@@ -40,6 +45,10 @@ const ExtraPage = ({ params }: PageProps) => {
   const handleUnpause = async () => {
     await unpauseSellingForExtra(address);
     setIsPaused(false);
+  };
+
+  const handleWithdraw = async () => {
+    await withdrawFundsFromExtra(address);
   };
 
   const handleEditClick = (field: string, chainlinkContractAddress?: string) => {
@@ -79,17 +88,20 @@ const ExtraPage = ({ params }: PageProps) => {
         >
           Change Mint Limit
         </button>
+        <button className="btn btn-gradient-primary rounded btn-md w-40" disabled={isPaused} onClick={handlePause}>
+          Pause
+        </button>
+        <button className="btn btn-gradient-primary rounded btn-md w-40" disabled={!isPaused} onClick={handleUnpause}>
+          Unpause
+        </button>
         <button
           className="btn btn-gradient-primary rounded btn-md w-40"
           onClick={() => handleEditClick("createdEvent_allowedChainlinkContract")}
         >
           Add Approved Chainlink Address
         </button>
-        <button className="btn btn-gradient-primary rounded btn-md w-40" disabled={isPaused} onClick={handlePause}>
-          Pause
-        </button>
-        <button className="btn btn-gradient-primary rounded btn-md w-40" disabled={!isPaused} onClick={handleUnpause}>
-          Unpause
+        <button className="btn btn-gradient-primary rounded btn-md w-40" onClick={handleWithdraw}>
+          Withdraw
         </button>
         <div className="mt-8 divider"></div>
         <ChainlinkContractManager extraAddress={address} onScheduleButtonClick={handleEditClick} />

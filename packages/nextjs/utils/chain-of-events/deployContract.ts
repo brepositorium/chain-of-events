@@ -260,6 +260,19 @@ export const unpauseSellingForExtra = async (address: string) => {
   }
 };
 
+export const withdrawFundsFromExtra = async (address: string) => {
+  const signer = await wprovider.getSigner();
+  const contract = new ethers.Contract(address, ExtraNft.abi, signer);
+  try {
+    const txResponse = await contract.withdraw();
+    console.log("Transaction response:", txResponse);
+    const receipt = await txResponse.wait();
+    console.log("Transaction receipt:", receipt);
+  } catch (error) {
+    console.error("Error pausing the contract:", error);
+  }
+};
+
 export const getPausedStatus = async (contractAddress: string) => {
   const contract = new ethers.Contract(contractAddress, ExtraNft.abi, provider);
   try {
