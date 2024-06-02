@@ -151,12 +151,20 @@ const EditDashboardPage = ({ params }: PageProps) => {
         </div>
         <div className="mt-8">
           <button className="btn btn-gradient-primary rounded btn-md" onClick={() => handleAddModalOpen(0)}>
-            Add ticket type
+            Add Ticket Type
           </button>
         </div>
         <div>
           <button className="btn btn-gradient-primary rounded btn-md" onClick={() => handleAddModalOpen(1)}>
-            Add consumable
+            Add Consumable
+          </button>
+        </div>
+        <div>
+          <button
+            className="btn btn-gradient-primary rounded btn-md"
+            onClick={() => handleEditClick("createdEvent_allowedAddress")}
+          >
+            Add Allowed Address
           </button>
         </div>
       </div>
@@ -168,7 +176,7 @@ const EditDashboardPage = ({ params }: PageProps) => {
               extraName={item.name}
               description={item.description}
               imageUrl={item.imageUrl}
-              price={Number(item.price)}
+              price={Number(item.price) / 100}
               hasQuantity={false}
               action={ACTIONS.MANAGE}
               manageUrl={"/extra/" + item.address}
@@ -185,7 +193,7 @@ const EditDashboardPage = ({ params }: PageProps) => {
               extraName={item.name}
               description={item.description}
               imageUrl={item.imageUrl}
-              price={Number(item.price)}
+              price={Number(item.price) / 100}
               hasQuantity={false}
               action={ACTIONS.MANAGE}
               manageUrl={"/extra/" + item.address}

@@ -17,6 +17,7 @@ const ExtraPage = ({ params }: PageProps) => {
   const [currentField, setCurrentField] = useState("");
   const [isPaused, setIsPaused] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [chainlinkContractAddress, setChainlinkContractAddress] = useState("");
 
   useEffect(() => {
     const fetchPausedStatus = async () => {
@@ -41,7 +42,10 @@ const ExtraPage = ({ params }: PageProps) => {
     setIsPaused(false);
   };
 
-  const handleEditClick = (field: string) => {
+  const handleEditClick = (field: string, chainlinkContractAddress?: string) => {
+    if (chainlinkContractAddress) {
+      setChainlinkContractAddress(chainlinkContractAddress);
+    }
     setCurrentField(field);
     setIsSimpleModalOpen(true);
   };
@@ -64,21 +68,27 @@ const ExtraPage = ({ params }: PageProps) => {
           Extra's address: <span className="font-extrabold">{address}</span>
         </div>
         <button
-          className="btn btn-gradient-primary rounded btn-md w-32"
+          className="btn btn-gradient-primary rounded btn-md w-40"
           onClick={() => handleEditClick("createdEvent_price")}
         >
           Change price
         </button>
         <button
-          className="btn btn-gradient-primary rounded btn-md w-32"
+          className="btn btn-gradient-primary rounded btn-md w-40"
           onClick={() => handleEditClick("createdEvent_mintLimit")}
         >
           Change Mint Limit
         </button>
-        <button className="btn btn-gradient-primary rounded btn-md w-32" disabled={isPaused} onClick={handlePause}>
+        <button
+          className="btn btn-gradient-primary rounded btn-md w-40"
+          onClick={() => handleEditClick("createdEvent_allowedChainlinkContract")}
+        >
+          Add Approved Chainlink Address
+        </button>
+        <button className="btn btn-gradient-primary rounded btn-md w-40" disabled={isPaused} onClick={handlePause}>
           Pause
         </button>
-        <button className="btn btn-gradient-primary rounded btn-md w-32" disabled={!isPaused} onClick={handleUnpause}>
+        <button className="btn btn-gradient-primary rounded btn-md w-40" disabled={!isPaused} onClick={handleUnpause}>
           Unpause
         </button>
         <div className="mt-8 divider"></div>
@@ -90,6 +100,7 @@ const ExtraPage = ({ params }: PageProps) => {
           onClose={handleSimpleModalClose}
           fieldName={currentField.replace("createdEvent_", "")}
           extraAddress={address}
+          chainlinkContractAddress={chainlinkContractAddress}
         />
       </div>
     </div>

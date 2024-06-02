@@ -14,7 +14,7 @@ const ChainlinkContractManager = ({
   onScheduleButtonClick,
 }: {
   extraAddress: string;
-  onScheduleButtonClick: (field: string) => void; // Callback to open the modal
+  onScheduleButtonClick: (field: string, chainlinkContractAddress: string) => void;
 }) => {
   const [contractAddress, setContractAddress] = useState("");
   const [updateType, setUpdateType] = useState(AUTOMATION_UPDATE_TYPES.PRICE);
@@ -39,7 +39,20 @@ const ChainlinkContractManager = ({
         });
     };
 
+    const fetchChainlinkContractAddress = async () => {
+      setContractAddress("");
+      const templateRef = ref(database, `${updateType}Contracts/${extraAddress}`);
+      const snapshot = await get(templateRef);
+
+      if (snapshot.exists()) {
+        setContractAddress(snapshot.val().chainlinkContractAddress);
+      } else {
+        console.log("No Chainlink contract found for this extra.");
+      }
+    };
+
     fetchContractDetails();
+    fetchChainlinkContractAddress();
   }, [extraAddress, updateType]);
 
   const deployContract = async () => {
@@ -58,9 +71,7 @@ const ChainlinkContractManager = ({
         return;
     }
 
-    // const chainlinkContractAddress = await deployContractForType(extraAddress, updateType);
-    const chainlinkContractAddress = "adresa aici";
-    console.log(chainlinkContractAddress);
+    const chainlinkContractAddress = await deployContractForType(extraAddress, updateType);
     setContractAddress(chainlinkContractAddress);
     setButtonState(statusUpdate);
     saveOrUpdateContractDetails(
@@ -107,7 +118,7 @@ const ChainlinkContractManager = ({
         return;
     }
 
-    // await registerUpkeepForType(contractAddress, `${updateType}Automation` + extraAddress, updateType);
+    await registerUpkeepForType(contractAddress, `${updateType}Automation` + extraAddress, updateType);
 
     setButtonState(statusUpdate);
     saveOrUpdateContractDetails(extraAddress, contractAddress, `${updateType}Automation` + extraAddress, statusUpdate);
@@ -261,24 +272,25 @@ const ChainlinkContractManager = ({
           </li>
         ))}
       </ul>
+      {contractAddress ? <p className="mt-4 font-outfit">Deployed at: {contractAddress}</p> : <p></p>}
 
       {/* Deploy Contract Button */}
       {buttonState === getInitialButtonState(updateType) && (
-        <button className="btn btn-gradient-primary rounded btn-md w-48 mt-12 mb-4" onClick={deployContract}>
+        <button className="btn btn-gradient-primary rounded btn-md w-48 mt-6 mb-4" onClick={deployContract}>
           Deploy {updateType.charAt(0).toUpperCase() + updateType.slice(1)} Contract
         </button>
       )}
 
       {/* Fund Contract Button */}
       {buttonState === getFundState(updateType) && (
-        <button className="btn btn-gradient-primary rounded btn-md w-48 mt-12 mb-4" onClick={fundContract}>
+        <button className="btn btn-gradient-primary rounded btn-md w-48 mt-6 mb-4" onClick={fundContract}>
           I have funded the {updateType.charAt(0).toUpperCase() + updateType.slice(1)} Contract
         </button>
       )}
 
       {/* Register Upkeep Button */}
       {buttonState === getRegisterUpkeepState(updateType) && (
-        <button className="btn btn-gradient-primary rounded btn-md w-48 mt-12 mb-4" onClick={registerUpkeep}>
+        <button className="btn btn-gradient-primary rounded btn-md w-48 mt-6 mb-4" onClick={registerUpkeep}>
           Register upkeep for {updateType.charAt(0).toUpperCase() + updateType.slice(1)}
         </button>
       )}
@@ -286,9 +298,9 @@ const ChainlinkContractManager = ({
       {/* Schedule Update Button */}
       {buttonState === getScheduleState(updateType) && (
         <button
-          className="btn btn-gradient-primary rounded btn-md w-48 mt-12 mb-4"
+          className="btn btn-gradient-primary rounded btn-md w-48 mt-6 mb-4"
           onClick={() => {
-            onScheduleButtonClick("schedule" + updateType);
+            onScheduleButtonClick("schedule" + updateType, contractAddress);
           }}
         >
           Schedule Update for {updateType.charAt(0).toUpperCase() + updateType.slice(1)}

@@ -4,7 +4,7 @@ import Card from "./BaseCard";
 import SimpleModal from "./SimpleModal";
 import { useAccount } from "wagmi";
 import { ACTIONS } from "~~/utils/chain-of-events/Actions";
-import { mintNft } from "~~/utils/chain-of-events/deployContract";
+import { mintNft, redeemExtra } from "~~/utils/chain-of-events/deployContract";
 
 interface ExtraCardProps {
   extraName?: string;
@@ -17,6 +17,7 @@ interface ExtraCardProps {
   action: ACTIONS;
   manageUrl?: string;
   extraAddress?: string;
+  extraOwner?: string;
 }
 
 const ExtraCard: React.FC<ExtraCardProps> = ({
@@ -30,6 +31,7 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
   action,
   manageUrl,
   extraAddress,
+  extraOwner,
 }) => {
   const [quantity, setQuantity] = useState(0); // Initialize quantity with 0
   const [isSimpleModalOpen, setIsSimpleModalOpen] = useState(false);
@@ -62,7 +64,7 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
   }
 
   function handleRedeem(): void {
-    throw new Error("Function not implemented.");
+    redeemExtra(extraAddress!, extraOwner!, BigInt(quantity));
   }
 
   const handleSimpleModalClose = () => {
@@ -87,7 +89,7 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
       )}
       <div className="flex flex-col h-full p-2">
         <h2 className="text-center font-bold font-outfit">{extraName}</h2>
-        <p className="text-sm font-outfit">{description}</p>
+        <p className="text-sm font-outfit h-32 overflow-auto">{description}</p>
         <p className="text-sm text-center font-bold font-outfit">{`$${price?.toFixed(2)}`}</p>
         {hasQuantity ? (
           <div className="flex items-center justify-center my-2">

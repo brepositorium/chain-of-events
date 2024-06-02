@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import ExtraCard from "~~/components/ExtraCard";
 import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 import { ACTIONS } from "~~/utils/chain-of-events/Actions";
-import { fetchExtraDetails, mintNft } from "~~/utils/chain-of-events/deployContract";
+import { fetchExtraDetails } from "~~/utils/chain-of-events/deployContract";
 
 type PageProps = {
   params: { id: number; extraType: number };
@@ -64,7 +64,7 @@ const ShopPage = ({ params }: PageProps) => {
               description={extra.description}
               imageUrl={extra.imageUrl}
               extraAddress={extra.address}
-              price={Number(extra.price)}
+              price={Number(extra.price) / 100}
               hasQuantity={true}
               action={ACTIONS.BUY}
               extraType={Number(extra.extraType)}

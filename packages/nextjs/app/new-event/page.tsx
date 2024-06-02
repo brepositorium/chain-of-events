@@ -65,7 +65,8 @@ const NewEvent: NextPage = () => {
             className="input input-md input-bordered w-80 bg-base-content rounded text-black"
           />
         </div>
-        <div className="">
+        <div className="flex flex-col -mt-6">
+          <p className="-mb-1">Number of tickets</p>
           <input
             type="number"
             placeholder="Number of Tickets"

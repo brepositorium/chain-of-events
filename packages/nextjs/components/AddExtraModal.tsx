@@ -118,7 +118,7 @@ const AddExtraModal: React.FC<AddExtraModalProps> = ({ isOpen, onClose, extraTyp
             <label>Price</label>
             <input
               type="number"
-              placeholder="Enter price"
+              placeholder="Enter price in USD"
               value={price}
               onChange={e => setPrice(Number(e.target.value))}
               className="input input-md input-bordered w-80 bg-base-content rounded text-black"

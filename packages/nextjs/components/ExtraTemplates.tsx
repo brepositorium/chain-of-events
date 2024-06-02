@@ -3,6 +3,9 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { get, push, ref, set } from "firebase/database";
+import toast from "react-hot-toast";
+import { useAccount } from "wagmi";
+import { getExtraOwner } from "~~/utils/chain-of-events/deployContract";
 import { database } from "~~/utils/chain-of-events/firebaseConfig";
 
 interface LocalTemplate {
@@ -32,6 +35,8 @@ const ExtraTemplates: React.FC<ExtraTemplatesProps> = ({ extraAddress }) => {
   const [templates, setTemplates] = useState<FullTemplate[]>([]);
   const [newTemplateId, setNewTemplateId] = useState<string>("");
   const [newAddresses, setNewAddresses] = useState<Record<string, string>>({});
+
+  const { address } = useAccount();
 
   useEffect(() => {
     if (extraAddress) {
@@ -72,6 +77,10 @@ const ExtraTemplates: React.FC<ExtraTemplatesProps> = ({ extraAddress }) => {
   };
 
   const handleAddTemplate = async () => {
+    if (address !== (await getExtraOwner(extraAddress))) {
+      toast.error("You are not the owner");
+      return;
+    }
     const templateRef = ref(database, `extraTemplates/${extraAddress}`);
     const newTemplateRef = push(templateRef);
     await set(newTemplateRef, {
@@ -83,6 +92,10 @@ const ExtraTemplates: React.FC<ExtraTemplatesProps> = ({ extraAddress }) => {
   };
 
   const handleAddAddress = async (templateKey: string) => {
+    if (address !== (await getExtraOwner(extraAddress))) {
+      toast.error("You are not the owner");
+      return;
+    }
     const specificTemplateRef = ref(database, `extraTemplates/${extraAddress}/${templateKey}/deployedAddresses`);
     const snapshot = await get(specificTemplateRef);
     let addresses = [];

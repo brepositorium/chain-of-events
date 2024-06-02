@@ -3,10 +3,13 @@ import React, { useState } from "react";
 import moment from "moment-timezone";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import {
+  addApprovedChainlinkContract,
   scheduleMintLimitUpdate,
   schedulePause,
   schedulePriceUpdate,
   transferExtra,
+  updateMintLimit,
+  updatePrice,
 } from "~~/utils/chain-of-events/deployContract";
 
 interface SimpleModalProps {
@@ -15,13 +18,21 @@ interface SimpleModalProps {
   fieldName: string;
   quantity?: number;
   extraAddress?: string;
+  chainlinkContractAddress?: string;
   eventId?: bigint;
 }
 
-const SimpleModal: React.FC<SimpleModalProps> = ({ isOpen, onClose, fieldName, eventId, quantity, extraAddress }) => {
+const SimpleModal: React.FC<SimpleModalProps> = ({
+  isOpen,
+  onClose,
+  fieldName,
+  eventId,
+  quantity,
+  extraAddress,
+  chainlinkContractAddress,
+}) => {
   const [inputValue, setInputValue] = useState("");
   const { writeContractAsync: writeEventCreationAsync } = useScaffoldWriteContract("EventCreation");
-  const { writeContractAsync: writeExtraNftAsync } = useScaffoldWriteContract("ExtraNft");
 
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -73,20 +84,14 @@ const SimpleModal: React.FC<SimpleModalProps> = ({ isOpen, onClose, fieldName, e
       }
     } else if (fieldName === "price") {
       try {
-        writeExtraNftAsync({
-          functionName: "updatePrice",
-          args: [BigInt(inputValue)],
-        });
+        updatePrice(extraAddress!, Number(inputValue));
         console.log("Succesfully changed price");
       } catch (e) {
         console.error("Error changing price:", e);
       }
     } else if (fieldName === "mintLimit") {
       try {
-        writeExtraNftAsync({
-          functionName: "updateMintLimit",
-          args: [BigInt(inputValue)],
-        });
+        updateMintLimit(extraAddress!, Number(inputValue));
         console.log("Succesfully changed mint limit");
       } catch (e) {
         console.error("Error changing mint limit:", e);
@@ -102,16 +107,32 @@ const SimpleModal: React.FC<SimpleModalProps> = ({ isOpen, onClose, fieldName, e
       } catch (e) {
         console.error("Error sending extra:", e);
       }
+    } else if (fieldName === "allowedAddress") {
+      try {
+        writeEventCreationAsync({
+          functionName: "addAllowedAddress",
+          args: [inputValue, eventId],
+        });
+      } catch (e) {
+        console.error("Error sending extra:", e);
+      }
+    } else if (fieldName === "allowedChainlinkContract") {
+      try {
+        addApprovedChainlinkContract(inputValue, extraAddress!);
+      } catch (e) {
+        console.error("Error sending extra:", e);
+      }
     } else if (fieldName.includes("schedule")) {
       const datetime = `${date} ${time}`;
       const calculatedTimestamp = moment.tz(datetime, timezone).unix();
       setTimestamp(calculatedTimestamp);
       if (fieldName === "schedulePrice") {
-        schedulePriceUpdate(extraAddress!, BigInt(inputValue), calculatedTimestamp);
+        console.log(chainlinkContractAddress);
+        schedulePriceUpdate(chainlinkContractAddress!, Number(inputValue) * 100, calculatedTimestamp);
       } else if (fieldName === "scheduleMintLimit") {
-        scheduleMintLimitUpdate(extraAddress!, BigInt(inputValue), calculatedTimestamp);
+        scheduleMintLimitUpdate(chainlinkContractAddress!, Number(inputValue) * 100, calculatedTimestamp);
       } else if (fieldName === "schedulePause") {
-        schedulePause(extraAddress!, calculatedTimestamp);
+        schedulePause(chainlinkContractAddress!, calculatedTimestamp);
       }
     } else {
       console.log("Wrong fieldName");
@@ -144,6 +165,8 @@ const SimpleModal: React.FC<SimpleModalProps> = ({ isOpen, onClose, fieldName, e
               ? "Edit logo URL"
               : fieldName === "transfer"
               ? "Send to address"
+              : fieldName === "allowedAddress" || fieldName === "allowedChainlinkContract"
+              ? "Add allowed address"
               : fieldName === "mintLimit"
               ? "Edit mint limit"
               : fieldName.includes("schedule")
@@ -205,7 +228,9 @@ const SimpleModal: React.FC<SimpleModalProps> = ({ isOpen, onClose, fieldName, e
                     ? "Enter new number of tickets"
                     : fieldName === "logoUrl"
                     ? "Enter new logo URL"
-                    : fieldName === "transfer"
+                    : fieldName === "transfer" ||
+                      fieldName === "allowedAddress" ||
+                      fieldName === "allowedChainlinkContract"
                     ? "Enter address"
                     : fieldName === "mintLimit"
                     ? "Enter new mint limit"

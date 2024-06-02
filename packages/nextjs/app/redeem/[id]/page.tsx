@@ -39,7 +39,6 @@ const RedeemPage = ({ params }: PageProps) => {
     const match = inputString.match(/0x[a-fA-F0-9]{40}/);
     return match ? match[0] : null;
   }
-  console.log(data);
   useEffect(() => {
     const fetchExtras = async () => {
       if (!data || data.length === 0) {
@@ -85,8 +84,9 @@ const RedeemPage = ({ params }: PageProps) => {
                   price={Number(detail.price)}
                   hasQuantity={true}
                   noOfItems={Number(detail.balance)}
-                  action={ACTIONS.TRANSFER}
+                  action={ACTIONS.REDEEM}
                   extraType={Number(detail.extraType)}
+                  extraOwner={extractAddress(qrResult)!}
                 />
               ))
             ) : (
