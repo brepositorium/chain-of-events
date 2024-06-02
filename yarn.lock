@@ -13632,6 +13632,7 @@ __metadata:
   resolution: "se-2@workspace:."
   dependencies:
     "@apollo/client": ^3.10.4
+    axios: ^1.7.2
     ethers: ^6.12.1
     firebase: ^10.12.0
     graphql: ^16.8.1
