@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "start": "next dev",
-    "build": "hardhat compile && next build",
+    "build": "yarn hardhat compile && next build",
     "serve": "next start",
     "lint": "next lint",
     "format": "prettier --write . '!(node_modules|.next|contracts)/**/*'",
