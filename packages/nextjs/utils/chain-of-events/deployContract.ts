@@ -30,7 +30,7 @@ const provider = new ethers.JsonRpcProvider(rpcUrl);
 const wallet = new ethers.Wallet(privateKey, provider);
 let wprovider: any;
 if (typeof window !== "undefined") {
-  const wprovider = new ethers.BrowserProvider(window.ethereum);
+  wprovider = new ethers.BrowserProvider(window.ethereum);
 }
 
 const loadContractArtifacts = async (updateType: any) => {
