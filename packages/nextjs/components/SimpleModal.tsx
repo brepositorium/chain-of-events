@@ -1,9 +1,13 @@
 // components/SimpleModal.tsx
 import React, { useState } from "react";
 import moment from "moment-timezone";
-import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import {
+  addAllowedAddress,
   addApprovedChainlinkContract,
+  changeDescription,
+  changeLocation,
+  changeLogo,
+  changeNumberOfTickets,
   scheduleMintLimitUpdate,
   schedulePause,
   schedulePriceUpdate,
@@ -32,7 +36,6 @@ const SimpleModal: React.FC<SimpleModalProps> = ({
   chainlinkContractAddress,
 }) => {
   const [inputValue, setInputValue] = useState("");
-  const { writeContractAsync: writeEventCreationAsync } = useScaffoldWriteContract("EventCreation");
 
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
@@ -44,40 +47,28 @@ const SimpleModal: React.FC<SimpleModalProps> = ({
 
     if (fieldName === "description") {
       try {
-        writeEventCreationAsync({
-          functionName: "changeDescription",
-          args: [inputValue, eventId],
-        });
+        changeDescription(inputValue, eventId!);
         console.log("Succesfully changed description");
       } catch (e) {
         console.error("Error changing description:", e);
       }
     } else if (fieldName === "location") {
       try {
-        writeEventCreationAsync({
-          functionName: "changeLocation",
-          args: [inputValue, eventId],
-        });
+        changeLocation(inputValue, eventId!);
         console.log("Succesfully changed location");
       } catch (e) {
         console.error("Error changing location:", e);
       }
     } else if (fieldName === "logoUrl") {
       try {
-        writeEventCreationAsync({
-          functionName: "changeLogo",
-          args: [inputValue, eventId],
-        });
+        changeLogo(inputValue, eventId!);
         console.log("Succesfully changed logoUrl");
       } catch (e) {
         console.error("Error changing logoUrl:", e);
       }
     } else if (fieldName === "numberOfTickets") {
       try {
-        writeEventCreationAsync({
-          functionName: "changeNumberOfTickets",
-          args: [BigInt(inputValue), eventId],
-        });
+        changeNumberOfTickets(inputValue, eventId!);
         console.log("Succesfully changed numberOfTickets");
       } catch (e) {
         console.error("Error changing numberOfTickets:", e);
@@ -109,10 +100,7 @@ const SimpleModal: React.FC<SimpleModalProps> = ({
       }
     } else if (fieldName === "allowedAddress") {
       try {
-        writeEventCreationAsync({
-          functionName: "addAllowedAddress",
-          args: [inputValue, eventId],
-        });
+        addAllowedAddress(inputValue, eventId!);
       } catch (e) {
         console.error("Error sending extra:", e);
       }

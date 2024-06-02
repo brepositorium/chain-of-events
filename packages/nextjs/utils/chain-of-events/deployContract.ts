@@ -1,3 +1,4 @@
+import EventCreation from "../../../hardhat/artifacts/contracts/EventCreation.sol/EventCreation.json";
 import ExtraNft from "../../../hardhat/artifacts/contracts/ExtraNft.sol/ExtraNft.json";
 import MintLimitAutomatedUpdate from "../../../hardhat/artifacts/contracts/MintLimitAutomatedUpdate.sol/MintLimitAutomatedUpdate.json";
 import PauseAutomatedUpdate from "../../../hardhat/artifacts/contracts/PauseAutomatedUpdate.sol/PauseAutomatedUpdate.json";
@@ -44,6 +45,54 @@ const loadContractArtifacts = async (updateType: any) => {
     `../../../hardhat/artifacts/contracts/${updateType}AutomatedUpdate.sol/${updateType}AutomatedUpdate.json`
   );
   return module.default;
+};
+
+export const createEvent = async (
+  name: string,
+  description: string,
+  location: string,
+  logoUrl: string,
+  numberOfTickets: BigInt,
+) => {
+  const signer = await wprovider.getSigner();
+  const contract = new ethers.Contract(process.env.NEXT_PUBLIC_EVENT_CREATION_ADDRESS!, EventCreation.abi, signer);
+  await contract.createEvent(name, description, location, logoUrl, numberOfTickets);
+  console.log("Create event");
+};
+
+export const changeDescription = async (newDescription: string, eventId: BigInt) => {
+  const signer = await wprovider.getSigner();
+  const contract = new ethers.Contract(process.env.NEXT_PUBLIC_EVENT_CREATION_ADDRESS!, EventCreation.abi, signer);
+  await contract.changeDescription(newDescription, eventId);
+  console.log("Change description");
+};
+
+export const changeNumberOfTickets = async (newNumberOfTickets: string, eventId: BigInt) => {
+  const signer = await wprovider.getSigner();
+  const contract = new ethers.Contract(process.env.NEXT_PUBLIC_EVENT_CREATION_ADDRESS!, EventCreation.abi, signer);
+  await contract.changeNumberOfTickets(newNumberOfTickets, eventId);
+  console.log("Change number of tickets");
+};
+
+export const changeLocation = async (newLocation: string, eventId: BigInt) => {
+  const signer = await wprovider.getSigner();
+  const contract = new ethers.Contract(process.env.NEXT_PUBLIC_EVENT_CREATION_ADDRESS!, EventCreation.abi, signer);
+  await contract.changeLocation(newLocation, eventId);
+  console.log("Change location");
+};
+
+export const changeLogo = async (newLogo: string, eventId: BigInt) => {
+  const signer = await wprovider.getSigner();
+  const contract = new ethers.Contract(process.env.NEXT_PUBLIC_EVENT_CREATION_ADDRESS!, EventCreation.abi, signer);
+  await contract.changeLogo(newLogo, eventId);
+  console.log("Change logo");
+};
+
+export const addAllowedAddress = async (allowedAddress: string, eventId: BigInt) => {
+  const signer = await wprovider.getSigner();
+  const contract = new ethers.Contract(process.env.NEXT_PUBLIC_EVENT_CREATION_ADDRESS!, EventCreation.abi, signer);
+  await contract.addAllowedAddress(allowedAddress, eventId);
+  console.log("Add allowed address");
 };
 
 export const deployContract = async (
