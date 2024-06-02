@@ -30,7 +30,7 @@ const config: HardhatUserConfig = {
       },
     },
   },
-  defaultNetwork: "baseSepolia",
+  defaultNetwork: "avalancheFuji",
   namedAccounts: {
     deployer: {
       // By default, it will take the first Hardhat account as the deployer
@@ -100,6 +100,10 @@ const config: HardhatUserConfig = {
     },
     baseSepolia: {
       url: "https://sepolia.base.org",
+      accounts: [deployerPrivateKey],
+    },
+    avalancheFuji: {
+      url: "https://api.avax-test.network/ext/bc/C/rpc",
       accounts: [deployerPrivateKey],
     },
     scrollSepolia: {
