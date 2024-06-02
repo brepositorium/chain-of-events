@@ -187,6 +187,13 @@ contract ExtraNft is
 		_unpause();
 	}
 
+	function withdraw() public payable onlyOwner {
+		uint256 balance = address(this).balance;
+		require(balance > 0, "No ether left to withdraw");
+		(bool sent, ) = msg.sender.call{ value: balance }("");
+		require(sent, "Failed to send Ether");
+	}
+
 	function tokenOfOwnerByIndex(
 		address owner,
 		uint256 index
@@ -217,14 +224,15 @@ contract ExtraNft is
 		address _to,
 		uint256 _amount
 	) public hasEnoughUnredeemedTokens(msg.sender, _amount) {
-		for (uint256 i; i < _amount; i++) {
-			uint256 _tokenId = tokenOfOwnerByIndex(msg.sender, i);
-			if (redemptionMap[_tokenId] == false) {
-				transferFrom(
-					msg.sender,
-					_to,
-					tokenOfOwnerByIndex(msg.sender, i)
-				);
+		uint256 transfered;
+		uint256 balance = balanceOf(msg.sender);
+		for (uint256 i; i <= balance; i++) {
+			if (transfered < _amount) {
+				uint256 _tokenId = tokenOfOwnerByIndex(msg.sender, i);
+				if (redemptionMap[_tokenId] == false) {
+					transferFrom(msg.sender, _to, _tokenId);
+					transfered++;
+				}
 			}
 		}
 	}
@@ -237,10 +245,15 @@ contract ExtraNft is
 		onlyAllowList(eventId)
 		hasEnoughUnredeemedTokens(_ticketOwner, _amount)
 	{
-		for (uint256 i; i < _amount; i++) {
-			uint256 _tokenId = tokenOfOwnerByIndex(_ticketOwner, i);
-			if (redemptionMap[_tokenId] == false) {
-				redeem(_tokenId);
+		uint256 redeemed;
+		uint256 balance = balanceOf(_ticketOwner);
+		for (uint256 i; i <= balance; i++) {
+			if (redeemed < _amount) {
+				uint256 _tokenId = tokenOfOwnerByIndex(_ticketOwner, i);
+				if (redemptionMap[_tokenId] == false) {
+					redeem(_tokenId);
+					redeemed++;
+				}
 			}
 		}
 	}
