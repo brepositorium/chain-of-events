@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import EventCreation from "../../../../../hardhat/artifacts/contracts/EventCreation.sol/EventCreation.json";
+import { useReadContract } from "wagmi";
 import ExtraCard from "~~/components/ExtraCard";
-import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 import { ACTIONS } from "~~/utils/chain-of-events/Actions";
 import { fetchExtraDetails } from "~~/utils/chain-of-events/deployContract";
 
@@ -27,19 +28,22 @@ const ShopPage = ({ params }: PageProps) => {
 
   const [filteredExtras, setFilteredExtras] = useState<ExtraDetail[]>([]);
 
-  const { data } = useScaffoldReadContract({
-    contractName: "EventCreation",
+  const { data, error, isLoading } = useReadContract({
+    abi: EventCreation.abi,
+    address: process.env.NEXT_PUBLIC_EVENT_CREATION_ADDRESS!,
     functionName: "getExtras",
     args: [BigInt(id)],
   });
 
+  const addresses = data as string[] | undefined;
+
   useEffect(() => {
     const fetchExtras = async () => {
-      if (!data || data.length === 0) {
+      if (!addresses || addresses.length === 0) {
         setFilteredExtras([]);
         return;
       }
-      const promises = data.map(address =>
+      const promises = addresses.map(address =>
         fetchExtraDetails(address)
           .then(details => (Number(details?.extraType) === Number(extraType) ? { address, ...details } : null))
           .catch(error => ({ address, error: error.message })),
@@ -50,6 +54,7 @@ const ShopPage = ({ params }: PageProps) => {
 
       setFilteredExtras(filteredExtras);
     };
+
     fetchExtras();
   }, [data]);
 

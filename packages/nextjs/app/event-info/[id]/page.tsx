@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import EventCreation from "../../../../hardhat/artifacts/contracts/EventCreation.sol/EventCreation.json";
 import { ApolloClient, InMemoryCache, useQuery } from "@apollo/client";
-import { useAccount } from "wagmi";
+import { useAccount, useReadContract } from "wagmi";
 import ExtraCard from "~~/components/ExtraCard";
-import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 import { ACTIONS } from "~~/utils/chain-of-events/Actions";
 import { fetchExtraDetails, getUnredeemedBalanceOf } from "~~/utils/chain-of-events/deployContract";
 import { GET_EVENT_DETAILS_BY_ID } from "~~/utils/chain-of-events/queries";
@@ -44,32 +44,35 @@ const EditDashboardPage = ({ params }: PageProps) => {
 
   const { address } = useAccount();
 
-  const { data } = useScaffoldReadContract({
-    contractName: "EventCreation",
+  const { data, error, isLoading } = useReadContract({
+    abi: EventCreation.abi,
+    address: process.env.NEXT_PUBLIC_EVENT_CREATION_ADDRESS!,
     functionName: "getExtras",
     args: [BigInt(id)],
   });
+
+  const addresses = data as string[] | undefined;
 
   const [extraDetails, setExtraDetails] = useState<ExtraDetail[]>([]);
 
   useEffect(() => {
     const fetchExtras = async () => {
-      if (!data || data.length === 0) {
+      if (!addresses || addresses.length === 0) {
         setExtraDetails([]);
         return;
       }
 
-      const balancePromises = data.map(extra => getUnredeemedBalanceOf(extra, address!));
+      const balancePromises = addresses.map(extra => getUnredeemedBalanceOf(extra, address!));
       const balances = await Promise.all(balancePromises);
 
-      const nonZeroExtras = data.filter((extra, index) => balances[index] > 0);
+      const nonZeroExtras = addresses.filter((extra, index) => balances[index] > 0);
 
       const detailPromises = nonZeroExtras.map(extra => fetchExtraDetails(extra));
       const details = await Promise.all(detailPromises);
 
       const combinedDetails = nonZeroExtras.map((extra, index) => ({
         ...details[index],
-        balance: balances[data.indexOf(extra)],
+        balance: balances[addresses.indexOf(extra)],
         extraAddress: extra,
       }));
       setExtraDetails(combinedDetails);
