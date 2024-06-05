@@ -120,7 +120,7 @@ const EditDashboardPage = ({ params }: PageProps) => {
                 description={detail.description}
                 imageUrl={detail.imageUrl}
                 extraAddress={detail.extraAddress}
-                price={Number(detail.price)}
+                price={Number(detail.price) / 100}
                 hasQuantity={true}
                 noOfItems={Number(detail.balance)}
                 action={ACTIONS.TRANSFER}
