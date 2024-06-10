@@ -1,17 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ApolloClient, InMemoryCache, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { get, ref, runTransaction } from "firebase/database";
 import { useAccount } from "wagmi";
 import EventCard from "~~/components/EventCard";
+import useApolloClient from "~~/hooks/chain-of-events/useApolloClient";
 import { database } from "~~/utils/chain-of-events/firebaseConfig";
 import { GET_ALL_EVENTS_PAGINATED, GET_EVENTS_DETAILS_BY_IDS } from "~~/utils/chain-of-events/queries";
-
-const client = new ApolloClient({
-  uri: "https://api.studio.thegraph.com/query/71641/test-coe/version/latest",
-  cache: new InMemoryCache(),
-});
 
 interface EventDetail {
   id: number;
@@ -26,6 +22,7 @@ const EventsPage = () => {
   const { address } = useAccount();
   const [bookmarkedEvents, setBookmarkedEvents] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const client = useApolloClient();
 
   const {
     data: dataEventsDetails,
@@ -33,7 +30,7 @@ const EventsPage = () => {
     error: errorEventsDetails,
   } = useQuery(GET_EVENTS_DETAILS_BY_IDS, {
     variables: { ids: bookmarkedEvents },
-    client: client,
+    client,
     skip: bookmarkedEvents?.length < 1,
   });
 

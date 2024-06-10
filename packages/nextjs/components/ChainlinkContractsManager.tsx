@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { get, ref, runTransaction } from "firebase/database";
+import { useChainId } from "wagmi";
 import { AUTOMATION_UPDATE_TYPES } from "~~/utils/chain-of-events/AutomationUpdateTypes";
 import {
   MINT_UPDATE_STATUS,
@@ -19,6 +20,8 @@ const ChainlinkContractManager = ({
   const [contractAddress, setContractAddress] = useState("");
   const [updateType, setUpdateType] = useState(AUTOMATION_UPDATE_TYPES.PRICE);
   const [buttonState, setButtonState] = useState(getInitialButtonState(updateType));
+
+  const chainId = useChainId();
 
   useEffect(() => {
     const fetchContractDetails = () => {
@@ -71,7 +74,7 @@ const ChainlinkContractManager = ({
         return;
     }
 
-    const chainlinkContractAddress = await deployContractForType(extraAddress, updateType);
+    const chainlinkContractAddress = await deployContractForType(extraAddress, updateType, chainId);
     setContractAddress(chainlinkContractAddress);
     setButtonState(statusUpdate);
     saveOrUpdateContractDetails(

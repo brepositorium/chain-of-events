@@ -19,18 +19,9 @@ if (!privateKey) {
   throw new Error("Private key not found in environment variables");
 }
 
-const priceFeedHandlerAddress = process.env.NEXT_PUBLIC_PRICE_FEED_HANDLER_ADDRESS;
-
-const rpcUrl = process.env.NEXT_PUBLIC_RPC_URL;
-if (!rpcUrl) {
-  throw new Error("RPC URL must be provided");
-}
-
-const provider = new ethers.JsonRpcProvider(rpcUrl);
-const wallet = new ethers.Wallet(privateKey, provider);
-let wprovider: any;
+let provider: any;
 if (typeof window !== "undefined") {
-  wprovider = new ethers.BrowserProvider(window.ethereum);
+  provider = new ethers.BrowserProvider(window.ethereum);
 }
 
 const loadContractArtifacts = async (updateType: any) => {
@@ -53,44 +44,49 @@ export const createEvent = async (
   location: string,
   logoUrl: string,
   numberOfTickets: BigInt,
+  eventCreationAddress: string,
 ) => {
-  const signer = await wprovider.getSigner();
-  const contract = new ethers.Contract(process.env.NEXT_PUBLIC_EVENT_CREATION_ADDRESS!, EventCreation.abi, signer);
+  const signer = await provider.getSigner();
+  const contract = new ethers.Contract(eventCreationAddress, EventCreation.abi, signer);
   await contract.createEvent(name, description, location, logoUrl, numberOfTickets);
   console.log("Create event");
 };
 
-export const changeDescription = async (newDescription: string, eventId: BigInt) => {
-  const signer = await wprovider.getSigner();
-  const contract = new ethers.Contract(process.env.NEXT_PUBLIC_EVENT_CREATION_ADDRESS!, EventCreation.abi, signer);
+export const changeDescription = async (newDescription: string, eventId: BigInt, eventCreationAddress: string) => {
+  const signer = await provider.getSigner();
+  const contract = new ethers.Contract(eventCreationAddress, EventCreation.abi, signer);
   await contract.changeDescription(newDescription, eventId);
   console.log("Change description");
 };
 
-export const changeNumberOfTickets = async (newNumberOfTickets: string, eventId: BigInt) => {
-  const signer = await wprovider.getSigner();
-  const contract = new ethers.Contract(process.env.NEXT_PUBLIC_EVENT_CREATION_ADDRESS!, EventCreation.abi, signer);
+export const changeNumberOfTickets = async (
+  newNumberOfTickets: string,
+  eventId: BigInt,
+  eventCreationAddress: string,
+) => {
+  const signer = await provider.getSigner();
+  const contract = new ethers.Contract(eventCreationAddress, EventCreation.abi, signer);
   await contract.changeNumberOfTickets(newNumberOfTickets, eventId);
   console.log("Change number of tickets");
 };
 
-export const changeLocation = async (newLocation: string, eventId: BigInt) => {
-  const signer = await wprovider.getSigner();
-  const contract = new ethers.Contract(process.env.NEXT_PUBLIC_EVENT_CREATION_ADDRESS!, EventCreation.abi, signer);
+export const changeLocation = async (newLocation: string, eventId: BigInt, eventCreationAddress: string) => {
+  const signer = await provider.getSigner();
+  const contract = new ethers.Contract(eventCreationAddress, EventCreation.abi, signer);
   await contract.changeLocation(newLocation, eventId);
   console.log("Change location");
 };
 
-export const changeLogo = async (newLogo: string, eventId: BigInt) => {
-  const signer = await wprovider.getSigner();
-  const contract = new ethers.Contract(process.env.NEXT_PUBLIC_EVENT_CREATION_ADDRESS!, EventCreation.abi, signer);
+export const changeLogo = async (newLogo: string, eventId: BigInt, eventCreationAddress: string) => {
+  const signer = await provider.getSigner();
+  const contract = new ethers.Contract(eventCreationAddress, EventCreation.abi, signer);
   await contract.changeLogo(newLogo, eventId);
   console.log("Change logo");
 };
 
-export const addAllowedAddress = async (allowedAddress: string, eventId: BigInt) => {
-  const signer = await wprovider.getSigner();
-  const contract = new ethers.Contract(process.env.NEXT_PUBLIC_EVENT_CREATION_ADDRESS!, EventCreation.abi, signer);
+export const addAllowedAddress = async (allowedAddress: string, eventId: BigInt, eventCreationAddress: string) => {
+  const signer = await provider.getSigner();
+  const contract = new ethers.Contract(eventCreationAddress, EventCreation.abi, signer);
   await contract.addAllowedAddress(allowedAddress, eventId);
   console.log("Add allowed address");
 };
@@ -105,14 +101,14 @@ export const deployContract = async (
   eventId: BigInt,
   priceFeedHandlerAddress?: string,
 ) => {
-  const signer = await wprovider.getSigner();
+  const signer = await provider.getSigner();
   const factory = new ethers.ContractFactory(ExtraNft.abi, ExtraNft.bytecode, signer);
   const contract = await factory.deploy(
     name,
     symbol,
     uri,
     extraType,
-    BigInt(price * 100),
+    BigInt(Math.round(price * 100)),
     eventAddress,
     eventId,
     priceFeedHandlerAddress,
@@ -121,21 +117,19 @@ export const deployContract = async (
   return await contract.getAddress();
 };
 
-export const deployContractForType = async (extraAddress: string, updateType: string) => {
-  const signer = await wprovider.getSigner();
+export const deployContractForType = async (extraAddress: string, updateType: string, chainId: number) => {
+  const signer = await provider.getSigner();
   const { abi, bytecode } = await loadContractArtifacts(updateType);
   const contractFactory = new ethers.ContractFactory(abi, bytecode, signer);
-  const contract = await contractFactory.deploy(
-    extraAddress,
-    process.env.NEXT_PUBLIC_LINK_TOKEN_INTERFACE,
-    process.env.NEXT_PUBLIC_CHAINLINK_REGISTRAR,
-  );
+  const [linkTokenInterface, chainlinkRegistrar] = getChainlinkAddresses(chainId);
+
+  const contract = await contractFactory.deploy(extraAddress, linkTokenInterface, chainlinkRegistrar);
   console.log("Contract deployed at ", await contract.getAddress());
   return await contract.getAddress();
 };
 
 export const registerUpkeepForType = async (chainlinkContractAddress: string, name: string, updateType: string) => {
-  const signer = await wprovider.getSigner();
+  const signer = await provider.getSigner();
   const { abi } = await loadContractArtifacts(updateType);
   const contract = new ethers.Contract(chainlinkContractAddress, abi, signer);
   await contract.registerUpkeep(name, BigInt(500000), BigInt(2000000000000000000)); //2e18
@@ -143,7 +137,7 @@ export const registerUpkeepForType = async (chainlinkContractAddress: string, na
 };
 
 export const schedulePriceUpdate = async (chainlinkContractAddress: string, newValue: number, scheduleTime: number) => {
-  const signer = await wprovider.getSigner();
+  const signer = await provider.getSigner();
   const contract = new ethers.Contract(chainlinkContractAddress, PriceAutomatedUpdate.abi, signer);
   console.log(chainlinkContractAddress);
   await contract.scheduleUpdate(BigInt(newValue), BigInt(scheduleTime));
@@ -155,35 +149,35 @@ export const scheduleMintLimitUpdate = async (
   newValue: number,
   scheduleTime: number,
 ) => {
-  const signer = await wprovider.getSigner();
+  const signer = await provider.getSigner();
   const contract = new ethers.Contract(chainlinkContractAddress, MintLimitAutomatedUpdate.abi, signer);
   await contract.scheduleUpdate(BigInt(newValue), BigInt(scheduleTime));
   console.log("Schedule mint limit update");
 };
 
 export const schedulePause = async (extraAddress: string, scheduleTime: number) => {
-  const signer = await wprovider.getSigner();
+  const signer = await provider.getSigner();
   const contract = new ethers.Contract(extraAddress, PauseAutomatedUpdate.abi, signer);
   await contract.scheduleUpdate(BigInt(scheduleTime));
   console.log("Schedule pause");
 };
 
 export const updatePrice = async (extraAddress: string, newPrice: number) => {
-  const signer = await wprovider.getSigner();
+  const signer = await provider.getSigner();
   const contract = new ethers.Contract(extraAddress, ExtraNft.abi, signer);
-  await contract.updatePrice(BigInt(newPrice * 100));
+  await contract.updatePrice(BigInt(Math.round(newPrice * 100)));
   console.log("Update price");
 };
 
 export const updateMintLimit = async (extraAddress: string, newMintLimit: number) => {
-  const signer = await wprovider.getSigner();
+  const signer = await provider.getSigner();
   const contract = new ethers.Contract(extraAddress, ExtraNft.abi, signer);
   await contract.updateMintLimit(BigInt(newMintLimit));
   console.log("Update price");
 };
 
 export const addApprovedChainlinkContract = async (chainlinkContractAddress: string, extraAddress: string) => {
-  const signer = await wprovider.getSigner();
+  const signer = await provider.getSigner();
   const contract = new ethers.Contract(extraAddress, ExtraNft.abi, signer);
   await contract.addApprovedChainlinkContract(chainlinkContractAddress);
   console.log("Add approved Chainlink Contract");
@@ -231,7 +225,7 @@ export const getExtraOwner = async (extraAddress: string) => {
 };
 
 export const transferExtra = async (extraAddress: string, to: string, amount: BigInt) => {
-  const signer = await wprovider.getSigner();
+  const signer = await provider.getSigner();
   const contract = new ethers.Contract(extraAddress, ExtraNft.abi, signer);
   try {
     const tx = await contract.bulkTransferUnredeemedTokens(to, amount);
@@ -245,7 +239,7 @@ export const transferExtra = async (extraAddress: string, to: string, amount: Bi
 };
 
 export const redeemExtra = async (extraAddress: string, extraOwner: string, amount: BigInt) => {
-  const signer = await wprovider.getSigner();
+  const signer = await provider.getSigner();
   const contract = new ethers.Contract(extraAddress, ExtraNft.abi, signer);
   try {
     const tx = await contract.bulkRedeem(extraOwner, amount);
@@ -259,8 +253,8 @@ export const redeemExtra = async (extraAddress: string, extraOwner: string, amou
   }
 };
 
-const getEthPriceFromUsd = async (usdAmount: BigInt) => {
-  const contract = new ethers.Contract(priceFeedHandlerAddress!, PriceFeedHandler.abi, provider);
+const getEthPriceFromUsd = async (usdAmount: BigInt, priceFeedHandlerAddress: string) => {
+  const contract = new ethers.Contract(priceFeedHandlerAddress, PriceFeedHandler.abi, provider);
   try {
     const valueInEth: BigInt = await contract.calculateEthAmount(usdAmount);
     return valueInEth;
@@ -270,13 +264,18 @@ const getEthPriceFromUsd = async (usdAmount: BigInt) => {
   }
 };
 
-export const mintNft = async (extraAddress: string, to: string, ticketPrice: number, amount: number) => {
-  const signer = await wprovider.getSigner();
+export const mintNft = async (
+  extraAddress: string,
+  to: string,
+  ticketPrice: number,
+  amount: number,
+  priceFeedHandlerAddress: string,
+) => {
+  const signer = await provider.getSigner();
   const contract = new ethers.Contract(extraAddress, ExtraNft.abi, signer);
   try {
     const totalPrice = ticketPrice * amount;
-    const valueInEth = await getEthPriceFromUsd(BigInt(totalPrice * 100));
-    console.log(extraAddress);
+    const valueInEth = await getEthPriceFromUsd(BigInt(Math.round(totalPrice * 100)), priceFeedHandlerAddress);
     const txResponse = await contract.safeMint(to, amount, { value: valueInEth });
     console.log("Transaction response:", txResponse);
     const receipt = await txResponse.wait();
@@ -287,7 +286,7 @@ export const mintNft = async (extraAddress: string, to: string, ticketPrice: num
 };
 
 export const pauseSellingForExtra = async (address: string) => {
-  const signer = await wprovider.getSigner();
+  const signer = await provider.getSigner();
   const contract = new ethers.Contract(address, ExtraNft.abi, signer);
   try {
     const txResponse = await contract.pause();
@@ -300,7 +299,7 @@ export const pauseSellingForExtra = async (address: string) => {
 };
 
 export const unpauseSellingForExtra = async (address: string) => {
-  const signer = await wprovider.getSigner();
+  const signer = await provider.getSigner();
   const contract = new ethers.Contract(address, ExtraNft.abi, signer);
   try {
     const txResponse = await contract.unpause();
@@ -313,7 +312,7 @@ export const unpauseSellingForExtra = async (address: string) => {
 };
 
 export const withdrawFundsFromExtra = async (address: string) => {
-  const signer = await wprovider.getSigner();
+  const signer = await provider.getSigner();
   const contract = new ethers.Contract(address, ExtraNft.abi, signer);
   try {
     const txResponse = await contract.withdraw();
@@ -389,5 +388,16 @@ export const constructExtraUri = async (
     return metadataUrl;
   } catch (error) {
     console.error("Error pinning to IPFS:", error);
+  }
+};
+
+const getChainlinkAddresses = (chainId: number): [string, string] => {
+  switch (chainId) {
+    case 8453:
+      return [process.env.NEXT_PUBLIC_LINK_TOKEN_INTERFACE_BASE!, process.env.NEXT_PUBLIC_CHAINLINK_REGISTRAR_BASE!];
+    case 43113:
+      return [process.env.NEXT_PUBLIC_LINK_TOKEN_INTERFACE_FUJI!, process.env.NEXT_PUBLIC_CHAINLINK_REGISTRAR_FUJI!];
+    default:
+      return [process.env.NEXT_PUBLIC_LINK_TOKEN_INTERFACE_BASE!, process.env.NEXT_PUBLIC_CHAINLINK_REGISTRAR_BASE!];
   }
 };

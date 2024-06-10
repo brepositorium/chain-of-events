@@ -5,6 +5,7 @@ import EventCreation from "../../../../hardhat/artifacts/contracts/EventCreation
 import { useReadContract } from "wagmi";
 import ExtraCard from "~~/components/ExtraCard";
 import QrReader from "~~/components/QrReader";
+import useContractAddress from "~~/hooks/chain-of-events/useEventCreationAddress";
 import { ACTIONS } from "~~/utils/chain-of-events/Actions";
 import { fetchExtraDetails, getUnredeemedBalanceOf } from "~~/utils/chain-of-events/deployContract";
 
@@ -27,9 +28,11 @@ interface ExtraDetail {
 const RedeemPage = ({ params }: PageProps) => {
   const id = params.id;
 
+  const contractAddress = useContractAddress();
+
   const { data, error, isLoading } = useReadContract({
     abi: EventCreation.abi,
-    address: process.env.NEXT_PUBLIC_EVENT_CREATION_ADDRESS!,
+    address: contractAddress,
     functionName: "getExtras",
     args: [BigInt(id)],
   });

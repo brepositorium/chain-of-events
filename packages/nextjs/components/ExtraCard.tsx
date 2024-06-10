@@ -3,6 +3,7 @@ import Link from "next/link";
 import Card from "./BaseCard";
 import SimpleModal from "./SimpleModal";
 import { useAccount } from "wagmi";
+import { usePriceFeedHandlerAddress } from "~~/hooks/chain-of-events/usePriceFeedHandlerAddress";
 import { ACTIONS } from "~~/utils/chain-of-events/Actions";
 import { mintNft, redeemExtra } from "~~/utils/chain-of-events/deployContract";
 
@@ -38,6 +39,7 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
   const [currentField, setCurrentField] = useState("");
 
   const { address } = useAccount();
+  const priceFeedHandlerAddress = usePriceFeedHandlerAddress();
 
   const handleIncrease = () => {
     setQuantity(prevQuantity => prevQuantity + 1);
@@ -55,7 +57,7 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
   async function handleBuy(extraAddress: string, extraPrice: number, quantity: number): Promise<void> {
     if (address) {
       try {
-        await mintNft(extraAddress, address, extraPrice, quantity);
+        await mintNft(extraAddress, address, extraPrice, quantity, priceFeedHandlerAddress!);
         console.log("Minting successful");
       } catch (e) {
         console.error("Error minting:", e);

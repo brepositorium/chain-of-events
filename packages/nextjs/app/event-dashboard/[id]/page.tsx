@@ -2,19 +2,16 @@
 
 import { useEffect, useState } from "react";
 import EventCreation from "../../../../hardhat/artifacts/contracts/EventCreation.sol/EventCreation.json";
-import { ApolloClient, InMemoryCache, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { useReadContract } from "wagmi";
 import AddExtraModal from "~~/components/AddExtraModal";
 import ExtraCard from "~~/components/ExtraCard";
 import SimpleModal from "~~/components/SimpleModal";
+import useApolloClient from "~~/hooks/chain-of-events/useApolloClient";
+import useContractAddress from "~~/hooks/chain-of-events/useEventCreationAddress";
 import { ACTIONS } from "~~/utils/chain-of-events/Actions";
 import { fetchExtraDetails } from "~~/utils/chain-of-events/deployContract";
 import { GET_EVENT_DETAILS_BY_ID } from "~~/utils/chain-of-events/queries";
-
-const client = new ApolloClient({
-  uri: "https://api.studio.thegraph.com/query/71641/test-coe/version/latest",
-  cache: new InMemoryCache(),
-});
 
 type PageProps = {
   params: { id: number };
@@ -33,13 +30,15 @@ interface ExtraDetail {
 
 const EditDashboardPage = ({ params }: PageProps) => {
   const id = params.id;
+  const client = useApolloClient();
+
   const {
     loading: loadingEvents,
     error: errorEvents,
     data: dataEvents,
   } = useQuery(GET_EVENT_DETAILS_BY_ID, {
     variables: { id },
-    client: client,
+    client,
   });
 
   const [isSimpleModalOpen, setIsSimpleModalOpen] = useState(false);
@@ -49,9 +48,11 @@ const EditDashboardPage = ({ params }: PageProps) => {
   const [ticketTypes, setTicketTypes] = useState<ExtraDetail[]>([]);
   const [consumables, setConsumables] = useState<ExtraDetail[]>([]);
 
+  const contractAddress = useContractAddress();
+
   const { data, error, isLoading } = useReadContract({
     abi: EventCreation.abi,
-    address: process.env.NEXT_PUBLIC_EVENT_CREATION_ADDRESS!,
+    address: contractAddress,
     functionName: "getExtras",
     args: [BigInt(id)],
   });
@@ -120,7 +121,12 @@ const EditDashboardPage = ({ params }: PageProps) => {
     );
   if (errorEvents) return <p>Error loading events</p>;
 
-  const eventData = dataEvents.eventCreateds[0];
+  let eventData;
+  if (dataEvents.eventCreateds[0]) {
+    eventData = dataEvents.eventCreateds[0];
+  } else {
+    return <p>No events found</p>;
+  }
 
   return (
     <div className="h-[650px] bg-spirals bg-no-repeat">

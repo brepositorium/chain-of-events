@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import EventCreation from "../../../../../hardhat/artifacts/contracts/EventCreation.sol/EventCreation.json";
 import { useReadContract } from "wagmi";
 import ExtraCard from "~~/components/ExtraCard";
+import useContractAddress from "~~/hooks/chain-of-events/useEventCreationAddress";
 import { ACTIONS } from "~~/utils/chain-of-events/Actions";
 import { fetchExtraDetails } from "~~/utils/chain-of-events/deployContract";
 
@@ -28,9 +29,11 @@ const ShopPage = ({ params }: PageProps) => {
 
   const [filteredExtras, setFilteredExtras] = useState<ExtraDetail[]>([]);
 
+  const contractAddress = useContractAddress();
+
   const { data, error, isLoading } = useReadContract({
     abi: EventCreation.abi,
-    address: process.env.NEXT_PUBLIC_EVENT_CREATION_ADDRESS!,
+    address: contractAddress,
     functionName: "getExtras",
     args: [BigInt(id)],
   });

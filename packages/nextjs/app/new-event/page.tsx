@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { NextPage } from "next";
+import useEventCreationAddress from "~~/hooks/chain-of-events/useEventCreationAddress";
 import { createEvent, pinFileToIPFS } from "~~/utils/chain-of-events/deployContract";
 
 const NewEvent: NextPage = () => {
@@ -10,6 +11,8 @@ const NewEvent: NextPage = () => {
   const [location, setLocation] = useState("");
   const [numberOfTickets, setNumberOfTickets] = useState(0);
   const [image, setImage] = useState<File | null>(null);
+
+  const eventCreationAddress = useEventCreationAddress();
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -20,7 +23,14 @@ const NewEvent: NextPage = () => {
   const handleSubmit = async () => {
     if (image != null) {
       try {
-        createEvent(name, description, location, await pinFileToIPFS(image), BigInt(numberOfTickets));
+        createEvent(
+          name,
+          description,
+          location,
+          await pinFileToIPFS(image),
+          BigInt(numberOfTickets),
+          eventCreationAddress!,
+        );
         console.log("Succesfully created event");
       } catch (e) {
         console.error("Error creating event:", e);

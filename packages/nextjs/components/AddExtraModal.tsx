@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import useContractAddress from "~~/hooks/chain-of-events/useEventCreationAddress";
+import { usePriceFeedHandlerAddress } from "~~/hooks/chain-of-events/usePriceFeedHandlerAddress";
 import { constructExtraUri, deployContract } from "~~/utils/chain-of-events/deployContract";
 
 interface AddExtraModalProps {
@@ -16,33 +18,18 @@ const AddExtraModal: React.FC<AddExtraModalProps> = ({ isOpen, onClose, extraTyp
   const [image, setImage] = useState<File | null>(null);
   const [price, setPrice] = useState<number>();
 
+  const contractAddress = useContractAddress();
+  const priceFeedHandlerAddress = usePriceFeedHandlerAddress();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (image && price && process.env.NEXT_PUBLIC_EVENT_CREATION_ADDRESS) {
+    if (image && price && contractAddress) {
       const metadataUri = await constructExtraUri(name, description, externalUrl, price, image);
       if (metadataUri) {
         if (extraType === 0) {
-          deployContract(
-            name,
-            symbol,
-            metadataUri,
-            0,
-            price,
-            process.env.NEXT_PUBLIC_EVENT_CREATION_ADDRESS,
-            BigInt(id),
-            process.env.NEXT_PUBLIC_PRICE_FEED_HANDLER_ADDRESS,
-          );
+          deployContract(name, symbol, metadataUri, 0, price, contractAddress, BigInt(id), priceFeedHandlerAddress);
         } else {
-          deployContract(
-            name,
-            symbol,
-            metadataUri,
-            1,
-            price,
-            process.env.NEXT_PUBLIC_EVENT_CREATION_ADDRESS,
-            BigInt(id),
-            process.env.NEXT_PUBLIC_PRICE_FEED_HANDLER_ADDRESS,
-          );
+          deployContract(name, symbol, metadataUri, 1, price, contractAddress, BigInt(id), priceFeedHandlerAddress);
         }
         console.log("Added:", { name, symbol, description, metadataUri, price });
       }

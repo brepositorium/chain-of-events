@@ -1,6 +1,7 @@
 // components/SimpleModal.tsx
 import React, { useState } from "react";
 import moment from "moment-timezone";
+import useEventCreationAddress from "~~/hooks/chain-of-events/useEventCreationAddress";
 import {
   addAllowedAddress,
   addApprovedChainlinkContract,
@@ -36,39 +37,40 @@ const SimpleModal: React.FC<SimpleModalProps> = ({
   chainlinkContractAddress,
 }) => {
   const [inputValue, setInputValue] = useState("");
-
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [timezone, setTimezone] = useState("UTC");
   const [timestamp, setTimestamp] = useState(0);
+
+  const eventCreationAddress = useEventCreationAddress();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (fieldName === "description") {
       try {
-        changeDescription(inputValue, eventId!);
+        changeDescription(inputValue, eventId!, eventCreationAddress!);
         console.log("Succesfully changed description");
       } catch (e) {
         console.error("Error changing description:", e);
       }
     } else if (fieldName === "location") {
       try {
-        changeLocation(inputValue, eventId!);
+        changeLocation(inputValue, eventId!, eventCreationAddress!);
         console.log("Succesfully changed location");
       } catch (e) {
         console.error("Error changing location:", e);
       }
     } else if (fieldName === "logoUrl") {
       try {
-        changeLogo(inputValue, eventId!);
+        changeLogo(inputValue, eventId!, eventCreationAddress!);
         console.log("Succesfully changed logoUrl");
       } catch (e) {
         console.error("Error changing logoUrl:", e);
       }
     } else if (fieldName === "numberOfTickets") {
       try {
-        changeNumberOfTickets(inputValue, eventId!);
+        changeNumberOfTickets(inputValue, eventId!, eventCreationAddress!);
         console.log("Succesfully changed numberOfTickets");
       } catch (e) {
         console.error("Error changing numberOfTickets:", e);
@@ -100,7 +102,7 @@ const SimpleModal: React.FC<SimpleModalProps> = ({
       }
     } else if (fieldName === "allowedAddress") {
       try {
-        addAllowedAddress(inputValue, eventId!);
+        addAllowedAddress(inputValue, eventId!, eventCreationAddress!);
       } catch (e) {
         console.error("Error sending extra:", e);
       }

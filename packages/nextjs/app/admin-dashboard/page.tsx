@@ -1,20 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { ApolloClient, InMemoryCache, useQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import type { NextPage } from "next";
 import { useAccount } from "wagmi";
 import EventCard from "~~/components/EventCard";
+import useApolloClient from "~~/hooks/chain-of-events/useApolloClient";
 import { GET_PERSONS_EVENTS } from "~~/utils/chain-of-events/queries";
-
-const client = new ApolloClient({
-  uri: "https://api.studio.thegraph.com/query/71641/test-coe/version/latest",
-  cache: new InMemoryCache(),
-});
 
 const AdminDashboard: NextPage = () => {
   const { address } = useAccount();
   const [visibleEvents, setVisibleEvents] = useState<number>(3);
+  const client = useApolloClient();
 
   const {
     loading: loadingEvents,
@@ -22,7 +19,7 @@ const AdminDashboard: NextPage = () => {
     data: dataEvents,
   } = useQuery(GET_PERSONS_EVENTS, {
     variables: { address },
-    client: client,
+    client,
   });
 
   if (loadingEvents)
