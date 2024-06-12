@@ -213,11 +213,15 @@ const EventsPage = () => {
             />
           ))}
         </div>
-        <div className="flex items-center justify-center">
-          <button className="btn btn-sm btn-primary rounded-xl w-36 border-0 my-8" onClick={handleLoadMore}>
-            Load more
-          </button>
-        </div>
+        {data.eventCreateds.length == 3 ? (
+          <div className="flex items-center justify-center">
+            <button className="btn btn-sm btn-primary rounded-xl w-36 border-0 my-8" onClick={handleLoadMore}>
+              Load more
+            </button>
+          </div>
+        ) : (
+          <div></div>
+        )}
       </div>
     </div>
   );
