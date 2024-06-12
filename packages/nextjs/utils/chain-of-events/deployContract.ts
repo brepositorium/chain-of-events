@@ -14,11 +14,6 @@ type PinataResponse = {
   Timestamp: string;
 };
 
-const privateKey = process.env.NEXT_PUBLIC_WALLET_PRIVATE_KEY;
-if (!privateKey) {
-  throw new Error("Private key not found in environment variables");
-}
-
 let provider: any;
 if (typeof window !== "undefined") {
   provider = new ethers.BrowserProvider(window.ethereum);
