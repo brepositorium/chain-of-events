@@ -342,8 +342,8 @@ export const pinFileToIPFS = async (file: File): Promise<string> => {
   data.append("file", file);
   const response = await axios.post<PinataResponse>(url, data, {
     headers: {
-      pinata_api_key: process.env.NEXT_PUBLIC_PINATA_API_KEY!,
-      pinata_secret_api_key: process.env.NEXT_PUBLIC_PINATA_API_SECRET!,
+      pinata_api_key: process.env.PINATA_API_KEY!,
+      pinata_secret_api_key: process.env.PINATA_API_SECRET!,
     },
   });
   console.log(`Pinned file at https://gateway.pinata.cloud/ipfs/${response.data.IpfsHash}`);
@@ -355,8 +355,8 @@ const pinJSONToIPFS = async (json: Object): Promise<string> => {
   const response = await axios.post<PinataResponse>(url, json, {
     headers: {
       "Content-Type": "application/json",
-      pinata_api_key: process.env.NEXT_PUBLIC_PINATA_API_KEY!,
-      pinata_secret_api_key: process.env.NEXT_PUBLIC_PINATA_API_SECRET!,
+      pinata_api_key: process.env.PINATA_API_KEY!,
+      pinata_secret_api_key: process.env.PINATA_API_SECRET!,
     },
   });
   return `https://gateway.pinata.cloud/ipfs/${response.data.IpfsHash}`;
