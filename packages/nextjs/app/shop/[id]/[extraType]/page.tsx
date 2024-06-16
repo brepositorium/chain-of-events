@@ -62,9 +62,9 @@ const ShopPage = ({ params }: PageProps) => {
   }, [data]);
 
   return (
-    <div className="container mx-auto px-40">
-      <h1 className="text-2xl font-bold my-4">Available extras</h1>
-      <div className="grid grid-cols-3 gap-4">
+    <div className="container mx-auto px-11 md:px-20 xl:px-40">
+      <h1 className="text-2xl font-medium my-4 font-poppins">Extras for sell</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {filteredExtras.length > 0 ? (
           filteredExtras.map((extra, index) => (
             <ExtraCard

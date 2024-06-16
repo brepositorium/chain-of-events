@@ -256,7 +256,7 @@ const ChainlinkContractManager = ({
 
   return (
     <div className="flex flex-col items-center">
-      <div className="font-outfit">
+      <div className="font-poppins">
         <p>Schedule update for</p>
         <select
           className="select bg-secondary rounded select-bordered"
@@ -270,12 +270,16 @@ const ChainlinkContractManager = ({
       </div>
       <ul className="steps mt-12">
         {getStepsLabels(updateType).map((label, index) => (
-          <li key={label} className={`step ${getStepStatus(index, buttonState, updateType)} font-outfit`}>
+          <li key={label} className={`step ${getStepStatus(index, buttonState, updateType)} font-poppins`}>
             {label}
           </li>
         ))}
       </ul>
-      {contractAddress ? <p className="mt-4 font-outfit">Deployed at: {contractAddress}</p> : <p></p>}
+      {contractAddress ? (
+        <p className="mt-4 font-poppins text-sm -ml-4 md:text-base text-green-500">Deployed at: {contractAddress}</p>
+      ) : (
+        <p></p>
+      )}
 
       {/* Deploy Contract Button */}
       {buttonState === getInitialButtonState(updateType) && (

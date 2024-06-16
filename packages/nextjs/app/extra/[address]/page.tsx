@@ -5,6 +5,7 @@ import ChainlinkContractManager from "~~/components/ChainlinkContractsManager";
 import ExtraTemplates from "~~/components/ExtraTemplates";
 import SimpleModal from "~~/components/SimpleModal";
 import {
+  fetchExtraDetails,
   getPausedStatus,
   pauseSellingForExtra,
   unpauseSellingForExtra,
@@ -15,6 +16,16 @@ type PageProps = {
   params: { address: string };
 };
 
+interface ExtraDetails {
+  name: string;
+  symbol: string;
+  price: string;
+  extraType: string;
+  uri: string;
+  description: string;
+  imageUrl: string;
+}
+
 const ExtraPage = ({ params }: PageProps) => {
   const address = params.address;
 
@@ -23,12 +34,19 @@ const ExtraPage = ({ params }: PageProps) => {
   const [isPaused, setIsPaused] = useState(false);
   const [loading, setLoading] = useState(true);
   const [chainlinkContractAddress, setChainlinkContractAddress] = useState("");
+  const [extraDetails, setExtraDetails] = useState<ExtraDetails | null>(null);
 
   useEffect(() => {
     const fetchPausedStatus = async () => {
       setLoading(true);
       const status = await getPausedStatus(address);
       setIsPaused(status);
+      const details = await fetchExtraDetails(address);
+      if (details) {
+        setExtraDetails(details);
+      } else {
+        console.error("Failed to fetch extra details");
+      }
       setLoading(false);
     };
 
@@ -72,37 +90,61 @@ const ExtraPage = ({ params }: PageProps) => {
 
   return (
     <div className="h-[650px] bg-spirals bg-no-repeat">
-      <div className="flex flex-col gap-4 mt-12 items-center p-6 max-w-2xl mx-auto bg-gradient-to-b from-secondary via-primary to-secondary ... rounded-xl shadow-md space-x-4">
-        <div className="text-xl font-outfit mb-8">
-          Extra's address: <span className="font-extrabold">{address}</span>
+      <div className="flex flex-col gap-4 mt-12 p-6 max-w-screen md:max-w-4xl mx-auto bg-gradient-to-b from-secondary via-primary to-secondary ... rounded-xl shadow-md space-x-4">
+        <div className="flex flex-col md:flex-row md:justify-around">
+          <div className="flex flex-col items-center md:mt-8">
+            <img src={extraDetails?.imageUrl} alt="Logo" height={300} width={300} />
+            <div className="flex flex-col items-center">
+              <div>
+                <p className="font-medium font-poppins text-2xl">
+                  {extraDetails?.name} <span className="text-green-500">&nbsp; ${extraDetails?.price.toString()}</span>
+                </p>
+              </div>
+              <div className="flex flex-col items-center">
+                <p className="font-medium font-poppins text-lg">About</p>
+                <p className="-mt-4">{extraDetails?.description}</p>
+              </div>
+              <div className="flex flex-col items-center relative group">
+                <p className="-mb-4 font-medium font-poppins text-lg">Address</p>
+                <p>{address}</p>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col gap-4 items-center mt-8">
+            <button
+              className="btn btn-gradient-primary rounded btn-md w-40"
+              onClick={() => handleEditClick("createdEvent_price")}
+            >
+              Change price
+            </button>
+            <button
+              className="btn btn-gradient-primary rounded btn-md w-40"
+              onClick={() => handleEditClick("createdEvent_mintLimit")}
+            >
+              Change Mint Limit
+            </button>
+            <button className="btn btn-gradient-primary rounded btn-md w-40" disabled={isPaused} onClick={handlePause}>
+              Pause
+            </button>
+            <button
+              className="btn btn-gradient-primary rounded btn-md w-40"
+              disabled={!isPaused}
+              onClick={handleUnpause}
+            >
+              Unpause
+            </button>
+            <button
+              className="btn btn-gradient-primary rounded btn-md w-40"
+              onClick={() => handleEditClick("createdEvent_allowedChainlinkContract")}
+            >
+              Add Approved Chainlink Address
+            </button>
+            <button className="btn btn-gradient-primary rounded btn-md w-40" onClick={handleWithdraw}>
+              Withdraw
+            </button>
+          </div>
         </div>
-        <button
-          className="btn btn-gradient-primary rounded btn-md w-40"
-          onClick={() => handleEditClick("createdEvent_price")}
-        >
-          Change price
-        </button>
-        <button
-          className="btn btn-gradient-primary rounded btn-md w-40"
-          onClick={() => handleEditClick("createdEvent_mintLimit")}
-        >
-          Change Mint Limit
-        </button>
-        <button className="btn btn-gradient-primary rounded btn-md w-40" disabled={isPaused} onClick={handlePause}>
-          Pause
-        </button>
-        <button className="btn btn-gradient-primary rounded btn-md w-40" disabled={!isPaused} onClick={handleUnpause}>
-          Unpause
-        </button>
-        <button
-          className="btn btn-gradient-primary rounded btn-md w-40"
-          onClick={() => handleEditClick("createdEvent_allowedChainlinkContract")}
-        >
-          Add Approved Chainlink Address
-        </button>
-        <button className="btn btn-gradient-primary rounded btn-md w-40" onClick={handleWithdraw}>
-          Withdraw
-        </button>
+
         <div className="mt-8 divider"></div>
         <ChainlinkContractManager extraAddress={address} onScheduleButtonClick={handleEditClick} />
         <div className="divider"></div>

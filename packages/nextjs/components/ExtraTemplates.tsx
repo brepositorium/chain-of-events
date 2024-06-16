@@ -116,10 +116,10 @@ const ExtraTemplates: React.FC<ExtraTemplatesProps> = ({ extraAddress }) => {
 
   return (
     <div className="flex flex-col mt-4 w-full">
-      <h1 className="text-lg font-bold">Manage Templates</h1>
-      <div className="flex gap-8 my-4 justify-center">
+      <h1 className="text-lg font-bold text-center md:text-left md:ml-20">Manage Templates</h1>
+      <div className="flex flex-col md:flex-row gap-8 my-4 mb-12 items-center justify-center">
         <input
-          className="input input-sm input-bordered rounded bg-secondary w-80"
+          className="input input-sm input-bordered rounded bg-secondary w-40 md:w-80"
           type="text"
           placeholder="Template ID"
           value={newTemplateId}
@@ -129,15 +129,15 @@ const ExtraTemplates: React.FC<ExtraTemplatesProps> = ({ extraAddress }) => {
           Add Template
         </button>
       </div>
-      <h1 className="text-lg font-bold">Added templates</h1>
+      <h1 className="text-lg font-bold text-center md:text-left md:ml-20">Added templates</h1>
       <ul>
         {templates.map(template => (
           <li className="shadow-3xl p-4 mt-2" key={template.key}>
-            <div className="flex ml-8 mt-2 justify-between">
-              <span className="font-bold">Template ID:</span> <span className="font-outfit">{template.templateId}</span>
+            <div className="flex flex-col md:flex-row items-center md:ml-8 mt-2 justify-between">
+              <span className="font-bold">Template ID:</span> <span>{template.templateId}</span>
               <Link
                 href={template.linkToRemix || "#"}
-                className="btn btn-gradient-primary rounded btn-sm w-32 mr-8"
+                className="btn btn-gradient-primary rounded btn-sm w-32 md:mr-8"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -147,31 +147,31 @@ const ExtraTemplates: React.FC<ExtraTemplatesProps> = ({ extraAddress }) => {
             <div className="flex flex-col my-4 ml-8">
               <p>
                 <span className="font-bold">Name:</span>{" "}
-                <span className="font-outfit">
+                <span className="font-poppins">
                   {template.name || "Template not found. Please make sure the ID matches with a valid template"}
                 </span>
               </p>
               <p>
                 <span className="font-bold">Description:</span>{" "}
-                <span className="font-outfit">{template.name || "N/A"}</span>
+                <span className="font-poppins">{template.name || "N/A"}</span>
               </p>
             </div>
-            <div className="flex gap-4 my-4 ml-8">
+            <div className="flex flex-col md:flex-row gap-4 my-4 ml-8">
               <h1 className="font-bold">Deployed at these addresses:</h1>
               <ul>
                 {template.deployedAddresses.map((address, index) => (
                   <li key={index}>
-                    <span className="font-outfit">{address}</span>
+                    <span className="font-poppins">{address}</span>
                   </li>
                 ))}
               </ul>
             </div>
             {template.name ? (
-              <div className="flex gap-8 my-4 justify-center">
+              <div className="flex flex-col md:flex-row gap-8 my-4 justify-center items-center">
                 <input
                   type="text"
                   placeholder="Deployed Address"
-                  className="input input-sm input-bordered rounded bg-secondary w-80"
+                  className="input input-sm input-bordered rounded bg-secondary w-40 md:w-80"
                   value={newAddresses[template.key] || ""}
                   onChange={e => handleAddressChange(template.key, e.target.value)}
                 />

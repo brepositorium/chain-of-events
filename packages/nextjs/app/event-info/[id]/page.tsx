@@ -93,26 +93,37 @@ const EditDashboardPage = ({ params }: PageProps) => {
 
   return (
     <div className="h-[650px] bg-circles bg-no-repeat">
-      <div className="flex flex-col items-center mt-12 gap-4 p-6 max-w-2xl mx-auto bg-gradient-to-b from-secondary via-primary to-secondary ... rounded-xl shadow-md space-x-4">
-        <div className="text-2xl font-extrabold mb-6 font-outfit ml-8">
-          {dataEvents.eventCreateds[0].createdEvent_name}
-        </div>
-        <div className="text-lg w-96 border p-2 font-outfit">
-          {dataEvents.eventCreateds[0].createdEvent_description}
-        </div>
-        <div className="text-lg w-96 border p-2 font-outfit">{dataEvents.eventCreateds[0].createdEvent_location}</div>
-        <div className="flex my-8 justify-center gap-2">
-          <Link href={"/shop/" + id + "/0"} className="btn btn-gradient-primary rounded w-32">
-            Buy ticket
-          </Link>
-          <Link href={"/shop/" + id + "/1"} className="btn btn-gradient-primary rounded w-32">
-            Buy drink/snack
-          </Link>
+      <div className="flex flex-col gap-4 mt-12 p-6 max-w-screen md:max-w-4xl mx-auto bg-gradient-to-b from-secondary via-primary to-secondary ... rounded-xl shadow-md space-x-4">
+        <div className="flex flex-col md:flex-row md:justify-around gap-8">
+          <div className="flex flex-col gap-8 items-center md:mt-8">
+            <div>
+              <img src={dataEvents.eventCreateds[0].createdEvent_logoUrl} height={300} width={300} alt="Logo" />
+            </div>
+            <div className="text-2xl font-extrabold font-poppins">{dataEvents.eventCreateds[0].createdEvent_name}</div>
+            <div className="flex justify-center gap-2">
+              <Link href={"/shop/" + id + "/0"} className="btn btn-gradient-primary rounded w-32">
+                Buy Ticket
+              </Link>
+              <Link href={"/shop/" + id + "/1"} className="btn btn-gradient-primary rounded w-32">
+                Buy Drink/Snack
+              </Link>
+            </div>
+          </div>
+          <div className="flex flex-col md:mt-8 gap-12">
+            <div className="bg-secondary p-4 rounded-xl shadow-xl">
+              <p className="text-xl font-bold font-poppins">About</p>
+              <div className="text-lg">{dataEvents.eventCreateds[0].createdEvent_description}</div>
+            </div>
+            <div className="bg-secondary p-4 rounded-xl shadow-xl">
+              <p className="text-xl font-bold font-poppins">Location</p>
+              <div className="text-lg">{dataEvents.eventCreateds[0].createdEvent_location}</div>
+            </div>
+          </div>
         </div>
       </div>
-      <div className="container mx-auto px-40">
-        <h1 className="text-2xl font-bold my-4 mt-8">Your assets</h1>
-        <div className="grid grid-cols-3 gap-4">
+      <div className="container mx-auto px-11 md:px-20 xl:px-40">
+        <h1 className="text-2xl font-bold my-4 mt-8 font-poppins">Your assets</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {extraDetails.length > 0 ? (
             extraDetails.map((detail, index) => (
               <ExtraCard
@@ -128,7 +139,7 @@ const EditDashboardPage = ({ params }: PageProps) => {
               />
             ))
           ) : (
-            <p className="font-outfit">No extra details available.</p>
+            <p className="font-poppins">No extra details available.</p>
           )}
         </div>
       </div>

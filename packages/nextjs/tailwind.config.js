@@ -53,9 +53,7 @@ module.exports = {
         'blue-pattern': "url('/blue-pattern.png')",
       },
       fontFamily: {
-        cubano: ["cubano", "sans-serif"],
-        outfit: ["Outfit", "cursive"],
-        sans: ["Roboto", "sans-serif"],
+        poppins: ["poppins", "sans-serif"],
       },
       boxShadow: {
         center: "0 0 12px -2px rgb(255 255 255)",

@@ -36,9 +36,9 @@ const AdminDashboard: NextPage = () => {
 
   return (
     <div className="h-[650px] bg-spirals bg-no-repeat">
-      <div className="container mx-auto px-40">
+      <div className="container mx-auto px-11 md:px-20 xl:px-40">
         <h1 className="text-2xl font-bold my-8">Events created by you</h1>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {dataEvents &&
             dataEvents.eventCreateds
               .slice(0, visibleEvents)

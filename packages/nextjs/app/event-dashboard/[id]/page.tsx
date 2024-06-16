@@ -5,6 +5,7 @@ import EventCreation from "../../../../hardhat/artifacts/contracts/EventCreation
 import { useQuery } from "@apollo/client";
 import { useReadContract } from "wagmi";
 import AddExtraModal from "~~/components/AddExtraModal";
+import EventDetails from "~~/components/EventDetails";
 import ExtraCard from "~~/components/ExtraCard";
 import SimpleModal from "~~/components/SimpleModal";
 import useApolloClient from "~~/hooks/chain-of-events/useApolloClient";
@@ -26,6 +27,12 @@ interface ExtraDetail {
   imageUrl: string;
   price: bigint;
   uri: string;
+}
+
+interface SaveDetails {
+  description: string;
+  location: string;
+  numberOfTickets: number;
 }
 
 const EditDashboardPage = ({ params }: PageProps) => {
@@ -130,57 +137,53 @@ const EditDashboardPage = ({ params }: PageProps) => {
 
   return (
     <div className="h-[650px] bg-spirals bg-no-repeat">
-      <div className="flex flex-col gap-4 mt-12 items-center p-6 max-w-2xl mx-auto bg-gradient-to-b from-secondary via-primary to-secondary ... rounded-xl shadow-md space-x-4">
-        <div className="text-2xl font-extrabold mb-6 font-outfit">{eventData.createdEvent_name}</div>
-        <div className="flex">
-          <div className="text-lg w-96 border p-2 font-outfit">{eventData.createdEvent_description}</div>
-          <button
-            className="btn btn-gradient-primary rounded btn-sm ml-8"
-            onClick={() => handleEditClick("createdEvent_description")}
-          >
-            Edit description
-          </button>
-        </div>
-        <div className="flex">
-          <div className="text-lg w-96 border p-2 mr-6 font-outfit">{eventData.createdEvent_location}</div>
-          <button
-            className="btn btn-gradient-primary rounded btn-sm ml-8"
-            onClick={() => handleEditClick("createdEvent_location")}
-          >
-            Edit location
-          </button>
-        </div>
-        <div className="text-lg mt-6 font-outfit">
-          No. of tickets: &nbsp; &nbsp; {eventData.createdEvent_numberOfTickets}
-          <button
-            className="btn btn-gradient-primary rounded btn-sm ml-8 font-sans"
-            onClick={() => handleEditClick("createdEvent_numberOfTickets")}
-          >
-            Edit number of tickets
-          </button>
-        </div>
-        <div className="mt-8">
-          <button className="btn btn-gradient-primary rounded btn-md" onClick={() => handleAddModalOpen(0)}>
-            Add Ticket Type
-          </button>
-        </div>
-        <div>
-          <button className="btn btn-gradient-primary rounded btn-md" onClick={() => handleAddModalOpen(1)}>
-            Add Consumable
-          </button>
-        </div>
-        <div>
-          <button
-            className="btn btn-gradient-primary rounded btn-md"
-            onClick={() => handleEditClick("createdEvent_allowedAddress")}
-          >
-            Add Allowed Address
-          </button>
+      <div className="flex flex-col gap-4 mt-12 p-6 max-w-screen md:max-w-4xl mx-auto bg-gradient-to-b from-secondary via-primary to-secondary ... rounded-xl shadow-md space-x-4">
+        <div className="flex flex-col md:flex-row md:justify-around">
+          <div className="flex flex-col gap-8 items-center md:mt-8">
+            <div>
+              <img src={eventData.createdEvent_logoUrl} height={300} width={300} alt="Logo" />
+            </div>
+            <div className="text-2xl font-extrabold">{eventData.createdEvent_name}</div>
+          </div>
+          <div className="flex flex-col gap-8">
+            <EventDetails
+              initialDescription={eventData.createdEvent_description}
+              initialLocation={eventData.createdEvent_location}
+              initialNumberOfTickets={eventData.createdEvent_numberOfTickets}
+              eventId={id}
+            />
+            <div className="flex flex-col gap-4 items-center">
+              <div>
+                <button
+                  className="btn btn-gradient-primary rounded btn-md w-48 font-poppins"
+                  onClick={() => handleAddModalOpen(0)}
+                >
+                  Add Ticket Type
+                </button>
+              </div>
+              <div>
+                <button
+                  className="btn btn-gradient-primary rounded btn-md w-48 font-poppins"
+                  onClick={() => handleAddModalOpen(1)}
+                >
+                  Add Consumable
+                </button>
+              </div>
+              <div>
+                <button
+                  className="btn btn-gradient-primary rounded btn-md w-48 font-poppins"
+                  onClick={() => handleEditClick("createdEvent_allowedAddress")}
+                >
+                  Add Allowed Address
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div className="container mx-auto px-40 mt-8">
+      <div className="container mx-auto px-11 md:px-20 xl:px-40 mt-8">
         <h1 className="text-2xl font-bold my-4">Ticket types</h1>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {ticketTypes.map((item, index) => (
             <ExtraCard
               extraName={item.name}
@@ -195,9 +198,9 @@ const EditDashboardPage = ({ params }: PageProps) => {
           ))}
         </div>
       </div>
-      <div className="container mx-auto px-40">
+      <div className="container mx-auto px-11 md:px-20 xl:px-40 mt-8">
         <h1 className="text-2xl font-bold my-4">Consumables</h1>
-        <div className="grid grid-cols-3 gap-4 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mt-4">
           {consumables.map((item, index) => (
             <ExtraCard
               extraName={item.name}

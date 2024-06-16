@@ -90,9 +90,9 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
         <div></div>
       )}
       <div className="flex flex-col h-full p-2">
-        <h2 className="text-center font-bold font-outfit">{extraName}</h2>
-        <p className="text-sm font-outfit h-32 overflow-auto">{description}</p>
-        <p className="text-sm text-center font-bold font-outfit">{`$${price?.toFixed(2)}`}</p>
+        <h2 className="text-center font-bold">{extraName}</h2>
+        <p className="text-sm font-poppins h-32 overflow-auto">{description}</p>
+        <p className="text-sm text-center font-bold">{`$${price?.toFixed(2)}`}</p>
         {hasQuantity ? (
           <div className="flex items-center justify-center my-2">
             <button className="btn text-xl" onClick={handleDecrease}>

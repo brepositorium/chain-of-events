@@ -43,7 +43,7 @@ const AddExtraModal: React.FC<AddExtraModalProps> = ({ isOpen, onClose, extraTyp
 
   return (
     <dialog open className="modal" onClose={onClose}>
-      <div className="modal-box bg-base-300">
+      <div className="modal-box bg-base-300 rounded-xl">
         <button type="button" className="btn btn-sm btn-circle absolute right-2 top-2" onClick={onClose}>
           ✕
         </button>

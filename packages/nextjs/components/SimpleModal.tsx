@@ -5,10 +5,7 @@ import useEventCreationAddress from "~~/hooks/chain-of-events/useEventCreationAd
 import {
   addAllowedAddress,
   addApprovedChainlinkContract,
-  changeDescription,
-  changeLocation,
   changeLogo,
-  changeNumberOfTickets,
   scheduleMintLimitUpdate,
   schedulePause,
   schedulePriceUpdate,
@@ -47,33 +44,12 @@ const SimpleModal: React.FC<SimpleModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (fieldName === "description") {
-      try {
-        changeDescription(inputValue, eventId!, eventCreationAddress!);
-        console.log("Succesfully changed description");
-      } catch (e) {
-        console.error("Error changing description:", e);
-      }
-    } else if (fieldName === "location") {
-      try {
-        changeLocation(inputValue, eventId!, eventCreationAddress!);
-        console.log("Succesfully changed location");
-      } catch (e) {
-        console.error("Error changing location:", e);
-      }
-    } else if (fieldName === "logoUrl") {
+    if (fieldName === "logoUrl") {
       try {
         changeLogo(inputValue, eventId!, eventCreationAddress!);
         console.log("Succesfully changed logoUrl");
       } catch (e) {
         console.error("Error changing logoUrl:", e);
-      }
-    } else if (fieldName === "numberOfTickets") {
-      try {
-        changeNumberOfTickets(inputValue, eventId!, eventCreationAddress!);
-        console.log("Succesfully changed numberOfTickets");
-      } catch (e) {
-        console.error("Error changing numberOfTickets:", e);
       }
     } else if (fieldName === "price") {
       try {

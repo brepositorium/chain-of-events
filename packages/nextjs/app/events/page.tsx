@@ -142,10 +142,10 @@ const EventsPage = () => {
 
   return (
     <div className="h-[650px] bg-circles bg-no-repeat">
-      <div className="container mx-auto px-40">
+      <div className="container mx-auto px-11 md:px-20 xl:px-40">
         <div className="flex flex-col justify-between my-8">
           <h1 className="text-2xl font-bold mb-4">Bookmarked events</h1>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {dataEventsDetails && dataEventsDetails.eventCreateds.length > 0 ? (
               dataEventsDetails.eventCreateds.map((event: any) => (
                 <EventCard
@@ -168,14 +168,14 @@ const EventsPage = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-40">
+      <div className="container mx-auto px-11 md:px-20 xl:px-40">
         <div className="flex items-center justify-between mb-4">
           <h1 className="text-2xl font-bold">Find events</h1>
-          <div className="relative w-50">
+          <div className="relative w-50 -mr-2.5 md:mr-2 xl:mr-5">
             <input
               type="text"
               placeholder="Search events"
-              className="input input-md input-bordered w-full bg-base-content rounded-lg text-black pl-10 font-outfit"
+              className="input input-md input-bordered w-full bg-base-content rounded-lg text-black pl-10"
               value={searchTerm}
               onChange={handleSearchChange}
             />
@@ -197,7 +197,7 @@ const EventsPage = () => {
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filteredEvents.map((event: EventDetail) => (
             <EventCard
               key={event.id}
