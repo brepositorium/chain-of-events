@@ -48,12 +48,31 @@ export const AddressInfoDropdown = ({
   return (
     <>
       <details ref={dropdownRef} className="dropdown dropdown-end leading-3">
-        <summary tabIndex={0} className="btn btn-secondary btn-sm pl-0 pr-2 shadow-md dropdown-toggle gap-0 !h-auto">
+        <summary
+          tabIndex={0}
+          style={{
+            background: "transparent",
+            boxSizing: "border-box",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            width: "175px",
+            height: "40px",
+            fontFamily: "Arial, sans-serif",
+            fontWeight: "bold",
+            fontSize: "14px",
+            backgroundColor: "#C9D5FF",
+            paddingLeft: "11px",
+            paddingRight: "11px",
+            borderRadius: "10px",
+            color: "#1A61DB",
+          }}
+        >
           <BlockieAvatar address={checkSumAddress} size={30} ensImage={ensAvatar} />
           <span className="ml-2 mr-1">
             {isENS(displayName) ? displayName : checkSumAddress?.slice(0, 6) + "..." + checkSumAddress?.slice(-4)}
           </span>
-          <ChevronDownIcon className="h-6 w-4 ml-2 sm:ml-0" />
+          <ChevronDownIcon className="text-black h-6 w-4 ml-2 sm:ml-0" />
         </summary>
         <ul
           tabIndex={0}

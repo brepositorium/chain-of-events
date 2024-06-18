@@ -7,7 +7,26 @@ export const WrongNetworkDropdown = () => {
 
   return (
     <div className="dropdown dropdown-end mr-2">
-      <label tabIndex={0} className="btn btn-accent btn-sm dropdown-toggle gap-1 font-poppins">
+      <label
+        tabIndex={0}
+        style={{
+          background: "transparent",
+          boxSizing: "border-box",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "150px",
+          height: "40px",
+          fontFamily: "Arial, sans-serif",
+          fontWeight: "bold",
+          fontSize: "14px",
+          backgroundColor: "#AA3A4B",
+          paddingLeft: "11px",
+          paddingRight: "11px",
+          borderRadius: "10px",
+          color: "#FFFFFF",
+        }}
+      >
         <span>Wrong network</span>
         <ChevronDownIcon className="h-6 w-4 ml-2 sm:ml-0" />
       </label>
@@ -17,11 +36,7 @@ export const WrongNetworkDropdown = () => {
       >
         <NetworkOptions />
         <li>
-          <button
-            className="menu-item text-error btn-sm !rounded-xl flex gap-3 py-3"
-            type="button"
-            onClick={() => disconnect()}
-          >
+          <button className="text-error btn-sm !rounded-xl flex gap-3 py-3" type="button" onClick={() => disconnect()}>
             <ArrowLeftOnRectangleIcon className="h-6 w-4 ml-2 sm:ml-0" />
             <span>Disconnect</span>
           </button>

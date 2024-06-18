@@ -4,6 +4,8 @@ import React, { useCallback, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { BlueCreateWalletButton } from "./scaffold-eth/BlueCreateWalletButton";
+import toast from "react-hot-toast";
 import { Bars3Icon, BugAntIcon } from "@heroicons/react/24/outline";
 import { FaucetButton, RainbowKitCustomConnectButton } from "~~/components/scaffold-eth";
 import { useOutsideClick } from "~~/hooks/scaffold-eth";
@@ -46,8 +48,8 @@ export const HeaderMenuLinks = () => {
               href={href}
               passHref
               className={`${
-                isActive ? "bg-secondary shadow-md " : ""
-              } hover:bg-secondary hover:shadow-md focus:!bg-secondary active:!text-neutral py-1.5 px-3 text-sm rounded-full gap-2 grid grid-flow-col `}
+                isActive ? "border-b-4 border-primary" : "border-b-4 border-transparent"
+              } hover:border-primary focus:border-primary border-2 active:border-neutral py-1.5 px-3 text-sm rounded-xl gap-2 grid grid-flow-col`}
             >
               {icon}
               <span>{label}</span>
@@ -71,7 +73,7 @@ export const Header = () => {
   );
 
   return (
-    <div className="sticky lg:static top-0 navbar bg-transparent min-h-0 flex-shrink-0 justify-between z-20 shadow-md shadow-secondary px-0 sm:px-2">
+    <div className="sticky top-0 navbar bg-base-200 min-h-0 flex-shrink-0 justify-between z-20 shadow-md shadow-secondary px-0 sm:px-2 bg-overlay backdrop-blur">
       <div className="navbar-start w-auto lg:w-1/2">
         <div className="lg:hidden dropdown" ref={burgerMenuRef}>
           <label
@@ -81,7 +83,7 @@ export const Header = () => {
               setIsDrawerOpen(prevIsOpenState => !prevIsOpenState);
             }}
           >
-            <Bars3Icon className="h-1/2" />
+            <Bars3Icon className="h-8" />
           </label>
           {isDrawerOpen && (
             <ul
@@ -96,16 +98,22 @@ export const Header = () => {
           )}
         </div>
         <Link href="/" passHref className="hidden lg:flex items-center gap-2 mt-2 ml-36 mr-6 shrink-0">
-          <div className="flex relative w-40 h-20">
-            <Image alt="CoE logo" className="cursor-pointer" width={180} height={120} src="/logo.png" />
+          <div className="flex relative w-40 h-16">
+            <Image alt="CoE logo" className="cursor-pointer" width={110} height={120} src="/logo.png" />
           </div>
         </Link>
       </div>
-      <div className="navbar-end flex-grow mr-36">
-        <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2">
+      <div className="navbar-end flex-grow mr-2 md:mr-36">
+        <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2 md:mr-24">
           <HeaderMenuLinks />
         </ul>
-        <RainbowKitCustomConnectButton />
+        <div className="flex flex-col items-center md:flex-row gap-1 md:gap-4">
+          <BlueCreateWalletButton
+            handleSuccess={() => toast.success("Wallet created")}
+            handleError={() => console.log("Exited wallet creation")}
+          ></BlueCreateWalletButton>
+          <RainbowKitCustomConnectButton />
+        </div>
       </div>
     </div>
   );

@@ -9,18 +9,18 @@ module.exports = {
     themes: [
       {
         dark: {
-          primary: "#701A7E",
-          "primary-content": "#F9FBFF",
-          secondary: "#1E1A38",
-          "secondary-content": "#F9FBFF",
+          primary: "#1A61DB",
+          "primary-content": "#ffffff",
+          secondary: "##f1f4fe",
+          "secondary-content": "#ffffff",
           accent: "#AA3A4B",
-          "accent-content": "#F9FBFF",
-          neutral: "#F9FBFF",
+          "accent-content": "#737373",
+          neutral: "#737373",
           "neutral-content": "#385183",
           "base-100": "#4E35F6",
-          "base-200": "#1E1A38",
+          "base-200": "#f1f1f1",
           "base-300": "#5295B5",
-          "base-content": "#F9FBFF",
+          "base-content": "#3b3b3b",
           info: "#385183",
           success: "#34EEB6",
           warning: "#FFCF72",
@@ -63,6 +63,10 @@ module.exports = {
       animation: {
         "pulse-fast": "pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
+      backgroundColor: theme => ({
+        ...theme('colors'),
+        'overlay': 'rgba(255, 255, 255, 0.8)',
+      }),
     },
   },
 };
