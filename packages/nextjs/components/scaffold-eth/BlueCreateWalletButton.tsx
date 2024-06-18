@@ -31,7 +31,10 @@ const sdk = new CoinbaseWalletSDK({
   appChainIds: [84532],
 });
 
-const provider = sdk.makeWeb3Provider();
+let provider: any;
+if (typeof window !== "undefined") {
+  const provider = sdk.makeWeb3Provider();
+}
 
 export function BlueCreateWalletButton({ handleSuccess, handleError }: BlueCreateWalletButtonProps) {
   const createWallet = useCallback(async () => {
