@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Card from "./BaseCard";
 import SimpleModal from "./SimpleModal";
+import toast from "react-hot-toast";
 import { useAccount } from "wagmi";
 import { usePriceFeedHandlerAddress } from "~~/hooks/chain-of-events/usePriceFeedHandlerAddress";
 import { ACTIONS } from "~~/utils/chain-of-events/Actions";
@@ -58,15 +59,24 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
     if (address) {
       try {
         await mintNft(extraAddress, address, extraPrice, quantity, priceFeedHandlerAddress!);
+        toast.success("Thank you for your purchase!");
         console.log("Minting successful");
       } catch (e) {
+        toast.error("Could not process sell." + e);
         console.error("Error minting:", e);
       }
     }
   }
 
-  function handleRedeem(): void {
-    redeemExtra(extraAddress!, extraOwner!, BigInt(quantity));
+  async function handleRedeem(): Promise<void> {
+    try {
+      await redeemExtra(extraAddress!, extraOwner!, BigInt(quantity));
+      toast.success("Extra Redeemed Successfully!");
+      console.log("Redeeming successful");
+    } catch (e) {
+      toast.error("Could Not Redeem Extra." + e);
+      console.error("Error redeeming:", e);
+    }
   }
 
   const handleSimpleModalClose = () => {
@@ -77,8 +87,8 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
     <Card
       className={
         extraType === 0
-          ? "w-72 bg-blue-pattern bg-cover bg-no-repeat rounded-lg"
-          : "w-72 bg-green-pattern bg-cover bg-no-repeat rounded-lg"
+          ? "w-72 bg-blue-pattern bg-cover bg-no-repeat rounded-lg text-primary-content"
+          : "w-72 bg-green-pattern bg-cover bg-no-repeat rounded-lg text-primary-content"
       }
     >
       <img src={imageUrl} alt={extraName} className="w-full h-52 object-cover rounded-lg" />
@@ -90,9 +100,9 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
         <div></div>
       )}
       <div className="flex flex-col h-full p-2">
-        <h2 className="text-center font-bold">{extraName}</h2>
+        <h2 className="text-center font-bold text-lg">{extraName}</h2>
         <p className="text-sm font-poppins h-32 overflow-auto">{description}</p>
-        <p className="text-sm text-center font-bold">{`$${price?.toFixed(2)}`}</p>
+        <p className="text-lg text-center font-bold">{`$${price?.toFixed(2)}`}</p>
         {hasQuantity ? (
           <div className="flex items-center justify-center my-2">
             <button className="btn text-xl" onClick={handleDecrease}>
@@ -108,22 +118,22 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
         )}
         <div className="flex flex-wrap justify-evenly mt-4 ">
           {action === ACTIONS.MANAGE && manageUrl ? (
-            <Link href={manageUrl} className={`btn btn-gradient-primary rounded-xl w-36 border-0`}>
+            <Link href={manageUrl} className={`btn btn-primary rounded-xl w-36 border-0`}>
               Manage
             </Link>
           ) : action === ACTIONS.TRANSFER ? (
-            <button className={`btn btn-gradient-primary rounded-xl w-36 border-0`} onClick={handleTransfer}>
+            <button className={`btn btn-primary rounded-xl w-36 border-0`} onClick={handleTransfer}>
               Transfer
             </button>
           ) : action === ACTIONS.BUY ? (
             <button
-              className={`btn btn-gradient-primary rounded-xl w-36 border-0`}
+              className={`btn btn-primary rounded-xl w-36 border-0`}
               onClick={() => handleBuy(extraAddress!, price!, quantity)}
             >
               Buy
             </button>
           ) : action === ACTIONS.REDEEM ? (
-            <button className={`btn btn-gradient-primary rounded-xl w-36 border-0`} onClick={() => handleRedeem()}>
+            <button className={`btn btn-primary rounded-xl w-36 border-0`} onClick={() => handleRedeem()}>
               Redeem
             </button>
           ) : (

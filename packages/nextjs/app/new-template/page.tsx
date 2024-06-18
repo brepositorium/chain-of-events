@@ -35,7 +35,7 @@ const NewTemplatePage = () => {
         </div>
         <div className="">
           <input
-            className="input input-md input-bordered w-80 bg-base-content rounded text-black"
+            className="input input-md input-bordered w-80 bg-secondary-content rounded text-black"
             type="text"
             value={name}
             onChange={e => setName(e.target.value)}
@@ -44,7 +44,7 @@ const NewTemplatePage = () => {
         </div>
         <div className="">
           <textarea
-            className="textarea textarea-bordered w-80 bg-base-content rounded text-black"
+            className="textarea textarea-bordered w-80 bg-secondary-content rounded text-black"
             value={description}
             onChange={e => setDescription(e.target.value)}
             placeholder="Description"
@@ -52,7 +52,7 @@ const NewTemplatePage = () => {
         </div>
         <div className="flex flex-col">
           <input
-            className="input input-md input-bordered w-80 bg-base-content rounded text-black"
+            className="input input-md input-bordered w-80 bg-secondary-content rounded text-black"
             type="text"
             value={linkToRemix}
             onChange={e => setLinkToRemix(e.target.value)}
@@ -61,7 +61,7 @@ const NewTemplatePage = () => {
           {formError && <span className="text-error text-sm">{formError}</span>}
         </div>
         <div className="ml-36">
-          <button type="button" className="btn btn-gradient-primary rounded-xl w-36" onClick={handleSave}>
+          <button type="button" className="btn btn-primary rounded-xl w-36" onClick={handleSave}>
             Save Template
           </button>
         </div>

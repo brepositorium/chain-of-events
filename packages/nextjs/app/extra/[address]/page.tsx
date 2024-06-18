@@ -19,7 +19,7 @@ type PageProps = {
 interface ExtraDetails {
   name: string;
   symbol: string;
-  price: string;
+  price: number;
   extraType: string;
   uri: string;
   description: string;
@@ -43,6 +43,7 @@ const ExtraPage = ({ params }: PageProps) => {
       setIsPaused(status);
       const details = await fetchExtraDetails(address);
       if (details) {
+        details.price = Number(details.price) / 100;
         setExtraDetails(details);
       } else {
         console.error("Failed to fetch extra details");
@@ -90,14 +91,15 @@ const ExtraPage = ({ params }: PageProps) => {
 
   return (
     <div className="h-[650px] bg-spirals bg-no-repeat">
-      <div className="flex flex-col gap-4 mt-12 p-6 max-w-screen md:max-w-4xl mx-auto bg-gradient-to-b from-secondary via-primary to-secondary ... rounded-xl shadow-md space-x-4">
+      <div className="flex flex-col gap-4 mt-12 p-6 max-w-screen md:max-w-4xl mx-auto bg-secondary-content rounded-xl shadow-md space-x-4">
         <div className="flex flex-col md:flex-row md:justify-around">
-          <div className="flex flex-col items-center md:mt-8">
+          <div className="flex flex-col items-center md:mt-8 bg-base-200 p-4 rounded-xl shadow-xl">
             <img src={extraDetails?.imageUrl} alt="Logo" height={300} width={300} />
             <div className="flex flex-col items-center">
               <div>
                 <p className="font-medium font-poppins text-2xl">
-                  {extraDetails?.name} <span className="text-green-500">&nbsp; ${extraDetails?.price.toString()}</span>
+                  {extraDetails?.name}{" "}
+                  <span className="text-green-500">&nbsp; ${`${extraDetails?.price?.toFixed(2)}`}</span>
                 </p>
               </div>
               <div className="flex flex-col items-center">
@@ -110,36 +112,32 @@ const ExtraPage = ({ params }: PageProps) => {
               </div>
             </div>
           </div>
-          <div className="flex flex-col gap-4 items-center mt-8">
+          <div className="flex flex-col gap-4 items-center mt-8 justify-around bg-base-200 p-4 rounded-xl shadow-xl">
             <button
-              className="btn btn-gradient-primary rounded btn-md w-40"
+              className="btn btn-primary rounded btn-md w-40"
               onClick={() => handleEditClick("createdEvent_price")}
             >
-              Change price
+              Change Price
             </button>
             <button
-              className="btn btn-gradient-primary rounded btn-md w-40"
+              className="btn btn-primary rounded btn-md w-40"
               onClick={() => handleEditClick("createdEvent_mintLimit")}
             >
               Change Mint Limit
             </button>
-            <button className="btn btn-gradient-primary rounded btn-md w-40" disabled={isPaused} onClick={handlePause}>
+            <button className="btn btn-primary rounded btn-md w-40" disabled={isPaused} onClick={handlePause}>
               Pause
             </button>
-            <button
-              className="btn btn-gradient-primary rounded btn-md w-40"
-              disabled={!isPaused}
-              onClick={handleUnpause}
-            >
+            <button className="btn btn-primary rounded btn-md w-40" disabled={!isPaused} onClick={handleUnpause}>
               Unpause
             </button>
             <button
-              className="btn btn-gradient-primary rounded btn-md w-40"
+              className="btn btn-primary rounded btn-md w-40"
               onClick={() => handleEditClick("createdEvent_allowedChainlinkContract")}
             >
               Add Approved Chainlink Address
             </button>
-            <button className="btn btn-gradient-primary rounded btn-md w-40" onClick={handleWithdraw}>
+            <button className="btn btn-primary rounded btn-md w-40" onClick={handleWithdraw}>
               Withdraw
             </button>
           </div>

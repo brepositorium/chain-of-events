@@ -78,7 +78,9 @@ const RedeemPage = ({ params }: PageProps) => {
       <QrReader onScanComplete={setQrResult} />
       <div className="h-[650px] bg-circles bg-no-repeat">
         <div className="container mx-auto px-11 md:px-20 xl:px-40">
-          <h2 className="my-4">Wallet address: {extractAddress(qrResult)}</h2>
+          <h2 className="my-4">
+            <span className="font-bold">Wallet address:</span> {extractAddress(qrResult)}
+          </h2>
           <h1 className="text-2xl font-bold my-4">Your assets</h1>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {extraDetails.length > 0 ? (

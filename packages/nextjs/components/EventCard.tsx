@@ -26,7 +26,7 @@ const EventCard: React.FC<EventCardProps> = ({
   actionLabel,
 }) => {
   return (
-    <Card className="w-72 bg-red-pattern bg-cover bg-no-repeat rounded-lg flex flex-col">
+    <Card className="w-72 bg-secondary-content shadow-2xl rounded-xl flex flex-col">
       {logoUrl && <img src={logoUrl} alt={eventName} className="w-full h-48 object-cover rounded-lg" />}
       <div
         className={
@@ -45,12 +45,12 @@ const EventCard: React.FC<EventCardProps> = ({
         {hasBookmark ? (
           <div className="flex gap-2 flex-wrap justify-evenly mt-4 basis-1/5">
             <div className="shadow hover:shadow-xl">
-              <Link href={actionUrl} className="btn btn-gradient-primary rounded-xl w-36 border-0">
+              <Link href={actionUrl} className="btn btn-primary text-secondary-content rounded-xl w-36 border-0">
                 {actionLabel}
               </Link>
             </div>
             <button
-              className={`btn btn-gradient-primary rounded-xl w-36 border-0 shadow hover:shadow-xl`}
+              className={`btn btn-primary text-secondary-content rounded-xl w-36 border-0 shadow hover:shadow-xl`}
               onClick={onToggleBookmark}
             >
               {isBookmarked ? "Unbookmark" : "Bookmark"}
@@ -58,7 +58,7 @@ const EventCard: React.FC<EventCardProps> = ({
           </div>
         ) : (
           <div className="shadow hover:shadow-xl">
-            <Link href={actionUrl} className="btn btn-gradient-primary rounded-xl w-36 border-0">
+            <Link href={actionUrl} className="btn btn-primary text-secondary-content rounded-xl w-36 border-0">
               {actionLabel}
             </Link>
           </div>

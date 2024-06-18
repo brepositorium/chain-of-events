@@ -70,17 +70,17 @@ const EventDetails: React.FC<EventDetailsProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center mt-2">
+    <div className="flex flex-col items-center mt-2 bg-base-200 p-4 rounded-xl shadow-xl">
       <div className="flex flex-col">
         <p className="self-start font-medium font-poppins">Description</p>
         <textarea
           value={description}
           onChange={e => setDescription(e.target.value)}
-          className="textarea textarea-bordered w-80 bg-base-content rounded text-black -mt-3"
+          className="textarea textarea-bordered w-80 bg-secondary-content rounded text-black -mt-3"
         />
         <button
           onClick={() => handleSave("description")}
-          className="btn btn-gradient-primary rounded btn-sm w-20 mt-2"
+          className="btn btn-primary rounded btn-sm w-20 mt-2"
           disabled={!isDescriptionChanged}
         >
           Save
@@ -92,11 +92,11 @@ const EventDetails: React.FC<EventDetailsProps> = ({
           type="text"
           value={location}
           onChange={e => setLocation(e.target.value)}
-          className="input input-md input-bordered w-80 bg-base-content rounded text-black -mt-3"
+          className="input input-md input-bordered w-80 bg-secondary-content rounded text-black -mt-3"
         />
         <button
           onClick={() => handleSave("location")}
-          className="btn btn-gradient-primary rounded btn-sm w-20 mt-2"
+          className="btn btn-primary rounded btn-sm w-20 mt-2"
           disabled={!isLocationChanged}
         >
           Save
@@ -108,11 +108,11 @@ const EventDetails: React.FC<EventDetailsProps> = ({
           type="number"
           value={numberOfTickets}
           onChange={e => setNumberOfTickets(parseInt(e.target.value) || 0)}
-          className="input input-md input-bordered w-80 bg-base-content rounded text-black -mt-3"
+          className="input input-md input-bordered w-80 bg-secondary-content rounded text-black -mt-3"
         />
         <button
           onClick={() => handleSave("numberOfTickets")}
-          className="btn btn-gradient-primary rounded btn-sm w-20 mt-2"
+          className="btn btn-primary rounded btn-sm w-20 mt-2"
           disabled={!isNumberOfTicketsChanged}
         >
           Save

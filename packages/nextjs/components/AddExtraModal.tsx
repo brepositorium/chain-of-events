@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import toast from "react-hot-toast";
 import useContractAddress from "~~/hooks/chain-of-events/useEventCreationAddress";
 import { usePriceFeedHandlerAddress } from "~~/hooks/chain-of-events/usePriceFeedHandlerAddress";
 import { constructExtraUri, deployContract } from "~~/utils/chain-of-events/deployContract";
@@ -17,33 +18,54 @@ const AddExtraModal: React.FC<AddExtraModalProps> = ({ isOpen, onClose, extraTyp
   const [externalUrl, setExternalUrl] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [price, setPrice] = useState<number>();
+  const [loading, setLoading] = useState(false);
 
   const contractAddress = useContractAddress();
   const priceFeedHandlerAddress = usePriceFeedHandlerAddress();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (image && price && contractAddress) {
-      const metadataUri = await constructExtraUri(name, description, externalUrl, price, image);
-      if (metadataUri) {
-        if (extraType === 0) {
-          deployContract(name, symbol, metadataUri, 0, price, contractAddress, BigInt(id), priceFeedHandlerAddress);
-        } else {
-          deployContract(name, symbol, metadataUri, 1, price, contractAddress, BigInt(id), priceFeedHandlerAddress);
-        }
-        console.log("Added:", { name, symbol, description, metadataUri, price });
-      }
-    } else {
-      console.error("Error adding extra");
+    setLoading(true);
+
+    if (!image || !price || !contractAddress) {
+      toast.error("Please provide all required fields.");
+      setLoading(false);
+      return;
     }
-    onClose();
+
+    try {
+      const metadataUri = await toast.promise(constructExtraUri(name, description, externalUrl, price, image), {
+        loading: "👨‍🎨 Pinning to IPFS...",
+        success: "🖼️ Metadata Pinned Successfully!",
+        error: "Failed to construct metadata.",
+      });
+      if (metadataUri) {
+        const deployPromise =
+          extraType === 0
+            ? deployContract(name, symbol, metadataUri, 0, price, contractAddress, BigInt(id), priceFeedHandlerAddress)
+            : deployContract(name, symbol, metadataUri, 1, price, contractAddress, BigInt(id), priceFeedHandlerAddress);
+        console.log("Added:", { name, symbol, description, metadataUri, price });
+        toast
+          .promise(deployPromise!, {
+            loading: "🏗️ Bringing Your Extra Onchain...",
+            success: "🔗 Extra Deployed Successfully!",
+            error: "Failed to Deploy Extra.",
+          })
+          .then(() => onClose());
+      }
+    } catch (error) {
+      toast.error("Failed to prepare metadata or deploy contract.");
+      console.error("Error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!isOpen) return null;
 
   return (
     <dialog open className="modal" onClose={onClose}>
-      <div className="modal-box bg-base-300 rounded-xl">
+      <div className="modal-box bg-base-200 rounded-xl">
         <button type="button" className="btn btn-sm btn-circle absolute right-2 top-2" onClick={onClose}>
           ✕
         </button>
@@ -60,7 +82,7 @@ const AddExtraModal: React.FC<AddExtraModalProps> = ({ isOpen, onClose, extraTyp
               placeholder="Enter name"
               value={name}
               onChange={e => setName(e.target.value)}
-              className="input input-md input-bordered w-80 bg-base-content rounded text-black"
+              className="input input-md input-bordered w-80 bg-secondary-content rounded text-black"
             />
           </div>
           <div className="mt-4 flex flex-col">
@@ -70,7 +92,7 @@ const AddExtraModal: React.FC<AddExtraModalProps> = ({ isOpen, onClose, extraTyp
               placeholder="Enter symbol"
               value={symbol}
               onChange={e => setSymbol(e.target.value)}
-              className="input input-md input-bordered w-80 bg-base-content rounded text-black"
+              className="input input-md input-bordered w-80 bg-secondary-content rounded text-black"
             />
           </div>
           <div className="mt-4 flex flex-col">
@@ -79,7 +101,7 @@ const AddExtraModal: React.FC<AddExtraModalProps> = ({ isOpen, onClose, extraTyp
               placeholder="Enter description"
               value={description}
               onChange={e => setDescription(e.target.value)}
-              className="textarea textarea-bordered w-80 bg-base-content rounded text-black"
+              className="textarea textarea-bordered w-80 bg-secondary-content rounded text-black"
             />
           </div>
           <div className="mt-4 flex flex-col">
@@ -89,7 +111,7 @@ const AddExtraModal: React.FC<AddExtraModalProps> = ({ isOpen, onClose, extraTyp
               placeholder="Enter an URL to your event"
               value={externalUrl}
               onChange={e => setExternalUrl(e.target.value)}
-              className="input input-md input-bordered w-80 bg-base-content rounded text-black"
+              className="input input-md input-bordered w-80 bg-secondary-content rounded text-black"
             />
           </div>
           <div className="mt-4 flex flex-col">
@@ -98,7 +120,7 @@ const AddExtraModal: React.FC<AddExtraModalProps> = ({ isOpen, onClose, extraTyp
               type="file"
               accept="image/*"
               onChange={e => setImage(e.target.files ? e.target.files[0] : null)}
-              className="file-input file-input-bordered w-80 rounded bg-base-content text-black"
+              className="file-input file-input-bordered w-80 rounded bg-secondary-content text-black"
             />
           </div>
           <div className="mt-4 flex flex-col">
@@ -108,11 +130,11 @@ const AddExtraModal: React.FC<AddExtraModalProps> = ({ isOpen, onClose, extraTyp
               placeholder="Enter price in USD"
               value={price}
               onChange={e => setPrice(Number(e.target.value))}
-              className="input input-md input-bordered w-80 bg-base-content rounded text-black"
+              className="input input-md input-bordered w-80 bg-secondary-content rounded text-black"
             />
           </div>
           <div className="mt-8">
-            <button type="submit" className="btn btn-gradient-primary rounded-xl w-24 border-0">
+            <button type="submit" className="btn btn-primary rounded-xl w-24 border-0">
               Add
             </button>
           </div>

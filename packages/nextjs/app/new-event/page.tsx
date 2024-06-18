@@ -100,13 +100,13 @@ const NewEvent: NextPage = () => {
         <div className="mr-28 mt-4 text-xl font-bold justify-center px-4">
           <h1>Create your own event</h1>
         </div>
-        <div className="">
+        <div>
           <input
             type="text"
             placeholder="Name"
             value={name}
             onChange={e => setName(e.target.value)}
-            className="input input-md input-bordered w-80 bg-base-content rounded text-black"
+            className="input input-md input-bordered w-80 bg-secondary-content rounded text-black"
           />
           {formErrors.name && <p className="text-red-500 -mb-2 -mt-0.5">{formErrors.name}</p>}
         </div>
@@ -115,7 +115,7 @@ const NewEvent: NextPage = () => {
             placeholder="Description"
             value={description}
             onChange={e => setDescription(e.target.value)}
-            className="textarea textarea-bordered w-80 bg-base-content rounded text-black"
+            className="textarea textarea-bordered w-80 bg-secondary-content rounded text-black"
           />
           {formErrors.description && <p className="text-red-500 -mb-2 -mt-0.5 w-80">{formErrors.description}</p>}
         </div>
@@ -125,7 +125,7 @@ const NewEvent: NextPage = () => {
             placeholder="Location"
             value={location}
             onChange={e => setLocation(e.target.value)}
-            className="input input-md input-bordered w-80 bg-base-content rounded text-black"
+            className="input input-md input-bordered w-80 bg-secondary-content rounded text-black"
           />
         </div>
         <div className="flex flex-col -mt-6">
@@ -135,7 +135,7 @@ const NewEvent: NextPage = () => {
             placeholder="Number of Tickets"
             value={numberOfTickets}
             onChange={e => setNumberOfTickets(parseInt(e.target.value))}
-            className="input input-md input-bordered w-80 bg-base-content rounded text-black"
+            className="input input-md input-bordered w-80 bg-secondary-content rounded text-black"
           />
           {formErrors.numberOfTickets && <p className="text-red-500 -mb-2 -mt-0.5">{formErrors.numberOfTickets}</p>}
         </div>
@@ -144,17 +144,12 @@ const NewEvent: NextPage = () => {
             type="file"
             accept="image/*"
             onChange={handleImageChange}
-            className="file-input file-input-bordered w-80 rounded bg-base-content text-black"
+            className="file-input file-input-bordered w-80 rounded bg-secondary-content text-black"
           />
           {formErrors.image && <p className="text-red-500 -mb-2 -mt-0.5">{formErrors.image}</p>}
         </div>
         <div className="ml-36">
-          <button
-            type="button"
-            className="btn btn-gradient-primary rounded-xl w-36"
-            onClick={handleSubmit}
-            disabled={loading}
-          >
+          <button type="button" className="btn btn-primary rounded-xl w-36" onClick={handleSubmit} disabled={loading}>
             Create Event
           </button>
         </div>

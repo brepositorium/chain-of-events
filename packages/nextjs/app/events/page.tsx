@@ -52,7 +52,12 @@ const EventsPage = () => {
     client: client,
   });
 
-  if (loading) return <p>Loading...</p>;
+  if (loading)
+    return (
+      <div className="flex items-center justify-center h-[650px]">
+        <div className="loading loading-ring loading-lg"></div>
+      </div>
+    );
   if (error) return <p>Error: {error.message}</p>;
 
   const toggleBookmark = (eventId: number) => {
@@ -144,7 +149,7 @@ const EventsPage = () => {
     <div className="h-[650px] bg-circles bg-no-repeat">
       <div className="container mx-auto px-11 md:px-20 xl:px-40">
         <div className="flex flex-col justify-between my-8">
-          <h1 className="text-2xl font-bold mb-4">Bookmarked events</h1>
+          <h1 className="text-2xl font-bold font-poppins mb-4">Bookmarked Events</h1>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {dataEventsDetails && dataEventsDetails.eventCreateds.length > 0 ? (
               dataEventsDetails.eventCreateds.map((event: any) => (
@@ -215,7 +220,10 @@ const EventsPage = () => {
         </div>
         {data.eventCreateds.length == 3 ? (
           <div className="flex items-center justify-center">
-            <button className="btn btn-sm btn-primary rounded-xl w-36 border-0 my-8" onClick={handleLoadMore}>
+            <button
+              className="btn btn-sm btn-gradient-primary text-secondary-content rounded-xl w-36 border-0 my-8"
+              onClick={handleLoadMore}
+            >
               Load more
             </button>
           </div>

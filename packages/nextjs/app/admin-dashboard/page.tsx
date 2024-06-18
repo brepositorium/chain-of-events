@@ -37,7 +37,7 @@ const AdminDashboard: NextPage = () => {
   return (
     <div className="h-[650px] bg-spirals bg-no-repeat">
       <div className="container mx-auto px-11 md:px-20 xl:px-40">
-        <h1 className="text-2xl font-bold my-8">Events created by you</h1>
+        <h1 className="text-2xl font-bold my-8">Events Created by You</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {dataEvents &&
             dataEvents.eventCreateds
@@ -54,7 +54,10 @@ const AdminDashboard: NextPage = () => {
         </div>
         {visibleEvents < dataEvents.eventCreateds.length && (
           <div className="flex items-center justify-center mr-4">
-            <button className="btn btn-gradient-primary btn-sm rounded-xl mt-4" onClick={loadMoreEvents}>
+            <button
+              className="btn btn-gradient-primary text-secondary-content border-none hover:shadow-2xl btn-sm rounded-xl mt-4"
+              onClick={loadMoreEvents}
+            >
               Load more
             </button>
           </div>

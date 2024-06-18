@@ -93,28 +93,34 @@ const EditDashboardPage = ({ params }: PageProps) => {
 
   return (
     <div className="h-[650px] bg-circles bg-no-repeat">
-      <div className="flex flex-col gap-4 mt-12 p-6 max-w-screen md:max-w-4xl mx-auto bg-gradient-to-b from-secondary via-primary to-secondary ... rounded-xl shadow-md space-x-4">
+      <div className="flex flex-col gap-4 mt-12 p-6 max-w-screen md:max-w-4xl mx-auto bg-secondary-content rounded-xl shadow-md space-x-4">
         <div className="flex flex-col md:flex-row md:justify-around gap-8">
-          <div className="flex flex-col gap-8 items-center md:mt-8">
+          <div className="flex flex-col gap-8 items-center md:mt-8 bg-base-200 p-4 rounded-xl shadow-xl">
             <div>
-              <img src={dataEvents.eventCreateds[0].createdEvent_logoUrl} height={300} width={300} alt="Logo" />
+              <img
+                src={dataEvents.eventCreateds[0].createdEvent_logoUrl}
+                height={300}
+                width={300}
+                alt="Logo"
+                className="rounded-xl"
+              />
             </div>
-            <div className="text-2xl font-extrabold font-poppins">{dataEvents.eventCreateds[0].createdEvent_name}</div>
+            <div className="text-2xl font-extrabold">{dataEvents.eventCreateds[0].createdEvent_name}</div>
             <div className="flex justify-center gap-2">
-              <Link href={"/shop/" + id + "/0"} className="btn btn-gradient-primary rounded w-32">
+              <Link href={"/shop/" + id + "/0"} className="btn btn-primary rounded w-32">
                 Buy Ticket
               </Link>
-              <Link href={"/shop/" + id + "/1"} className="btn btn-gradient-primary rounded w-32">
+              <Link href={"/shop/" + id + "/1"} className="btn btn-primary rounded w-32">
                 Buy Drink/Snack
               </Link>
             </div>
           </div>
           <div className="flex flex-col md:mt-8 gap-12">
-            <div className="bg-secondary p-4 rounded-xl shadow-xl">
+            <div className="bg-base-200 p-4 rounded-xl shadow-xl">
               <p className="text-xl font-bold font-poppins">About</p>
               <div className="text-lg">{dataEvents.eventCreateds[0].createdEvent_description}</div>
             </div>
-            <div className="bg-secondary p-4 rounded-xl shadow-xl">
+            <div className="bg-base-200 p-4 rounded-xl shadow-xl">
               <p className="text-xl font-bold font-poppins">Location</p>
               <div className="text-lg">{dataEvents.eventCreateds[0].createdEvent_location}</div>
             </div>

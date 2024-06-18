@@ -15,10 +15,10 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({ isOpen, onClose, 
       <div className="modal-box bg-base-300 rounded-xl" onClick={e => e.stopPropagation()}>
         <h3 className="font-bold text-lg">{children}</h3>
         <div className="modal-action">
-          <button className="btn btn-gradient-primary rounded btn-md w-28 mt-2" onClick={onConfirm}>
+          <button className="btn btn-primary rounded btn-md w-28 mt-2" onClick={onConfirm}>
             Confirm
           </button>
-          <button className="btn btn-outline rounded btn-md w-28 mt-2" onClick={onClose}>
+          <button className="btn rounded btn-md w-28 mt-2" onClick={onClose}>
             Cancel
           </button>
         </div>

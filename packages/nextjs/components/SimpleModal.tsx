@@ -1,6 +1,7 @@
 // components/SimpleModal.tsx
 import React, { useState } from "react";
 import moment from "moment-timezone";
+import toast from "react-hot-toast";
 import useEventCreationAddress from "~~/hooks/chain-of-events/useEventCreationAddress";
 import {
   addAllowedAddress,
@@ -46,61 +47,97 @@ const SimpleModal: React.FC<SimpleModalProps> = ({
 
     if (fieldName === "logoUrl") {
       try {
-        changeLogo(inputValue, eventId!, eventCreationAddress!);
+        await changeLogo(inputValue, eventId!, eventCreationAddress!);
+        toast.success("Succesfully Changed Logo");
         console.log("Succesfully changed logoUrl");
       } catch (e) {
+        toast.error("Error Changing Logo." + e);
         console.error("Error changing logoUrl:", e);
       }
     } else if (fieldName === "price") {
       try {
-        updatePrice(extraAddress!, Number(inputValue));
+        await updatePrice(extraAddress!, Number(inputValue));
+        toast.success("Succesfully Changed Price");
         console.log("Succesfully changed price");
       } catch (e) {
+        toast.error("Error Changing Price." + e);
         console.error("Error changing price:", e);
       }
     } else if (fieldName === "mintLimit") {
       try {
-        updateMintLimit(extraAddress!, Number(inputValue));
+        await updateMintLimit(extraAddress!, Number(inputValue));
+        toast.success("Succesfully Changed Mint Limit");
         console.log("Succesfully changed mint limit");
       } catch (e) {
+        toast.error("Error Changing Mint Limit." + e);
         console.error("Error changing mint limit:", e);
       }
     } else if (fieldName === "transfer") {
       try {
         if (quantity! > 0) {
-          console.log("Transfer extra function called");
-          transferExtra(extraAddress!, inputValue, BigInt(quantity!));
+          await transferExtra(extraAddress!, inputValue, BigInt(quantity!));
+          toast.success("Succesfully Transfered Asset");
+          console.log("Succesfully Transfered Asset");
         } else {
+          toast.error("Quantity needs to be bigger than 0");
           console.error("Quantity needs to be bigger than 0");
         }
       } catch (e) {
+        toast.error("Error Transfering Asset." + e);
         console.error("Error sending extra:", e);
       }
     } else if (fieldName === "allowedAddress") {
       try {
-        addAllowedAddress(inputValue, eventId!, eventCreationAddress!);
+        await addAllowedAddress(inputValue, eventId!, eventCreationAddress!);
+        toast.success("Succesfully Added Allowed Address");
+        console.log("Succesfully Added Allowed Address");
       } catch (e) {
-        console.error("Error sending extra:", e);
+        toast.error("Error Adding Allowed Address." + e);
+        console.error("Error Adding Allowed Address:", e);
       }
     } else if (fieldName === "allowedChainlinkContract") {
       try {
-        addApprovedChainlinkContract(inputValue, extraAddress!);
+        await addApprovedChainlinkContract(inputValue, extraAddress!);
+        toast.success("Succesfully Added Approved Chainlink Contract Address");
+        console.log("Succesfully Added Approved Chainlink Contract Address");
       } catch (e) {
-        console.error("Error sending extra:", e);
+        toast.error("Error Adding Approved Chainlink Contract Address." + e);
+        console.error("Error Adding Approved Chainlink Contract Address:", e);
       }
     } else if (fieldName.includes("schedule")) {
       const datetime = `${date} ${time}`;
       const calculatedTimestamp = moment.tz(datetime, timezone).unix();
       setTimestamp(calculatedTimestamp);
       if (fieldName === "schedulePrice") {
-        console.log(chainlinkContractAddress);
-        schedulePriceUpdate(chainlinkContractAddress!, Number(inputValue) * 100, calculatedTimestamp);
+        try {
+          await schedulePriceUpdate(chainlinkContractAddress!, Number(inputValue) * 100, calculatedTimestamp);
+          toast.success("Succesfully Scheduled Price Update");
+          console.log("Succesfully Scheduled Price Update");
+        } catch (e) {
+          toast.error("Error Scheduling Price Update." + e);
+          console.error("Error Scheduling Price Update:", e);
+        }
       } else if (fieldName === "scheduleMintLimit") {
-        scheduleMintLimitUpdate(chainlinkContractAddress!, Number(inputValue) * 100, calculatedTimestamp);
+        try {
+          await scheduleMintLimitUpdate(chainlinkContractAddress!, Number(inputValue) * 100, calculatedTimestamp);
+          toast.success("Succesfully Scheduled Mint Limit Update");
+          console.log("Succesfully Scheduled Mint Limit Update");
+        } catch (e) {
+          toast.error("Error Scheduling Mint Limit Update." + e);
+          console.error("Error Scheduling Mint Limit Update:", e);
+        }
       } else if (fieldName === "schedulePause") {
-        schedulePause(chainlinkContractAddress!, calculatedTimestamp);
+        try {
+          await schedulePause(chainlinkContractAddress!, calculatedTimestamp);
+          toast.success("Succesfully Scheduled Pause");
+          console.log("Succesfully Scheduled Pause");
+        } catch (e) {
+          toast.error("Error Scheduling Pause." + e);
+          console.error("Error Scheduling Pause:", e);
+        }
       }
     } else {
+      toast.error("Error");
       console.log("Wrong fieldName");
     }
 
@@ -112,7 +149,7 @@ const SimpleModal: React.FC<SimpleModalProps> = ({
 
   return (
     <dialog open className="modal" onClose={onClose}>
-      <div className="modal-box bg-base-300">
+      <div className="modal-box bg-base-200">
         <button
           type="button"
           className="btn btn-sm btn-circle absolute right-2 top-2"
@@ -147,7 +184,7 @@ const SimpleModal: React.FC<SimpleModalProps> = ({
                   placeholder={"New value"}
                   value={inputValue}
                   onChange={e => setInputValue(e.target.value)}
-                  className="input input-md input-bordered w-80 bg-base-content rounded text-black"
+                  className="input input-md input-bordered w-80 bg-secondary-content rounded text-black"
                 />
               ) : (
                 <></>
@@ -156,18 +193,18 @@ const SimpleModal: React.FC<SimpleModalProps> = ({
                 type="date"
                 value={date}
                 onChange={e => setDate(e.target.value)}
-                className="input input-md input-bordered w-80 bg-base-content rounded text-black"
+                className="input input-md input-bordered w-80 bg-secondary-content rounded text-black"
               />
               <input
                 type="time"
                 value={time}
                 onChange={e => setTime(e.target.value)}
-                className="input input-md input-bordered w-80 bg-base-content rounded text-black"
+                className="input input-md input-bordered w-80 bg-secondary-content rounded text-black"
               />
               <select
                 value={timezone}
                 onChange={e => setTimezone(e.target.value)}
-                className="select bg-base-content text-black rounded w-80 select-bordered"
+                className="select bg-secondary-content text-black rounded w-80 select-bordered"
               >
                 {moment.tz.names().map(tz => (
                   <option key={tz} value={tz}>
@@ -177,7 +214,7 @@ const SimpleModal: React.FC<SimpleModalProps> = ({
               </select>
             </div>
           ) : (
-            <div className="mt-8">
+            <div className="mt-4">
               <input
                 type={
                   fieldName === "numberOfTickets" ||
@@ -206,12 +243,12 @@ const SimpleModal: React.FC<SimpleModalProps> = ({
                 }
                 value={inputValue}
                 onChange={e => setInputValue(e.target.value)}
-                className="input input-md input-bordered w-80 bg-base-content rounded text-black"
+                className="input input-md input-bordered w-80 bg-secondary-content rounded text-black"
               />
             </div>
           )}
           <div className="mt-4">
-            <button type="submit" className="btn btn-gradient-primary rounded-xl w-18 border-0">
+            <button type="submit" className="btn btn-primary rounded-xl w-18 border-0">
               {fieldName === "transfer" ? "Send" : "Save"}
             </button>
           </div>

@@ -1,43 +1,47 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import type { NextPage } from "next";
 import { TypeAnimation } from "react-type-animation";
 
 const Home: NextPage = () => {
   return (
-    <div className="flex flex-col h-screen justify-start items-center gap-8 bg-hero-pattern bg-cover">
-      <div className="mt-40">
-        <span className="font-black font-poppins text-4xl">BRING </span>
-        <TypeAnimation
-          sequence={["ANY EVENT", 1000, "YOUR MUSIC FESTIVAL", 1000, "YOUR SPORT EVENT", 1000, "YOUR CONFERENCE", 1000]}
-          wrapper="span"
-          speed={20}
-          className="font-black font-poppins text-4xl"
-          repeat={Infinity}
-        />
-        <span className="font-black font-poppins text-4xl"> ONCHAIN</span>
+    <>
+      <div className="flex items-center h-screen bg-base-200 lg:-mt-20">
+        <div className="flex flex-col lg:flex-row lg:justify-around">
+          <div className="flex flex-col items-center max-w-xl mt-20 md:ml-32 gap-4">
+            <span className="font-black font-poppins text-4xl md:ml-28">
+              BRING YOUR &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+            </span>
+            <TypeAnimation
+              sequence={["EVENT", 1000, "MUSIC FESTIVAL", 1000, "SPORT EVENT", 1000, "CONFERENCE", 1000]}
+              wrapper="span"
+              speed={20}
+              className="font-black font-poppins text-4xl"
+              repeat={Infinity}
+            />
+            <span className="font-black font-poppins text-4xl"> ONCHAIN</span>
+            <div className="flex flex-col lg:flex-row justify-around lg:gap-20 lg:mr-14 items-center">
+              <p className="font-bold font-poppins text-2xl">NO COSTS</p>
+              <p className="font-bold font-poppins text-2xl">TRANSPARENT</p>
+              <p className="font-bold font-poppins text-2xl">EASY</p>
+            </div>
+            <Link href="/new-event">
+              <button className="btn btn-primary text-secondary-content text-lg font-poppins rounded-xl w-44 border shadow hover:shadow-white">
+                Create Event
+              </button>
+            </Link>
+            <Link href="/events">
+              <button className="btn btn-transparent rounded-xl w-44 text-lg border font-poppins border-black shadow hover:shadow-white">
+                Find Events
+              </button>
+            </Link>
+          </div>
+          <Image src="/hero.png" alt="Hero" height={600} width={600} />
+        </div>
       </div>
-      <div className="flex justify-around gap-20 mr-12">
-        <p className="font-bold font-poppins text-2xl">LOW-COST</p>
-        <p className="font-bold font-poppins text-2xl">TRANSPARENT</p>
-        <p className="font-bold font-poppins text-2xl">SIMPLE</p>
-      </div>
-      <Link href="/new-event">
-        <button className="btn btn-gradient-primary rounded w-44 border shadow hover:shadow-white">Create Event</button>
-      </Link>
-      <Link href="/events">
-        <button className="btn btn-secondary rounded w-44 border shadow hover:shadow-white">Find events</button>
-      </Link>
-      <div className="flex flex-col mt-8 justify-center max-w-lg">
-        <p className="font-black text-4xl">How it works</p>
-        <p>
-          Chain of Events makes organizing and going to events easier, transparent and more fun. Our platform uses
-          blockchain technology to enhance the overall experience, ensuring security, flexibility, and endless
-          possibilities for customization through innovative use of Chainlink products.
-        </p>
-      </div>
-    </div>
+    </>
   );
 };
 

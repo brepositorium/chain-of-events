@@ -125,19 +125,19 @@ const ExtraTemplates: React.FC<ExtraTemplatesProps> = ({ extraAddress }) => {
           value={newTemplateId}
           onChange={e => setNewTemplateId(e.target.value)}
         />
-        <button className="btn btn-gradient-primary rounded btn-sm" onClick={handleAddTemplate}>
+        <button className="btn btn-primary rounded btn-sm" onClick={handleAddTemplate}>
           Add Template
         </button>
       </div>
       <h1 className="text-lg font-bold text-center md:text-left md:ml-20">Added templates</h1>
       <ul>
         {templates.map(template => (
-          <li className="shadow-3xl p-4 mt-2" key={template.key}>
+          <li className="shadow-3xl p-4 mt-2 bg-base-200 rounded-xl " key={template.key}>
             <div className="flex flex-col md:flex-row items-center md:ml-8 mt-2 justify-between">
               <span className="font-bold">Template ID:</span> <span>{template.templateId}</span>
               <Link
                 href={template.linkToRemix || "#"}
-                className="btn btn-gradient-primary rounded btn-sm w-32 md:mr-8"
+                className="btn btn-primary rounded btn-sm w-32 md:mr-8"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -175,10 +175,7 @@ const ExtraTemplates: React.FC<ExtraTemplatesProps> = ({ extraAddress }) => {
                   value={newAddresses[template.key] || ""}
                   onChange={e => handleAddressChange(template.key, e.target.value)}
                 />
-                <button
-                  className="btn btn-gradient-primary rounded btn-sm"
-                  onClick={() => handleAddAddress(template.key)}
-                >
+                <button className="btn btn-primary rounded btn-sm" onClick={() => handleAddAddress(template.key)}>
                   Add Address
                 </button>
               </div>

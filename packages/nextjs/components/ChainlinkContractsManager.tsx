@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { get, ref, runTransaction } from "firebase/database";
+import toast from "react-hot-toast";
 import { useChainId } from "wagmi";
 import { AUTOMATION_UPDATE_TYPES } from "~~/utils/chain-of-events/AutomationUpdateTypes";
 import {
@@ -74,7 +75,11 @@ const ChainlinkContractManager = ({
         return;
     }
 
-    const chainlinkContractAddress = await deployContractForType(extraAddress, updateType, chainId);
+    const chainlinkContractAddress = await toast.promise(deployContractForType(extraAddress, updateType, chainId), {
+      loading: "Deploying Chainlink Contract...",
+      success: "Chainlink Contract Deployed Successfully!",
+      error: "Could Not Deploy Chainlink Contract",
+    });
     setContractAddress(chainlinkContractAddress);
     setButtonState(statusUpdate);
     saveOrUpdateContractDetails(
@@ -121,7 +126,11 @@ const ChainlinkContractManager = ({
         return;
     }
 
-    await registerUpkeepForType(contractAddress, `${updateType}Automation` + extraAddress, updateType);
+    await toast.promise(registerUpkeepForType(contractAddress, `${updateType}Automation` + extraAddress, updateType), {
+      loading: "Registering Upkeep...",
+      success: "Upkeep Registeres Successfully!",
+      error: "Could Not Register Upkeep",
+    });
 
     setButtonState(statusUpdate);
     saveOrUpdateContractDetails(extraAddress, contractAddress, `${updateType}Automation` + extraAddress, statusUpdate);
@@ -283,21 +292,21 @@ const ChainlinkContractManager = ({
 
       {/* Deploy Contract Button */}
       {buttonState === getInitialButtonState(updateType) && (
-        <button className="btn btn-gradient-primary rounded btn-md w-48 mt-6 mb-4" onClick={deployContract}>
+        <button className="btn btn-primary rounded btn-md w-60 mt-6 mb-4" onClick={deployContract}>
           Deploy {updateType.charAt(0).toUpperCase() + updateType.slice(1)} Contract
         </button>
       )}
 
       {/* Fund Contract Button */}
       {buttonState === getFundState(updateType) && (
-        <button className="btn btn-gradient-primary rounded btn-md w-48 mt-6 mb-4" onClick={fundContract}>
+        <button className="btn btn-primary rounded btn-md w-60 mt-6 mb-4" onClick={fundContract}>
           I have funded the {updateType.charAt(0).toUpperCase() + updateType.slice(1)} Contract
         </button>
       )}
 
       {/* Register Upkeep Button */}
       {buttonState === getRegisterUpkeepState(updateType) && (
-        <button className="btn btn-gradient-primary rounded btn-md w-48 mt-6 mb-4" onClick={registerUpkeep}>
+        <button className="btn btn-primary rounded btn-md w-60 mt-6 mb-4" onClick={registerUpkeep}>
           Register upkeep for {updateType.charAt(0).toUpperCase() + updateType.slice(1)}
         </button>
       )}
@@ -305,7 +314,7 @@ const ChainlinkContractManager = ({
       {/* Schedule Update Button */}
       {buttonState === getScheduleState(updateType) && (
         <button
-          className="btn btn-gradient-primary rounded btn-md w-48 mt-6 mb-4"
+          className="btn btn-primary rounded btn-md w-60 mt-6 mb-4"
           onClick={() => {
             onScheduleButtonClick("schedule" + updateType, contractAddress);
           }}

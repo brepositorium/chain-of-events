@@ -137,11 +137,11 @@ const EditDashboardPage = ({ params }: PageProps) => {
 
   return (
     <div className="h-[650px] bg-spirals bg-no-repeat">
-      <div className="flex flex-col gap-4 mt-12 p-6 max-w-screen md:max-w-4xl mx-auto bg-gradient-to-b from-secondary via-primary to-secondary ... rounded-xl shadow-md space-x-4">
+      <div className="flex flex-col gap-4 mt-12 p-6 max-w-screen md:max-w-4xl mx-auto bg-secondary-content rounded-xl shadow-md space-x-4">
         <div className="flex flex-col md:flex-row md:justify-around">
-          <div className="flex flex-col gap-8 items-center md:mt-8">
+          <div className="flex flex-col gap-8 items-center md:mt-8 ">
             <div>
-              <img src={eventData.createdEvent_logoUrl} height={300} width={300} alt="Logo" />
+              <img src={eventData.createdEvent_logoUrl} height={300} width={300} alt="Logo" className="rounded-xl" />
             </div>
             <div className="text-2xl font-extrabold">{eventData.createdEvent_name}</div>
           </div>
@@ -152,26 +152,35 @@ const EditDashboardPage = ({ params }: PageProps) => {
               initialNumberOfTickets={eventData.createdEvent_numberOfTickets}
               eventId={id}
             />
-            <div className="flex flex-col gap-4 items-center">
-              <div>
+            <div className="flex flex-col gap-4 items-center bg-base-200 p-4 rounded-xl shadow-xl">
+              <div
+                className="tooltip tooltip-secondary"
+                data-tip="Here you can add a new Ticket Type. It will deploy a new contract for your ticket."
+              >
                 <button
-                  className="btn btn-gradient-primary rounded btn-md w-48 font-poppins"
+                  className="btn btn-primary rounded btn-md w-48 font-poppins"
                   onClick={() => handleAddModalOpen(0)}
                 >
                   Add Ticket Type
                 </button>
               </div>
-              <div>
+              <div
+                className="tooltip tooltip-secondary"
+                data-tip="Here you can add a new Consumable. This could represent a drink, a snack or anything else that you would need for your event. It will deploy a new contract for your consumable."
+              >
                 <button
-                  className="btn btn-gradient-primary rounded btn-md w-48 font-poppins"
+                  className="btn btn-primary rounded btn-md w-48 font-poppins"
                   onClick={() => handleAddModalOpen(1)}
                 >
                   Add Consumable
                 </button>
               </div>
-              <div>
+              <div
+                className="tooltip tooltip-secondary"
+                data-tip="Here you can add a new Allowed Address. An Allowed Address can Redeem attendee's tickets or consumables. They could be bartenders, security or anybody you trust with those rights."
+              >
                 <button
-                  className="btn btn-gradient-primary rounded btn-md w-48 font-poppins"
+                  className="btn btn-primary rounded btn-md w-48 font-poppins"
                   onClick={() => handleEditClick("createdEvent_allowedAddress")}
                 >
                   Add Allowed Address
@@ -182,7 +191,7 @@ const EditDashboardPage = ({ params }: PageProps) => {
         </div>
       </div>
       <div className="container mx-auto px-11 md:px-20 xl:px-40 mt-8">
-        <h1 className="text-2xl font-bold my-4">Ticket types</h1>
+        <h1 className="text-2xl font-bold my-4">Ticket Types</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {ticketTypes.map((item, index) => (
             <ExtraCard
