@@ -110,7 +110,7 @@ export const Header = () => {
         <div className="flex flex-col items-center md:flex-row gap-1 md:gap-4">
           <BlueCreateWalletButton
             handleSuccess={() => toast.success("Wallet created")}
-            handleError={() => console.log("Exited wallet creation")}
+            handleError={(error: any) => console.log("Exited wallet creation." + error)}
           ></BlueCreateWalletButton>
           <RainbowKitCustomConnectButton />
         </div>
