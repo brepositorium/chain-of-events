@@ -16,6 +16,8 @@ contract EventCreation {
 		string logoUrl;
 		address admin;
 		uint256 numberOfTickets;
+		uint256 startTime;
+		uint256 endTime;
 		bool isActive;
 	}
 
@@ -41,6 +43,9 @@ contract EventCreation {
 	mapping(uint256 => mapping(address => bool)) public allowedList;
 
 	mapping(uint256 => uint256) public mintedTickets;
+
+	//key is the id of the event and value is another mapping where key is the participant's address and the value is an array of his/her redeemed tickets
+	mapping(uint256 => mapping(address => address[])) public participantsWithTickets;
 
 	uint256 public eventCounter;
 
@@ -70,7 +75,9 @@ contract EventCreation {
 		string calldata description,
 		string calldata location,
 		string calldata logoUrl,
-		uint256 numberOfTickets
+		uint256 numberOfTickets,
+		uint256 startTime,
+		uint256 endTime
 	) public {
 		uint256 eventId = eventCounter++;
 		events[eventId] = Event(
@@ -81,6 +88,8 @@ contract EventCreation {
 			logoUrl,
 			msg.sender,
 			numberOfTickets,
+			startTime,
+			endTime,
 			true
 		);
 		emit EventCreated(events[eventId]);
@@ -96,6 +105,10 @@ contract EventCreation {
 		address caller
 	) public isCallerAdmin(eventId, caller) {
 		extras[eventId].push(deployedExtraAddress);
+	}
+
+	function addParticipantWithTicket(uint256 eventId, address participant, address ticket) public {
+		participantsWithTickets[eventId][participant].push(ticket);
 	}
 
 	/// @notice Allows an address to redeem tickets for an event
@@ -172,6 +185,10 @@ contract EventCreation {
 
 	function getExtras(uint256 eventId) public view returns (address[] memory) {
 		return extras[eventId];
+	}
+
+	function getAdmin(uint256 eventId) public view returns (address) {
+		return events[eventId].admin;
 	}
 
 	function isAllowed(
