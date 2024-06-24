@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+import "./BundleDiscounts.sol";
+import "./ExtraNft.sol";
+
 error NotTheAdmin(uint256 eventId);
+error NotFromExtraContract(uint256 eventId);
+error NotFromBundleContractOfAdmin(uint256 eventId);
 
 /// @title Event Creation and Management for Chain of Events Platform
 /// @author radub.xyz
@@ -38,14 +43,29 @@ contract EventCreation {
 	/// @dev Maps event IDs to their corresponding arrays of extra addresses
 	mapping(uint256 => address[]) public extras;
 
+	/// @dev Maps event IDs to mappings of extra addresses to their inclusion status, ensuring only valid extras are considered for each event.
+	mapping(uint256 => mapping(address => bool)) extrasMapping;
+
 	/// @notice Check if a specific address is allowed to redeem tickets for a particular event
 	/// @dev Maps event IDs to a mapping of addresses allowed to redeem tickets
 	mapping(uint256 => mapping(address => bool)) public allowedList;
 
 	mapping(uint256 => uint256) public mintedTickets;
 
-	//key is the id of the event and value is another mapping where key is the participant's address and the value is an array of his/her redeemed tickets
-	mapping(uint256 => mapping(address => address[])) public participantsWithTickets;
+	/// @notice Retrieves the list of bundle contract addresses associated with an event
+	/// @dev Maps event IDs to arrays of bundle contract addresses
+	mapping(uint256 => address[]) public bundles;
+
+	/// @dev Maps event IDs to mappings of bundle addresses to their inclusion status, ensuring only valid bundles are considered for each event.
+	mapping(uint256 => mapping(address => bool)) public bundlesMapping;
+
+	/// @notice Retrieves the list of participant addresses for each event
+	/// @dev Maps event IDs to arrays of participant addresses who have redeemed tickets
+	mapping(uint256 => address[]) public participants;
+
+	/// @notice Retrieves the list of tickets redeemed by a participant
+	/// @dev Maps participant addresses to arrays of redeemed ticket addresses
+	mapping(address => address[]) public participantsTickets;
 
 	uint256 public eventCounter;
 
@@ -56,20 +76,22 @@ contract EventCreation {
 		_;
 	}
 
-	modifier isCallerAdmin(uint256 eventId, address caller) {
-		if (events[eventId].admin != caller) {
-			revert NotTheAdmin(eventId);
+	modifier isCallFromExtraContract(uint256 eventId) {
+		if (extrasMapping[eventId][msg.sender] == false) {
+			revert NotFromExtraContract(eventId);
 		}
 		_;
 	}
 
-	/// @notice Creates a new event with given details
-	/// @dev Emits an EventCreated event upon success
+	/// @notice Creates a new event with specified details and registers it on the blockchain
+	/// @dev Emits an EventCreated event upon successful creation
 	/// @param name Name of the event
 	/// @param description Description of the event
-	/// @param location Location of the event
+	/// @param location Location of the event as coordinates
 	/// @param logoUrl URL of the event's logo
 	/// @param numberOfTickets Total number of tickets available for the event
+	/// @param startTime Start time of the event as a Unix timestamp
+	/// @param endTime End time of the event as a Unix timestamp
 	function createEvent(
 		string calldata name,
 		string calldata description,
@@ -98,17 +120,89 @@ contract EventCreation {
 	/// @notice Adds an extra address for a specific event
 	/// @param deployedExtraAddress The contract address of the deployed extra (e.g., tickets, VIP passes)
 	/// @param eventId The ID of the event
-	/// @param caller The address attempting to add the extra
 	function addExtra(
 		address deployedExtraAddress,
-		uint256 eventId,
-		address caller
-	) public isCallerAdmin(eventId, caller) {
+		uint256 eventId
+	) private isSenderAdmin(eventId){
 		extras[eventId].push(deployedExtraAddress);
+		extrasMapping[eventId][deployedExtraAddress] = true;
 	}
 
-	function addParticipantWithTicket(uint256 eventId, address participant, address ticket) public {
-		participantsWithTickets[eventId][participant].push(ticket);
+	/// @notice Adds a bundle contract to the specified event
+	/// @dev Adds the contract address to the bundles array and sets its mapping status to true
+	/// @param deployedBundleAddress The contract address of the deployed bundle
+	/// @param eventId The ID of the event to associate with the bundle
+	function addBundleContract(
+		address deployedBundleAddress,
+		uint256 eventId
+	) private isSenderAdmin(eventId){
+		bundles[eventId].push(deployedBundleAddress);
+		bundlesMapping[eventId][deployedBundleAddress] = true;
+	}
+
+	/// @notice Creates a new bundle discount contract and registers it for the specified event
+	/// @dev Deploys a new BundleDiscounts contract and registers it using addBundleContract
+	/// @param _price Discount price for the bundle
+	/// @param _eventId ID of the event the bundle is associated with
+	/// @param _priceFeedHandlerAddress Address of the price feed handler for real-time pricing
+	function createAndRegisterBundle(
+        uint256 _price,
+        uint256 _eventId,
+        address _priceFeedHandlerAddress
+    ) public isSenderAdmin(_eventId) {
+        BundleDiscounts newBundleDiscount = new BundleDiscounts(
+		address(this),
+		_priceFeedHandlerAddress,
+		_eventId,
+		_price
+        );
+        addBundleContract(address(newBundleDiscount), _eventId);
+    }
+
+	/// @notice Creates a new ExtraNFT contract and registers it for the specified event
+	/// @dev Deploys a new ExtraNft contract, sets the caller as the owner, and registers it using addExtra
+	/// @param name Name of the extra
+	/// @param symbol Symbol of the extra NFT
+	/// @param uri URI for the extra's metadata
+	/// @param extraType Type identifier for the extra
+	/// @param price Price of the extra
+	/// @param eventId ID of the event the extra is associated with
+	/// @param priceFeedHandlerAddress Address of the price feed handler for real-time pricing
+	function createAndRegisterExtra(
+        string memory name,
+        string memory symbol,
+        string memory uri,
+        uint256 extraType,
+        uint256 price,
+        uint256 eventId,
+        address priceFeedHandlerAddress
+    ) public isSenderAdmin(eventId) {
+        ExtraNft newExtra = new ExtraNft(
+		name,
+		symbol,
+		uri,
+		extraType,
+		price,
+		address(this),
+		eventId,
+		priceFeedHandlerAddress
+        );
+		newExtra.transferOwnership(msg.sender);
+        addExtra(address(newExtra), eventId);
+    }
+
+	/// @notice Registers a ticket for a participant for a specific event once the ticket was redeemed
+	/// @dev Adds a participant address to the event's participant list and maps their ticket to their address
+	/// @param eventId ID of the event the ticket is for
+	/// @param participant Address of the participant redeeming the ticket
+	/// @param extraAddress Address of the redeemed ticket contract
+	function addParticipantWithTicket(uint256 eventId, address participant, address extraAddress) external 
+	isCallFromExtraContract(eventId)
+	{
+		if(participantsTickets[participant].length == 0) {
+			participants[eventId].push(participant);
+		}
+		participantsTickets[participant].push(extraAddress);
 	}
 
 	/// @notice Allows an address to redeem tickets for an event
@@ -171,7 +265,7 @@ contract EventCreation {
 		emit EventReactivated(eventId);
 	}
 
-	function increaseMintedTickets(uint256 eventId) external {
+	function increaseMintedTickets(uint256 eventId) external isCallFromExtraContract(eventId) {
 		mintedTickets[eventId]++;
 	}
 
@@ -185,6 +279,18 @@ contract EventCreation {
 
 	function getExtras(uint256 eventId) public view returns (address[] memory) {
 		return extras[eventId];
+	}
+
+	function isBundleContractPartOfEvent(uint256 _eventId, address _address) public view returns (bool) {
+		return bundlesMapping[_eventId][_address];
+	}
+
+	function getParticipants(uint256 eventId) public view returns (address[] memory) {
+		return participants[eventId];
+	}
+
+	function getReedemedTicketsOfParticipant(address participantAddress) public view returns (address[] memory) {
+		return participantsTickets[participantAddress];
 	}
 
 	function getAdmin(uint256 eventId) public view returns (address) {
