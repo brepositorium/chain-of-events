@@ -16,12 +16,15 @@ interface EventDetail {
   createdEvent_description: string;
   createdEvent_location: string;
   createdEvent_logoUrl: string;
+  locationGeoAddress?: string;
 }
 
 const EventsPage = () => {
   const { address } = useAccount();
   const [bookmarkedEvents, setBookmarkedEvents] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [eventsWithAddress, setEventsWithAddress] = useState<EventDetail[]>([]);
+  const [bookmarkedEventsWithAddress, setbookmarkedEventsWithAddress] = useState<EventDetail[]>([]);
   const client = useApolloClient();
 
   const {
@@ -32,6 +35,11 @@ const EventsPage = () => {
     variables: { ids: bookmarkedEvents },
     client,
     skip: bookmarkedEvents?.length < 1,
+  });
+
+  const { data, fetchMore, loading, error } = useQuery(GET_ALL_EVENTS_PAGINATED, {
+    variables: { first: 3, after: 0 },
+    client: client,
   });
 
   useEffect(() => {
@@ -45,12 +53,55 @@ const EventsPage = () => {
         }
       });
     }
-  }, [address]);
+    if (data && data.eventCreateds) {
+      const events = data.eventCreateds;
+      Promise.all(
+        events.map(async (event: any) => {
+          const locationParts = event.createdEvent_location.split("|");
+          if (locationParts.length === 2) {
+            const [lat, lng] = locationParts.map(Number);
+            const locationGeoAddress = await reverseGeocode(lat, lng);
+            return { ...event, locationGeoAddress };
+          } else {
+            return { ...event, locationGeoAddress: "Location format incorrect" };
+          }
+        }),
+      ).then(setEventsWithAddress);
+    }
+    if (dataEventsDetails) {
+      const events = dataEventsDetails.eventCreateds;
+      Promise.all(
+        events.map(async (event: any) => {
+          const locationParts = event.createdEvent_location.split("|");
+          if (locationParts.length === 2) {
+            const [lat, lng] = locationParts.map(Number);
+            const locationGeoAddress = await reverseGeocode(lat, lng);
+            return { ...event, locationGeoAddress };
+          } else {
+            return { ...event, locationGeoAddress: "Location format incorrect" };
+          }
+        }),
+      ).then(setbookmarkedEventsWithAddress);
+    }
+  }, [address, data]);
 
-  const { data, fetchMore, loading, error } = useQuery(GET_ALL_EVENTS_PAGINATED, {
-    variables: { first: 3, after: 0 },
-    client: client,
-  });
+  const reverseGeocode = async (lat: any, lng: any) => {
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.NEXT_PUBLIC_MAPS_API}`,
+      );
+      const data = await response.json();
+      if (data.status === "OK") {
+        return data.results[0].formatted_address;
+      } else {
+        console.error("No results found");
+        return "Address not found";
+      }
+    } catch (error) {
+      console.error("Error in reverse geocoding:", error);
+      return "Error fetching address";
+    }
+  };
 
   if (loading)
     return (
@@ -141,7 +192,7 @@ const EventsPage = () => {
     setSearchTerm(event.target.value.toLowerCase());
   };
 
-  const filteredEvents = data.eventCreateds.filter((event: EventDetail) =>
+  const filteredEvents = eventsWithAddress.filter((event: EventDetail) =>
     event.createdEvent_name.toLowerCase().includes(searchTerm),
   );
 
@@ -151,14 +202,14 @@ const EventsPage = () => {
         <div className="flex flex-col justify-between my-8">
           <h1 className="text-2xl font-bold font-poppins mb-4">Bookmarked Events</h1>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-            {dataEventsDetails && dataEventsDetails.eventCreateds.length > 0 ? (
-              dataEventsDetails.eventCreateds.map((event: any) => (
+            {bookmarkedEventsWithAddress && bookmarkedEventsWithAddress.length > 0 ? (
+              bookmarkedEventsWithAddress.map((event: any) => (
                 <EventCard
                   key={event.id}
                   logoUrl={event.createdEvent_logoUrl}
                   eventName={event.createdEvent_name}
                   eventDescription={event.createdEvent_description}
-                  eventLocation={event.createdEvent_location}
+                  eventLocation={event.locationGeoAddress}
                   actionUrl={"/event-info/" + Number(event.createdEvent_id)}
                   actionLabel="See more"
                   hasBookmark={true}
@@ -209,7 +260,7 @@ const EventsPage = () => {
               logoUrl={event.createdEvent_logoUrl}
               eventName={event.createdEvent_name}
               eventDescription={event.createdEvent_description}
-              eventLocation={event.createdEvent_location}
+              eventLocation={event.locationGeoAddress}
               actionUrl={"/event-info/" + Number(event.createdEvent_id)}
               actionLabel="See more"
               hasBookmark={true}
