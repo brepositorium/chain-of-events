@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import EventCreation from "../../../../hardhat/artifacts/contracts/EventCreation.sol/EventCreation.json";
 import { useQuery } from "@apollo/client";
+import { APIProvider, Map, Marker } from "@vis.gl/react-google-maps";
 import { useAccount, useReadContract } from "wagmi";
 import ExtraCard from "~~/components/ExtraCard";
 import useApolloClient from "~~/hooks/chain-of-events/useApolloClient";
@@ -54,6 +55,7 @@ const EditDashboardPage = ({ params }: PageProps) => {
   const addresses = data as string[] | undefined;
 
   const [extraDetails, setExtraDetails] = useState<ExtraDetail[]>([]);
+  const [locationAddress, setLocationAddress] = useState("");
 
   useEffect(() => {
     const fetchExtras = async () => {
@@ -78,10 +80,32 @@ const EditDashboardPage = ({ params }: PageProps) => {
       setExtraDetails(combinedDetails);
     };
 
+    if (dataEvents) {
+      reverseGeocode(
+        parseFloat(dataEvents.eventCreateds[0].createdEvent_location.split("|")[0]),
+        parseFloat(dataEvents.eventCreateds[0].createdEvent_location.split("|")[1]),
+      );
+    }
+
     if (address) {
       fetchExtras();
     }
-  }, [data, address]);
+  }, [data, address, dataEvents]);
+
+  function reverseGeocode(lat: any, lng: any) {
+    const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.NEXT_PUBLIC_MAPS_API}`;
+
+    fetch(apiUrl)
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === "OK") {
+          setLocationAddress(data.results[0].formatted_address);
+        } else {
+          console.error("No results found");
+        }
+      })
+      .catch(error => console.error("Error:", error));
+  }
 
   if (loadingEvents)
     return (
@@ -92,64 +116,92 @@ const EditDashboardPage = ({ params }: PageProps) => {
   if (errorEvents) return <p>Error loading events</p>;
 
   return (
-    <div className="h-[650px] bg-circles bg-no-repeat">
-      <div className="flex flex-col gap-4 mt-12 p-6 max-w-screen md:max-w-4xl mx-auto bg-secondary-content rounded-xl shadow-md space-x-4">
-        <div className="flex flex-col md:flex-row md:justify-around gap-8">
-          <div className="flex flex-col gap-8 items-center md:mt-8 bg-base-200 p-4 rounded-xl shadow-xl">
-            <div>
-              <img
-                src={dataEvents.eventCreateds[0].createdEvent_logoUrl}
-                height={300}
-                width={300}
-                alt="Logo"
-                className="rounded-xl"
-              />
+    <APIProvider apiKey={process.env.NEXT_PUBLIC_MAPS_API}>
+      <div className="h-[650px] bg-circles bg-no-repeat">
+        <div className="flex flex-col gap-4 mt-12 p-6 max-w-screen md:max-w-4xl mx-auto bg-secondary-content rounded-xl shadow-md space-x-4">
+          <div className="flex flex-col md:flex-row md:justify-around gap-8">
+            <div className="flex flex-col gap-8 items-center md:mt-8 bg-base-200 p-4 rounded-xl shadow-xl">
+              <div>
+                <img
+                  src={dataEvents.eventCreateds[0].createdEvent_logoUrl}
+                  height={300}
+                  width={300}
+                  alt="Logo"
+                  className="rounded-xl"
+                />
+              </div>
+              <div className="text-2xl font-extrabold">{dataEvents.eventCreateds[0].createdEvent_name}</div>
+              <div className="flex justify-center gap-2">
+                <Link href={"/shop/" + id + "/0"} className="btn btn-primary rounded w-32">
+                  Buy Ticket
+                </Link>
+                <Link href={"/shop/" + id + "/1"} className="btn btn-primary rounded w-32">
+                  Buy Drink/Snack
+                </Link>
+              </div>
+              <Map
+                defaultZoom={15}
+                defaultCenter={{
+                  lat: parseFloat(dataEvents.eventCreateds[0].createdEvent_location.split("|")[0]),
+                  lng: parseFloat(dataEvents.eventCreateds[0].createdEvent_location.split("|")[1]),
+                }}
+                center={{
+                  lat: parseFloat(dataEvents.eventCreateds[0].createdEvent_location.split("|")[0]),
+                  lng: parseFloat(dataEvents.eventCreateds[0].createdEvent_location.split("|")[1]),
+                }}
+                style={{
+                  width: "300px",
+                  height: "200px",
+                  borderRadius: "30px",
+                  overflow: "hidden",
+                }}
+                gestureHandling="greedy"
+                disableDefaultUI={true}
+              >
+                <Marker
+                  position={{
+                    lat: parseFloat(dataEvents.eventCreateds[0].createdEvent_location.split("|")[0]),
+                    lng: parseFloat(dataEvents.eventCreateds[0].createdEvent_location.split("|")[1]),
+                  }}
+                />
+              </Map>
             </div>
-            <div className="text-2xl font-extrabold">{dataEvents.eventCreateds[0].createdEvent_name}</div>
-            <div className="flex justify-center gap-2">
-              <Link href={"/shop/" + id + "/0"} className="btn btn-primary rounded w-32">
-                Buy Ticket
-              </Link>
-              <Link href={"/shop/" + id + "/1"} className="btn btn-primary rounded w-32">
-                Buy Drink/Snack
-              </Link>
-            </div>
-          </div>
-          <div className="flex flex-col md:mt-8 gap-12">
-            <div className="bg-base-200 p-4 rounded-xl shadow-xl">
-              <p className="text-xl font-bold font-poppins">About</p>
-              <div className="text-lg">{dataEvents.eventCreateds[0].createdEvent_description}</div>
-            </div>
-            <div className="bg-base-200 p-4 rounded-xl shadow-xl">
-              <p className="text-xl font-bold font-poppins">Location</p>
-              <div className="text-lg">{dataEvents.eventCreateds[0].createdEvent_location}</div>
+            <div className="flex flex-col md:mt-8 gap-12">
+              <div className="bg-base-200 p-4 rounded-xl shadow-xl">
+                <p className="text-xl font-bold font-poppins">About</p>
+                <div className="text-lg">{dataEvents.eventCreateds[0].createdEvent_description}</div>
+              </div>
+              <div className="bg-base-200 p-4 rounded-xl shadow-xl">
+                <p className="text-xl font-bold font-poppins">Location</p>
+                <div className="text-lg">{locationAddress}</div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div className="container mx-auto px-11 md:px-20 xl:px-40">
-        <h1 className="text-2xl font-bold my-4 mt-8 font-poppins">Your assets</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {extraDetails.length > 0 ? (
-            extraDetails.map((detail, index) => (
-              <ExtraCard
-                extraName={detail.name}
-                description={detail.description}
-                imageUrl={detail.imageUrl}
-                extraAddress={detail.extraAddress}
-                price={Number(detail.price) / 100}
-                hasQuantity={true}
-                noOfItems={Number(detail.balance)}
-                action={ACTIONS.TRANSFER}
-                extraType={Number(detail.extraType)}
-              />
-            ))
-          ) : (
-            <p className="font-poppins">No extra details available.</p>
-          )}
+        <div className="container mx-auto px-11 md:px-20 xl:px-40">
+          <h1 className="text-2xl font-bold my-4 mt-8 font-poppins">Your assets</h1>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {extraDetails.length > 0 ? (
+              extraDetails.map((detail, index) => (
+                <ExtraCard
+                  extraName={detail.name}
+                  description={detail.description}
+                  imageUrl={detail.imageUrl}
+                  extraAddress={detail.extraAddress}
+                  price={Number(detail.price) / 100}
+                  hasQuantity={true}
+                  noOfItems={Number(detail.balance)}
+                  action={ACTIONS.TRANSFER}
+                  extraType={Number(detail.extraType)}
+                />
+              ))
+            ) : (
+              <p className="font-poppins">No extra details available.</p>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </APIProvider>
   );
 };
 
