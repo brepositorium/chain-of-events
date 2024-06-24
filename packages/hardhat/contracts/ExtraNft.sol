@@ -16,6 +16,7 @@ error ExtraNonexistent(uint256 tokenId);
 error NumberOfTicketsLimitReached(uint256 eventId);
 error MintLimitReached(uint256 currentMintCount);
 error NotEnoughUnredeemedTokens(address _ticketOwner);
+error NotFromBundleContract(uint256 eventId);
 
 /// @title A contract for creating and managing ERC721 tokens for events
 /// @author radub.xyz
@@ -43,10 +44,12 @@ contract ExtraNft is
 
 	mapping(address => bool) public approvedChainlinkContracts;
 
-	//0 for ticket, 1 for consumable
+	/// @notice Specifies the type of the extra (0 for tickets, 1 for consumables)
 	uint256 public immutable EXTRA_TYPE;
 
 	mapping(uint256 => bool) public redemptionMap;
+
+	mapping(address => bool) public allowedBundleContracts;
 
 	modifier enoughMoneySent(uint256 moneySent, uint256 amount) {
 		uint256 requiredWei = priceFeedHandler.calculateEthAmount(price);
@@ -75,6 +78,7 @@ contract ExtraNft is
 		uint256 amountToMint
 	) {
 		if (
+			EXTRA_TYPE == 0 && 
 			eventCreation.getMintedTickets(_eventId) + amountToMint >
 			eventCreation.getNumberOfTickets(_eventId)
 		) {
@@ -98,6 +102,13 @@ contract ExtraNft is
 			approvedChainlinkContracts[msg.sender] != true
 		) {
 			revert OwnableUnauthorizedAccount(_msgSender());
+		}
+		_;
+	}
+
+	modifier onlyBundleContract() {
+		if (eventCreation.isBundleContractPartOfEvent(eventId, msg.sender) == false) {
+			revert NotFromBundleContract(eventId);
 		}
 		_;
 	}
@@ -135,7 +146,7 @@ contract ExtraNft is
 		uri = _uri;
 		EXTRA_TYPE = _extraType;
 		priceFeedHandler = PriceFeedHandler(_priceFeedHandlerAddress);
-		eventCreation.addExtra(address(this), _eventId, msg.sender);
+		pause();
 	}
 
 	/// @notice Mints new tokens
@@ -154,17 +165,36 @@ contract ExtraNft is
 		checkMintLimit(_amount)
 	{
 		for (uint i = 0; i < _amount; i++) {
-			uint256 tokenId = _nextTokenId++;
+			mintAnExtra(to);
+		}
+	}
 
+	/// @notice Mints new tokens specifically for bundle contracts, adhering to event-specific rules
+	/// @dev Ensures not paused, checks tickets limit and mint limit before minting, can only be called by bundle contracts
+	/// @param to Address to mint tokens to
+	/// @param _amount Number of tokens to mint
+	function mintForBundle(address to, uint256 _amount) public 
+		onlyBundleContract() 
+		whenNotPaused
+		checkTicketsLimitNotReached(eventId, _amount)
+		checkMintLimit(_amount)
+	{
+		for (uint i = 0; i < _amount; i++) {
+			mintAnExtra(to);
+		}
+	}
+
+	/// @notice Helper function to handle the minting process of a single token
+	/// @dev Mints the token, sets the redemption status to false, updates ticket counts if the type is ticket, and sets the token URI
+	/// @param _to The address that will receive the newly minted token
+	function mintAnExtra(address _to) private {
+		uint256 tokenId = _nextTokenId++;
 			redemptionMap[tokenId] = false;
-
 			if (EXTRA_TYPE == 0) {
 				eventCreation.increaseMintedTickets(eventId);
 			}
-
-			_safeMint(to, tokenId);
+			_safeMint(_to, tokenId);
 			_setTokenURI(tokenId, uri);
-		}
 	}
 
 	/// @notice Adds a Chainlink contract to the approved list for direct interactions
@@ -183,6 +213,9 @@ contract ExtraNft is
 		uint256 tokenId
 	) public onlyAllowList(eventId) isTokenMinted(tokenId) {
 		redemptionMap[tokenId] = true;
+		if (EXTRA_TYPE == 0) {
+			eventCreation.addParticipantWithTicket(eventId, ownerOf(tokenId), address(this));
+		}
 	}
 
 	function updatePrice(
