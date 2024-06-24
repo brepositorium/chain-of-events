@@ -39,11 +39,13 @@ export const createEvent = async (
   location: string,
   logoUrl: string,
   numberOfTickets: BigInt,
+  startTimestamp: BigInt,
+  endTimestamp: BigInt,
   eventCreationAddress: string,
 ) => {
   const signer = await provider.getSigner();
   const contract = new ethers.Contract(eventCreationAddress, EventCreation.abi, signer);
-  await contract.createEvent(name, description, location, logoUrl, numberOfTickets);
+  await contract.createEvent(name, description, location, logoUrl, numberOfTickets, startTimestamp, endTimestamp);
   console.log("Create event");
 };
 
