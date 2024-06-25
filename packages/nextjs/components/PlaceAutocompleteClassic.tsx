@@ -4,9 +4,10 @@ import { useMap, useMapsLibrary } from "@vis.gl/react-google-maps";
 interface Props {
   onPlaceSelect: (place: google.maps.places.PlaceResult | null) => void;
   isOnline: boolean;
+  existingValue?: string;
 }
 
-export const AutocompleteCustom = ({ onPlaceSelect, isOnline }: Props) => {
+export const AutocompleteCustom = ({ onPlaceSelect, isOnline, existingValue }: Props) => {
   const map = useMap();
   const places = useMapsLibrary("places");
 
@@ -79,12 +80,12 @@ export const AutocompleteCustom = ({ onPlaceSelect, isOnline }: Props) => {
 
   return (
     <div className="flex flex-col -mt-10">
-      <p className="-mb-0.5">Location</p>
+      <p className="-mb-0.5 font-medium font-poppins">Location</p>
       <input
         value={inputValue}
         onInput={(event: FormEvent<HTMLInputElement>) => onInputChange(event)}
         disabled={isOnline}
-        placeholder="Search for a place"
+        placeholder={existingValue ? existingValue : "Search for a place"}
         className="input input-md input-bordered w-80 bg-secondary-content rounded text-black"
       />
 

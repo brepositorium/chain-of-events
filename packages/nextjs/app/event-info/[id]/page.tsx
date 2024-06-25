@@ -56,6 +56,8 @@ const EditDashboardPage = ({ params }: PageProps) => {
 
   const [extraDetails, setExtraDetails] = useState<ExtraDetail[]>([]);
   const [locationAddress, setLocationAddress] = useState("");
+  const [latCoord, setLatCoord] = useState(11.197451);
+  const [lngCoord, setLngCoord] = useState(140.3606071);
 
   useEffect(() => {
     const fetchExtras = async () => {
@@ -80,11 +82,17 @@ const EditDashboardPage = ({ params }: PageProps) => {
       setExtraDetails(combinedDetails);
     };
 
-    if (dataEvents) {
-      reverseGeocode(
-        parseFloat(dataEvents.eventCreateds[0].createdEvent_location.split("|")[0]),
-        parseFloat(dataEvents.eventCreateds[0].createdEvent_location.split("|")[1]),
-      );
+    if (dataEvents && dataEvents.eventCreateds && dataEvents.eventCreateds.length > 0) {
+      const [lat, lng] = dataEvents.eventCreateds[0].createdEvent_location.split("|").map(Number);
+
+      if (!isNaN(lat) && !isNaN(lng)) {
+        setLatCoord(lat);
+        setLngCoord(lng);
+        reverseGeocode(lat, lng);
+      } else {
+        console.error("Invalid event location format:", dataEvents.eventCreateds[0].createdEvent_location);
+        setLocationAddress("Invalid location format");
+      }
     }
 
     if (address) {
@@ -93,6 +101,12 @@ const EditDashboardPage = ({ params }: PageProps) => {
   }, [data, address, dataEvents]);
 
   function reverseGeocode(lat: any, lng: any) {
+    if (!lat || !lng) {
+      console.error("Invalid latitude or longitude provided for reverse geocoding.");
+      setLocationAddress("Invalid location format");
+      return;
+    }
+
     const apiUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${process.env.NEXT_PUBLIC_MAPS_API}`;
 
     fetch(apiUrl)
@@ -101,6 +115,7 @@ const EditDashboardPage = ({ params }: PageProps) => {
         if (data.status === "OK") {
           setLocationAddress(data.results[0].formatted_address);
         } else {
+          setLocationAddress("Address format not correct");
           console.error("No results found");
         }
       })
@@ -120,7 +135,7 @@ const EditDashboardPage = ({ params }: PageProps) => {
       <div className="h-[650px] bg-circles bg-no-repeat">
         <div className="flex flex-col gap-4 mt-12 p-6 max-w-screen md:max-w-4xl mx-auto bg-secondary-content rounded-xl shadow-md space-x-4">
           <div className="flex flex-col md:flex-row md:justify-around gap-8">
-            <div className="flex flex-col gap-8 items-center md:mt-8 bg-base-200 p-4 rounded-xl shadow-xl">
+            <div className="flex flex-col gap-8 items-center md:mt-8 bg-base-200 p-4 rounded-xl shadow-xl basis-1/2">
               <div>
                 <img
                   src={dataEvents.eventCreateds[0].createdEvent_logoUrl}
@@ -142,12 +157,12 @@ const EditDashboardPage = ({ params }: PageProps) => {
               <Map
                 defaultZoom={15}
                 defaultCenter={{
-                  lat: parseFloat(dataEvents.eventCreateds[0].createdEvent_location.split("|")[0]),
-                  lng: parseFloat(dataEvents.eventCreateds[0].createdEvent_location.split("|")[1]),
+                  lat: latCoord,
+                  lng: lngCoord,
                 }}
                 center={{
-                  lat: parseFloat(dataEvents.eventCreateds[0].createdEvent_location.split("|")[0]),
-                  lng: parseFloat(dataEvents.eventCreateds[0].createdEvent_location.split("|")[1]),
+                  lat: latCoord,
+                  lng: lngCoord,
                 }}
                 style={{
                   width: "300px",
@@ -160,13 +175,13 @@ const EditDashboardPage = ({ params }: PageProps) => {
               >
                 <Marker
                   position={{
-                    lat: parseFloat(dataEvents.eventCreateds[0].createdEvent_location.split("|")[0]),
-                    lng: parseFloat(dataEvents.eventCreateds[0].createdEvent_location.split("|")[1]),
+                    lat: latCoord,
+                    lng: lngCoord,
                   }}
                 />
               </Map>
             </div>
-            <div className="flex flex-col md:mt-8 gap-12">
+            <div className="flex flex-col md:mt-8 gap-12 basis-1/2">
               <div className="bg-base-200 p-4 rounded-xl shadow-xl">
                 <p className="text-xl font-bold font-poppins">About</p>
                 <div className="text-lg">{dataEvents.eventCreateds[0].createdEvent_description}</div>

@@ -81,6 +81,20 @@ export const changeLogo = async (newLogo: string, eventId: BigInt, eventCreation
   console.log("Change logo");
 };
 
+export const changeStartTime = async (newStartTime: BigInt, eventId: BigInt, eventCreationAddress: string) => {
+  const signer = await provider.getSigner();
+  const contract = new ethers.Contract(eventCreationAddress, EventCreation.abi, signer);
+  await contract.changeStartTime(newStartTime, eventId);
+  console.log("Change start time");
+};
+
+export const changeEndTime = async (newEndTime: BigInt, eventId: BigInt, eventCreationAddress: string) => {
+  const signer = await provider.getSigner();
+  const contract = new ethers.Contract(eventCreationAddress, EventCreation.abi, signer);
+  await contract.changeEndTime(newEndTime, eventId);
+  console.log("Change end time");
+};
+
 export const addAllowedAddress = async (allowedAddress: string, eventId: BigInt, eventCreationAddress: string) => {
   const signer = await provider.getSigner();
   const contract = new ethers.Contract(eventCreationAddress, EventCreation.abi, signer);

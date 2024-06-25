@@ -160,7 +160,7 @@ const NewEvent: NextPage = () => {
             <h1>Create your own event</h1>
           </div>
           <div className="flex flex-col -mt-6">
-            <p className="-mb-0.5">Event Name</p>
+            <p className="-mb-0.5 font-medium font-poppins">Event Name</p>
             <input
               type="text"
               placeholder="Enter Name"
@@ -171,7 +171,7 @@ const NewEvent: NextPage = () => {
             {formErrors.name && <p className="text-red-500 -mb-2 -mt-0.5">{formErrors.name}</p>}
           </div>
           <div className="flex flex-col -mt-6">
-            <p className="-mb-0.5">Description</p>
+            <p className="-mb-0.5 font-medium font-poppins">Description</p>
             <textarea
               placeholder="Enter Description"
               value={description}
@@ -181,7 +181,7 @@ const NewEvent: NextPage = () => {
             {formErrors.description && <p className="text-red-500 -mb-2 -mt-0.5 w-80">{formErrors.description}</p>}
           </div>
           <div className="flex flex-col -mt-6">
-            <p className="-mb-0.5">Number of Tickets</p>
+            <p className="-mb-0.5 font-medium font-poppins">Number of Tickets</p>
             <input
               type="number"
               placeholder="Number of Tickets"
@@ -192,7 +192,7 @@ const NewEvent: NextPage = () => {
             {formErrors.numberOfTickets && <p className="text-red-500 -mb-2 -mt-0.5">{formErrors.numberOfTickets}</p>}
           </div>
           <div className="flex flex-col -mt-6">
-            <p className="-mb-0.5">Start Time</p>
+            <p className="-mb-0.5 font-medium font-poppins">Start Time</p>
             <input
               type="datetime-local"
               value={startTime}
@@ -202,7 +202,7 @@ const NewEvent: NextPage = () => {
             {formErrors.startTime && <p className="text-red-500 -mb-2 -mt-0.5">{formErrors.startTime}</p>}
           </div>
           <div className="flex flex-col -mt-6">
-            <p className="-mb-0.5">End Time</p>
+            <p className="-mb-0.5 font-medium font-poppins">End Time</p>
             <input
               type="datetime-local"
               value={endTime}
@@ -212,7 +212,7 @@ const NewEvent: NextPage = () => {
             {formErrors.endTime && <p className="text-red-500 -mb-2 -mt-0.5">{formErrors.endTime}</p>}
           </div>
           <div className="flex flex-col -mt-6">
-            <p className="-mb-0.5">Timezone</p>
+            <p className="-mb-0.5 font-medium font-poppins">Timezone</p>
             <select
               value={timezone}
               onChange={e => setTimezone(e.target.value)}
@@ -257,7 +257,7 @@ const NewEvent: NextPage = () => {
           </div>
 
           <div className="flex flex-col -mt-6">
-            <p className="-mb-0.5">Logo</p>
+            <p className="-mb-0.5 font-medium font-poppins">Logo</p>
             <input
               type="file"
               accept="image/*"

@@ -19,6 +19,9 @@ export const GET_EVENT_DETAILS_BY_ID = gql`
       createdEvent_location
       createdEvent_logoUrl
       createdEvent_numberOfTickets
+      createdEvent_startTime
+      createdEvent_endTime
+      createdEvent_isActive
     }
   }
 `;
@@ -32,6 +35,9 @@ export const GET_EVENTS_DETAILS_BY_IDS = gql`
       createdEvent_location
       createdEvent_logoUrl
       createdEvent_numberOfTickets
+      createdEvent_startTime
+      createdEvent_endTime
+      createdEvent_isActive
     }
   }
 `;
@@ -45,6 +51,9 @@ export const GET_ALL_EVENTS_PAGINATED = gql`
       createdEvent_location
       createdEvent_logoUrl
       createdEvent_numberOfTickets
+      createdEvent_startTime
+      createdEvent_endTime
+      createdEvent_isActive
       cursorField
     }
   }
