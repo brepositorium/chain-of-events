@@ -13,6 +13,8 @@ contract BundleDiscounts {
     EventCreation eventCreation;
 	PriceFeedHandler priceFeedHandler;
 
+    string public name;
+
     address[] public extras;
 
     mapping(address => uint256) public extrasWithAmounts;
@@ -22,10 +24,6 @@ contract BundleDiscounts {
     uint256 public eventId;
 
     bool public isActive;
-
-    event BundleCreated(address indexed bundleAddress, uint256 eventId);
-
-    event AddedToBundle(address indexed bundleAddress, address extraAddress, uint256 amount);
 
     modifier onlyAdmin(uint256 _eventId) {
 		if (eventCreation.getAdmin(_eventId) != msg.sender) {
@@ -53,14 +51,15 @@ contract BundleDiscounts {
 		address _eventCreationAddress,
 		address _priceFeedHandlerAddress,
         uint256 _eventId,
+        string memory _name,
         uint256 _price
 	) {
 		eventCreation = EventCreation(_eventCreationAddress);
 		priceFeedHandler = PriceFeedHandler(_priceFeedHandlerAddress);
         eventId = _eventId;
+        name = _name;
         price = _price;
         isActive = false;
-        emit BundleCreated(address(this), _eventId);
 	}
 
     function addExtraToBundle(address _extraAddress, uint256 _amount) public onlyAdmin(eventId) {
@@ -68,7 +67,6 @@ contract BundleDiscounts {
             extras.push(_extraAddress);
         }
         extrasWithAmounts[_extraAddress] = _amount;
-        emit AddedToBundle(address(this), _extraAddress, _amount);
     }
 
     function mintBundle(address _to) public payable enoughMoneySent(msg.value, price) isActivated() {

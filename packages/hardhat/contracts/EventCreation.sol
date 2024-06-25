@@ -36,6 +36,8 @@ contract EventCreation {
 	);
 	event EventDeleted(uint256 indexed eventId);
 	event EventReactivated(uint256 indexed eventId);
+	event StartTimeChanged(uint256 indexed eventId, uint256 newStartTime);
+	event EndTimeChanged(uint256 indexed eventId, uint256 newEndTime);
 
 	mapping(uint256 => Event) public events;
 
@@ -146,15 +148,17 @@ contract EventCreation {
 	/// @param _eventId ID of the event the bundle is associated with
 	/// @param _priceFeedHandlerAddress Address of the price feed handler for real-time pricing
 	function createAndRegisterBundle(
+		string calldata _name,
         uint256 _price,
         uint256 _eventId,
         address _priceFeedHandlerAddress
     ) public isSenderAdmin(_eventId) {
         BundleDiscounts newBundleDiscount = new BundleDiscounts(
-		address(this),
-		_priceFeedHandlerAddress,
-		_eventId,
-		_price
+            address(this),
+            _priceFeedHandlerAddress,
+			_eventId,
+			_name,
+            _price
         );
         addBundleContract(address(newBundleDiscount), _eventId);
     }
@@ -178,14 +182,14 @@ contract EventCreation {
         address priceFeedHandlerAddress
     ) public isSenderAdmin(eventId) {
         ExtraNft newExtra = new ExtraNft(
-		name,
-		symbol,
-		uri,
-		extraType,
-		price,
-		address(this),
-		eventId,
-		priceFeedHandlerAddress
+            name,
+            symbol,
+            uri,
+            extraType,
+            price,
+            address(this),
+            eventId,
+            priceFeedHandlerAddress
         );
 		newExtra.transferOwnership(msg.sender);
         addExtra(address(newExtra), eventId);
@@ -247,6 +251,22 @@ contract EventCreation {
 		emit NumberOfTicketsChanged(eventId, newNumberOfTickets);
 	}
 
+	function changeStartTime(
+		uint256 newStartTime,
+		uint256 eventId
+	) public isSenderAdmin(eventId) {
+		events[eventId].startTime = newStartTime;
+		emit StartTimeChanged(eventId, newStartTime);
+	}
+
+	function changeEndTime(
+		uint256 newEndTime,
+		uint256 eventId
+	) public isSenderAdmin(eventId) {
+		events[eventId].endTime = newEndTime;
+		emit EndTimeChanged(eventId, newEndTime);
+	}
+
 	/// @notice Marks an event as inactive and effectively deletes it from active listings
 	/// @dev Emits an EventDeleted event upon successfully marking the event as inactive
 	/// @param eventId The ID of the event to delete
@@ -285,8 +305,8 @@ contract EventCreation {
 		return bundlesMapping[_eventId][_address];
 	}
 
-	function getParticipants(uint256 eventId) public view returns (address[] memory) {
-		return participants[eventId];
+	function getNumberOfParticipants(uint256 eventId) public view returns (uint256) {
+		return participants[eventId].length;
 	}
 
 	function getReedemedTicketsOfParticipant(address participantAddress) public view returns (address[] memory) {
