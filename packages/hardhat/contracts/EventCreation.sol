@@ -59,7 +59,7 @@ contract EventCreation {
 	mapping(uint256 => address[]) public bundles;
 
 	/// @dev Maps event IDs to mappings of bundle addresses to their inclusion status, ensuring only valid bundles are considered for each event.
-	mapping(uint256 => mapping(address => bool)) public bundlesMapping;
+	mapping(uint256 => mapping(address => bool)) bundlesMapping;
 
 	/// @notice Retrieves the list of participant addresses for each event
 	/// @dev Maps event IDs to arrays of participant addresses who have redeemed tickets
@@ -299,6 +299,10 @@ contract EventCreation {
 
 	function getExtras(uint256 eventId) public view returns (address[] memory) {
 		return extras[eventId];
+	}
+
+	function getBundles(uint256 eventId) public view returns (address[] memory) {
+		return bundles[eventId];
 	}
 
 	function isBundleContractPartOfEvent(uint256 _eventId, address _address) public view returns (bool) {

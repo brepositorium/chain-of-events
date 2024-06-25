@@ -23,8 +23,6 @@ contract BundleDiscounts {
 
     uint256 public eventId;
 
-    bool public isActive;
-
     modifier onlyAdmin(uint256 _eventId) {
 		if (eventCreation.getAdmin(_eventId) != msg.sender) {
 			revert NotTheAdmin(_eventId);
@@ -36,13 +34,6 @@ contract BundleDiscounts {
 		uint256 requiredWei = priceFeedHandler.calculateEthAmount(_price);
 		if (moneySent < requiredWei) {
 			revert NotEnoughMoneySent(moneySent, _price);
-		}
-		_;
-	}
-
-    modifier isActivated() {
-		if (!isActive) {
-			revert NotActivated();
 		}
 		_;
 	}
@@ -59,7 +50,6 @@ contract BundleDiscounts {
         eventId = _eventId;
         name = _name;
         price = _price;
-        isActive = false;
 	}
 
     function addExtraToBundle(address _extraAddress, uint256 _amount) public onlyAdmin(eventId) {
@@ -69,24 +59,19 @@ contract BundleDiscounts {
         extrasWithAmounts[_extraAddress] = _amount;
     }
 
-    function mintBundle(address _to) public payable enoughMoneySent(msg.value, price) isActivated() {
+    function mintBundle(address _to) public payable enoughMoneySent(msg.value, price){
         for (uint i = 0; i < extras.length; i++) {
             address extraAddress = extras[i];
             ExtraNft(extraAddress).mintForBundle(_to, extrasWithAmounts[extraAddress]);
         }
     }
-
-    function activate() public onlyAdmin(eventId) {
-        require(!isActive, "Already active");
-        isActive = true;
-    }
-
-    function deactivate() public onlyAdmin(eventId) onlyAdmin(eventId) isActivated(){
-        isActive = false;
-    }
-
+ 
     function withdraw() public onlyAdmin(eventId){
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
         require(success, "Failed to send Ether");
     }
+
+    function getExtras() public view returns (address[] memory) {
+		return extras;
+	}
 }
