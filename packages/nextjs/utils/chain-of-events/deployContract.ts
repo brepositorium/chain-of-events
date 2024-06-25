@@ -1,3 +1,4 @@
+import BundleDiscounts from "../../../hardhat/artifacts/contracts/BundleDiscounts.sol/BundleDiscounts.json";
 import EventCreation from "../../../hardhat/artifacts/contracts/EventCreation.sol/EventCreation.json";
 import ExtraNft from "../../../hardhat/artifacts/contracts/ExtraNft.sol/ExtraNft.json";
 import MintLimitAutomatedUpdate from "../../../hardhat/artifacts/contracts/MintLimitAutomatedUpdate.sol/MintLimitAutomatedUpdate.json";
@@ -102,28 +103,43 @@ export const addAllowedAddress = async (allowedAddress: string, eventId: BigInt,
   console.log("Add allowed address");
 };
 
-export const deployContract = async (
+export const createAndRegisterExtra = async (
   name: string,
   symbol: string,
   uri: string,
   extraType: number,
   price: number,
-  eventAddress: string,
   eventId: BigInt,
-  priceFeedHandlerAddress?: string,
+  eventCreationAddress: string,
+  priceFeedHandlerAddress: string,
 ) => {
+  console.log("Create event");
   const signer = await provider.getSigner();
-  const factory = new ethers.ContractFactory(ExtraNft.abi, ExtraNft.bytecode, signer);
-  const contract = await factory.deploy(
+  const contract = new ethers.Contract(eventCreationAddress, EventCreation.abi, signer);
+  await contract.createAndRegisterExtra(
     name,
     symbol,
     uri,
     extraType,
     BigInt(Math.round(price * 100)),
-    eventAddress,
     eventId,
     priceFeedHandlerAddress,
   );
+  console.log("Contract deployed at ", await contract.getAddress());
+  return await contract.getAddress();
+};
+
+export const createAndRegisterBundle = async (
+  eventCreationAddress: string,
+  eventId: BigInt,
+  name: string,
+  price: number,
+  priceFeedHandlerAddress: string,
+) => {
+  console.log("Create bundle");
+  const signer = await provider.getSigner();
+  const contract = new ethers.Contract(eventCreationAddress, EventCreation.abi, signer);
+  await contract.createAndRegisterBundle(name, BigInt(Math.round(price * 100)), eventId, priceFeedHandlerAddress);
   console.log("Contract deployed at ", await contract.getAddress());
   return await contract.getAddress();
 };
@@ -194,6 +210,18 @@ export const addApprovedChainlinkContract = async (chainlinkContractAddress: str
   console.log("Add approved Chainlink Contract");
 };
 
+export const fetchExtraNameAndAddress = async (address: string) => {
+  const contract = new ethers.Contract(address, ExtraNft.abi, provider);
+  try {
+    const name = await contract.name();
+
+    return { name, address };
+  } catch (error) {
+    console.error("Failed to fetch contract data:", error);
+    return null;
+  }
+};
+
 export const fetchExtraDetails = async (address: string) => {
   const contract = new ethers.Contract(address, ExtraNft.abi, provider);
   try {
@@ -202,7 +230,6 @@ export const fetchExtraDetails = async (address: string) => {
     const price = await contract.price();
     const extraType = await contract.EXTRA_TYPE();
     const uri = await contract.uri();
-
     const response = await fetch(uri);
     const jsonData = await response.json();
 
@@ -211,6 +238,49 @@ export const fetchExtraDetails = async (address: string) => {
     console.error("Failed to fetch contract data:", error);
     return null;
   }
+};
+
+export const fetchBundleDetails = async (address: string) => {
+  const contract = new ethers.Contract(address, BundleDiscounts.abi, provider);
+  try {
+    const name = await contract.name();
+    const price = await contract.price();
+    console.log(name);
+    return { name, price };
+  } catch (error) {
+    console.error("Failed to fetch bundle data:", error);
+    return null;
+  }
+};
+
+export const fetchBundleBasics = async (bundleAddress: string) => {
+  const contract = new ethers.Contract(bundleAddress, BundleDiscounts.abi, provider);
+  console.log(bundleAddress);
+  try {
+    const name = await contract.name();
+    const price = await contract.price();
+    let extrasAddresses = [];
+    try {
+      extrasAddresses = await contract.getExtras();
+    } catch (error) {
+      console.warn("No extras found for this bundle", error);
+    }
+    return {
+      name,
+      price,
+      extrasAddresses,
+    };
+  } catch (error) {
+    console.error("Failed to fetch bundle details:", error);
+    return null;
+  }
+};
+
+export const addExtraToBundle = async (bundleAddress: string, extraAddress: string, amount: number) => {
+  const signer = await provider.getSigner();
+  const contract = new ethers.Contract(bundleAddress, BundleDiscounts.abi, signer);
+  await contract.addExtraToBundle(extraAddress, BigInt(amount));
+  console.log("Add Extra to Bundle");
 };
 
 export const getUnredeemedBalanceOf = async (contractAddress: string, callerAddress: string) => {

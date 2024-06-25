@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Card from "./BaseCard";
+import BundleDetailsModal from "./BundleDetailsModal";
 import SimpleModal from "./SimpleModal";
 import toast from "react-hot-toast";
 import { useAccount } from "wagmi";
@@ -20,6 +21,9 @@ interface ExtraCardProps {
   manageUrl?: string;
   extraAddress?: string;
   extraOwner?: string;
+  bundleAddress?: string;
+  eventId?: number;
+  contractAddress?: string;
 }
 
 const ExtraCard: React.FC<ExtraCardProps> = ({
@@ -34,10 +38,14 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
   manageUrl,
   extraAddress,
   extraOwner,
+  bundleAddress,
+  eventId,
+  contractAddress,
 }) => {
   const [quantity, setQuantity] = useState(0); // Initialize quantity with 0
   const [isSimpleModalOpen, setIsSimpleModalOpen] = useState(false);
   const [currentField, setCurrentField] = useState("");
+  const [selectedBundleAddress, setSelectedBundleAddress] = useState("");
 
   const { address } = useAccount();
   const priceFeedHandlerAddress = usePriceFeedHandlerAddress();
@@ -83,72 +91,97 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
     setIsSimpleModalOpen(false);
   };
 
+  const handleManageBundle = (address: string) => {
+    setSelectedBundleAddress(address);
+  };
+
   return (
-    <Card
-      className={
-        extraType === 0
-          ? "w-72 bg-blue-pattern bg-cover bg-no-repeat rounded-lg text-primary-content"
-          : "w-72 bg-green-pattern bg-cover bg-no-repeat rounded-lg text-primary-content"
-      }
-    >
-      <img src={imageUrl} alt={extraName} className="w-full h-52 object-cover rounded-lg" />
-      {noOfItems ? (
-        <div className="indicator">
-          <span className="indicator-item badge badge-warning">{`x${noOfItems}`}</span>
-        </div>
-      ) : (
-        <div></div>
-      )}
-      <div className="flex flex-col h-full p-2">
-        <h2 className="text-center font-bold text-lg">{extraName}</h2>
-        <p className="text-sm font-poppins h-32 overflow-auto">{description}</p>
-        <p className="text-lg text-center font-bold">{`$${price?.toFixed(2)}`}</p>
-        {hasQuantity ? (
-          <div className="flex items-center justify-center my-2">
-            <button className="btn text-xl" onClick={handleDecrease}>
-              -
-            </button>
-            <span className="mx-4">{quantity}</span>
-            <button className="btn text-xl" onClick={handleIncrease}>
-              +
-            </button>
+    <>
+      {extraType === 2 ? (
+        <Card className={"w-72 bg-green-pattern bg-cover bg-no-repeat rounded-lg text-primary-content"}>
+          <div className="flex flex-col h-full p-2">
+            <h2 className="text-center font-bold text-lg">{extraName}</h2>
+            <p className="text-lg text-center font-bold">{`$${price?.toFixed(2)}`}</p>
+            <div className="flex flex-wrap justify-evenly mt-4 ">
+              <button onClick={() => handleManageBundle(bundleAddress!)}>Manage</button>
+            </div>
           </div>
-        ) : (
-          <div></div>
-        )}
-        <div className="flex flex-wrap justify-evenly mt-4 ">
-          {action === ACTIONS.MANAGE && manageUrl ? (
-            <Link href={manageUrl} className={`btn btn-primary rounded-xl w-36 border-0`}>
-              Manage
-            </Link>
-          ) : action === ACTIONS.TRANSFER ? (
-            <button className={`btn btn-primary rounded-xl w-36 border-0`} onClick={handleTransfer}>
-              Transfer
-            </button>
-          ) : action === ACTIONS.BUY ? (
-            <button
-              className={`btn btn-primary rounded-xl w-36 border-0`}
-              onClick={() => handleBuy(extraAddress!, price!, quantity)}
-            >
-              Buy
-            </button>
-          ) : action === ACTIONS.REDEEM ? (
-            <button className={`btn btn-primary rounded-xl w-36 border-0`} onClick={() => handleRedeem()}>
-              Redeem
-            </button>
+          <BundleDetailsModal
+            isOpen={!!selectedBundleAddress}
+            onClose={() => setSelectedBundleAddress("")}
+            bundleAddress={selectedBundleAddress}
+            eventId={eventId!}
+            contractAddress={contractAddress!}
+          />
+        </Card>
+      ) : (
+        <Card
+          className={
+            extraType === 0
+              ? "w-72 bg-blue-pattern bg-cover bg-no-repeat rounded-lg text-primary-content"
+              : "w-72 bg-green-pattern bg-cover bg-no-repeat rounded-lg text-primary-content"
+          }
+        >
+          <img src={imageUrl} alt={extraName} className="w-full h-52 object-cover rounded-lg" />
+          {noOfItems ? (
+            <div className="indicator">
+              <span className="indicator-item badge badge-warning">{`x${noOfItems}`}</span>
+            </div>
           ) : (
             <div></div>
           )}
-        </div>
-        <SimpleModal
-          isOpen={isSimpleModalOpen}
-          onClose={handleSimpleModalClose}
-          fieldName={currentField}
-          quantity={quantity}
-          extraAddress={extraAddress}
-        />
-      </div>
-    </Card>
+          <div className="flex flex-col h-full p-2">
+            <h2 className="text-center font-bold text-lg">{extraName}</h2>
+            <p className="text-sm font-poppins h-32 overflow-auto">{description}</p>
+            <p className="text-lg text-center font-bold">{`$${price?.toFixed(2)}`}</p>
+            {hasQuantity ? (
+              <div className="flex items-center justify-center my-2">
+                <button className="btn text-xl" onClick={handleDecrease}>
+                  -
+                </button>
+                <span className="mx-4">{quantity}</span>
+                <button className="btn text-xl" onClick={handleIncrease}>
+                  +
+                </button>
+              </div>
+            ) : (
+              <div></div>
+            )}
+            <div className="flex flex-wrap justify-evenly mt-4 ">
+              {action === ACTIONS.MANAGE && manageUrl ? (
+                <Link href={manageUrl} className={`btn btn-primary rounded-xl w-36 border-0`}>
+                  Manage
+                </Link>
+              ) : action === ACTIONS.TRANSFER ? (
+                <button className={`btn btn-primary rounded-xl w-36 border-0`} onClick={handleTransfer}>
+                  Transfer
+                </button>
+              ) : action === ACTIONS.BUY ? (
+                <button
+                  className={`btn btn-primary rounded-xl w-36 border-0`}
+                  onClick={() => handleBuy(extraAddress!, price!, quantity)}
+                >
+                  Buy
+                </button>
+              ) : action === ACTIONS.REDEEM ? (
+                <button className={`btn btn-primary rounded-xl w-36 border-0`} onClick={() => handleRedeem()}>
+                  Redeem
+                </button>
+              ) : (
+                <div></div>
+              )}
+            </div>
+            <SimpleModal
+              isOpen={isSimpleModalOpen}
+              onClose={handleSimpleModalClose}
+              fieldName={currentField}
+              quantity={quantity}
+              extraAddress={extraAddress}
+            />
+          </div>
+        </Card>
+      )}
+    </>
   );
 };
 

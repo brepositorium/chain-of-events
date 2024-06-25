@@ -5,6 +5,7 @@ import EventCreation from "../../../../hardhat/artifacts/contracts/EventCreation
 import { useQuery } from "@apollo/client";
 import { useReadContract } from "wagmi";
 import AddExtraModal from "~~/components/AddExtraModal";
+import BundleList from "~~/components/BundlesList";
 import EventDetails from "~~/components/EventDetails";
 import ExtraCard from "~~/components/ExtraCard";
 import SimpleModal from "~~/components/SimpleModal";
@@ -203,6 +204,17 @@ const EditDashboardPage = ({ params }: PageProps) => {
               </div>
               <div
                 className="tooltip tooltip-secondary"
+                data-tip="Here you can add a new Bundle. A Bundle consists of multiple tickets or consumables sold together at a custom price. This way you can offer different discounts on your assets."
+              >
+                <button
+                  className="btn btn-primary rounded btn-md w-48 font-poppins"
+                  onClick={() => handleAddModalOpen(2)}
+                >
+                  Add Bundle
+                </button>
+              </div>
+              <div
+                className="tooltip tooltip-secondary"
                 data-tip="Here you can add a new Allowed Address. An Allowed Address can Redeem attendee's tickets or consumables. They could be bartenders, security or anybody you trust with those rights."
               >
                 <button
@@ -226,6 +238,10 @@ const EditDashboardPage = ({ params }: PageProps) => {
             />
           </div>
         </div>
+      </div>
+      <div className="container mx-auto px-11 md:px-20 xl:px-40 mt-8">
+        <h1 className="text-2xl font-bold my-4">Bundles</h1>
+        <BundleList eventId={id} contractAddress={contractAddress!} />
       </div>
       <div className="container mx-auto px-11 md:px-20 xl:px-40 mt-8">
         <h1 className="text-2xl font-bold my-4">Ticket Types</h1>
