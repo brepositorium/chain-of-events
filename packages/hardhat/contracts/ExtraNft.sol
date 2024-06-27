@@ -9,6 +9,7 @@ import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./EventCreation.sol";
 import "./PriceFeedHandler.sol";
+import "./Participants.sol";
 
 error NotEnoughMoneySent(uint256 moneySent, uint256 price);
 error NotOnAllowList(uint256 eventId, address sendersAddress);
@@ -30,6 +31,7 @@ contract ExtraNft is
 	Ownable
 {
 	EventCreation eventCreation;
+	Participants participantsContract;
 	PriceFeedHandler public priceFeedHandler;
 
 	uint256 private _nextTokenId;
@@ -138,7 +140,8 @@ contract ExtraNft is
 		uint256 _price,
 		address _eventCreationAddress,
 		uint256 _eventId,
-		address _priceFeedHandlerAddress
+		address _priceFeedHandlerAddress,
+		address _participantsContractAddress
 	) ERC721(_name, _symbol) Ownable(msg.sender) {
 		eventCreation = EventCreation(_eventCreationAddress);
 		eventId = _eventId;
@@ -146,6 +149,7 @@ contract ExtraNft is
 		uri = _uri;
 		EXTRA_TYPE = _extraType;
 		priceFeedHandler = PriceFeedHandler(_priceFeedHandlerAddress);
+		participantsContract = Participants(_participantsContractAddress);
 		pause();
 	}
 
@@ -214,7 +218,7 @@ contract ExtraNft is
 	) public onlyAllowList(eventId) isTokenMinted(tokenId) {
 		redemptionMap[tokenId] = true;
 		if (EXTRA_TYPE == 0) {
-			eventCreation.addParticipantWithTicket(eventId, ownerOf(tokenId), address(this));
+			participantsContract.addParticipantWithTicket(eventId, ownerOf(tokenId), address(this));
 		}
 	}
 

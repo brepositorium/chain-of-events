@@ -61,14 +61,6 @@ contract EventCreation {
 	/// @dev Maps event IDs to mappings of bundle addresses to their inclusion status, ensuring only valid bundles are considered for each event.
 	mapping(uint256 => mapping(address => bool)) bundlesMapping;
 
-	/// @notice Retrieves the list of participant addresses for each event
-	/// @dev Maps event IDs to arrays of participant addresses who have redeemed tickets
-	mapping(uint256 => address[]) public participants;
-
-	/// @notice Retrieves the list of tickets redeemed by a participant
-	/// @dev Maps participant addresses to arrays of redeemed ticket addresses
-	mapping(address => address[]) public participantsTickets;
-
 	uint256 public eventCounter;
 
 	modifier isSenderAdmin(uint256 eventId) {
@@ -179,7 +171,8 @@ contract EventCreation {
         uint256 extraType,
         uint256 price,
         uint256 eventId,
-        address priceFeedHandlerAddress
+        address priceFeedHandlerAddress,
+		address participantsContractAddress
     ) public isSenderAdmin(eventId) {
         ExtraNft newExtra = new ExtraNft(
             name,
@@ -189,25 +182,12 @@ contract EventCreation {
             price,
             address(this),
             eventId,
-            priceFeedHandlerAddress
+            priceFeedHandlerAddress,
+			participantsContractAddress
         );
 		newExtra.transferOwnership(msg.sender);
         addExtra(address(newExtra), eventId);
     }
-
-	/// @notice Registers a ticket for a participant for a specific event once the ticket was redeemed
-	/// @dev Adds a participant address to the event's participant list and maps their ticket to their address
-	/// @param eventId ID of the event the ticket is for
-	/// @param participant Address of the participant redeeming the ticket
-	/// @param extraAddress Address of the redeemed ticket contract
-	function addParticipantWithTicket(uint256 eventId, address participant, address extraAddress) external 
-	isCallFromExtraContract(eventId)
-	{
-		if(participantsTickets[participant].length == 0) {
-			participants[eventId].push(participant);
-		}
-		participantsTickets[participant].push(extraAddress);
-	}
 
 	/// @notice Allows an address to redeem tickets for an event
 	/// @param allowedAddress The address to allow
@@ -309,12 +289,8 @@ contract EventCreation {
 		return bundlesMapping[_eventId][_address];
 	}
 
-	function getNumberOfParticipants(uint256 eventId) public view returns (uint256) {
-		return participants[eventId].length;
-	}
-
-	function getReedemedTicketsOfParticipant(address participantAddress) public view returns (address[] memory) {
-		return participantsTickets[participantAddress];
+	function isExtraPartOfEvent(uint256 _eventId, address _address) public view returns (bool) {
+		return extrasMapping[_eventId][_address];
 	}
 
 	function getAdmin(uint256 eventId) public view returns (address) {
