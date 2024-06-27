@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import useContractAddress from "~~/hooks/chain-of-events/useEventCreationAddress";
+import useParticipantsContractAddress from "~~/hooks/chain-of-events/useParticipantsContractAddress";
 import { usePriceFeedHandlerAddress } from "~~/hooks/chain-of-events/usePriceFeedHandlerAddress";
 import {
   constructExtraUri,
@@ -26,6 +27,7 @@ const AddExtraModal: React.FC<AddExtraModalProps> = ({ isOpen, onClose, extraTyp
 
   const contractAddress = useContractAddress();
   const priceFeedHandlerAddress = usePriceFeedHandlerAddress();
+  const participantsContractAddress = useParticipantsContractAddress();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,6 +58,7 @@ const AddExtraModal: React.FC<AddExtraModalProps> = ({ isOpen, onClose, extraTyp
                   BigInt(id),
                   contractAddress,
                   priceFeedHandlerAddress!,
+                  participantsContractAddress!,
                 )
               : createAndRegisterExtra(
                   name,
@@ -66,6 +69,7 @@ const AddExtraModal: React.FC<AddExtraModalProps> = ({ isOpen, onClose, extraTyp
                   BigInt(id),
                   contractAddress,
                   priceFeedHandlerAddress!,
+                  participantsContractAddress!,
                 );
           console.log("Added:", { name, symbol, description, metadataUri, price });
           toast

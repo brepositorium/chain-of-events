@@ -112,8 +112,9 @@ export const createAndRegisterExtra = async (
   eventId: BigInt,
   eventCreationAddress: string,
   priceFeedHandlerAddress: string,
+  participantsContractAddress: string,
 ) => {
-  console.log("Create event");
+  console.log("Create extra");
   const signer = await provider.getSigner();
   const contract = new ethers.Contract(eventCreationAddress, EventCreation.abi, signer);
   await contract.createAndRegisterExtra(
@@ -124,6 +125,7 @@ export const createAndRegisterExtra = async (
     BigInt(Math.round(price * 100)),
     eventId,
     priceFeedHandlerAddress,
+    participantsContractAddress,
   );
   console.log("Contract deployed at ", await contract.getAddress());
   return await contract.getAddress();
@@ -166,7 +168,6 @@ export const registerUpkeepForType = async (chainlinkContractAddress: string, na
 export const schedulePriceUpdate = async (chainlinkContractAddress: string, newValue: number, scheduleTime: number) => {
   const signer = await provider.getSigner();
   const contract = new ethers.Contract(chainlinkContractAddress, PriceAutomatedUpdate.abi, signer);
-  console.log(chainlinkContractAddress);
   await contract.scheduleUpdate(BigInt(newValue), BigInt(scheduleTime));
   console.log("Schedule price update");
 };
@@ -245,7 +246,6 @@ export const fetchBundleDetails = async (address: string) => {
   try {
     const name = await contract.name();
     const price = await contract.price();
-    console.log(name);
     return { name, price };
   } catch (error) {
     console.error("Failed to fetch bundle data:", error);
@@ -255,7 +255,6 @@ export const fetchBundleDetails = async (address: string) => {
 
 export const fetchBundleBasics = async (bundleAddress: string) => {
   const contract = new ethers.Contract(bundleAddress, BundleDiscounts.abi, provider);
-  console.log(bundleAddress);
   try {
     const name = await contract.name();
     const price = await contract.price();
@@ -281,6 +280,39 @@ export const addExtraToBundle = async (bundleAddress: string, extraAddress: stri
   const contract = new ethers.Contract(bundleAddress, BundleDiscounts.abi, signer);
   await contract.addExtraToBundle(extraAddress, BigInt(amount));
   console.log("Add Extra to Bundle");
+};
+
+export const getEventParticipants = async (contractAddress: string, callerAddress: string) => {
+  const contract = new ethers.Contract(contractAddress, ExtraNft.abi, provider);
+  try {
+    const balance = await contract.getUnredeemedBalance(callerAddress);
+    return balance;
+  } catch (error) {
+    console.error("Failed to fetch balance:", error);
+    return null;
+  }
+};
+
+export const getTicketsOfParticipant = async (contractAddress: string, callerAddress: string) => {
+  const contract = new ethers.Contract(contractAddress, ExtraNft.abi, provider);
+  try {
+    const balance = await contract.getUnredeemedBalance(callerAddress);
+    return balance;
+  } catch (error) {
+    console.error("Failed to fetch balance:", error);
+    return null;
+  }
+};
+
+export const getNumberOfParticipants = async (contractAddress: string, callerAddress: string) => {
+  const contract = new ethers.Contract(contractAddress, ExtraNft.abi, provider);
+  try {
+    const balance = await contract.getUnredeemedBalance(callerAddress);
+    return balance;
+  } catch (error) {
+    console.error("Failed to fetch balance:", error);
+    return null;
+  }
 };
 
 export const getUnredeemedBalanceOf = async (contractAddress: string, callerAddress: string) => {

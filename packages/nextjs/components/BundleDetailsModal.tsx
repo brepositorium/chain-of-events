@@ -69,13 +69,10 @@ const BundleDetailsModal: React.FC<BundleDetailsModalProps> = ({
         const basics = await fetchBundleBasics(bundleAddress);
 
         const extrasDetailsPromises = basics?.extrasAddresses.map((address: string) => fetchExtraDetails(address));
-        console.log(extrasDetailsPromises);
+
         const extrasDetails = await Promise.all(extrasDetailsPromises);
-        console.log(extraDetails);
         if (extrasDetails) {
           setBundleDetails({ ...basics, extrasDetails });
-          console.log(extraDetails);
-          console.log(bundleDetails);
         } else {
           setBundleDetails(basics);
         }
