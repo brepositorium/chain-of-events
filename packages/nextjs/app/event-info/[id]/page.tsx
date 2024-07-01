@@ -7,10 +7,16 @@ import { useQuery } from "@apollo/client";
 import { APIProvider, Map, Marker } from "@vis.gl/react-google-maps";
 import { useAccount, useReadContract } from "wagmi";
 import ExtraCard from "~~/components/ExtraCard";
+import { Address } from "~~/components/scaffold-eth";
 import useApolloClient from "~~/hooks/chain-of-events/useApolloClient";
 import useContractAddress from "~~/hooks/chain-of-events/useEventCreationAddress";
 import { ACTIONS } from "~~/utils/chain-of-events/Actions";
-import { fetchExtraDetails, getUnredeemedBalanceOf } from "~~/utils/chain-of-events/deployContract";
+import {
+  checkVerifiedAccount,
+  fetchExtraDetails,
+  getEventAdmin,
+  getUnredeemedBalanceOf,
+} from "~~/utils/chain-of-events/deployContract";
 import { GET_EVENT_DETAILS_BY_ID } from "~~/utils/chain-of-events/queries";
 
 type PageProps = {
@@ -58,6 +64,8 @@ const EditDashboardPage = ({ params }: PageProps) => {
   const [locationAddress, setLocationAddress] = useState("");
   const [latCoord, setLatCoord] = useState(11.197451);
   const [lngCoord, setLngCoord] = useState(140.3606071);
+  const [eventAdmin, setEventAdmin] = useState("");
+  const [isVerified, setIsVerified] = useState(false);
 
   useEffect(() => {
     const fetchExtras = async () => {
@@ -99,6 +107,26 @@ const EditDashboardPage = ({ params }: PageProps) => {
       fetchExtras();
     }
   }, [data, address, dataEvents]);
+
+  useEffect(() => {
+    async function fetchAdmin() {
+      if (contractAddress) {
+        const adminData = await getEventAdmin(contractAddress, id);
+        if (adminData && adminData.admin) {
+          setEventAdmin(adminData.admin);
+
+          const verified = await checkVerifiedAccount(adminData.admin);
+          setIsVerified(verified);
+        } else {
+          console.error("Failed to fetch event admin");
+          setEventAdmin("Unable to fetch admin data");
+          setIsVerified(false);
+        }
+      }
+    }
+
+    fetchAdmin();
+  }, [contractAddress]);
 
   function reverseGeocode(lat: any, lng: any) {
     if (!lat || !lng) {
@@ -154,6 +182,19 @@ const EditDashboardPage = ({ params }: PageProps) => {
                   Buy Drink/Snack
                 </Link>
               </div>
+              <div className="flex justify-center items-center">
+                <Link
+                  href={`/shop/${id}/2`}
+                  className="btn btn-primary rounded w-48 -mt-6 flex items-center justify-center"
+                >
+                  <img
+                    className="w-10 h-10 -ml-2 -mr-2"
+                    alt="%"
+                    src="https://first-bucket-190624.s3.eu-north-1.amazonaws.com/bundle-icon.svg"
+                  ></img>
+                  Discount Bundles
+                </Link>
+              </div>
               <Map
                 defaultZoom={15}
                 defaultCenter={{
@@ -189,6 +230,21 @@ const EditDashboardPage = ({ params }: PageProps) => {
               <div className="bg-base-200 p-4 rounded-xl shadow-xl">
                 <p className="text-xl font-bold font-poppins">Location</p>
                 <div className="text-lg">{locationAddress}</div>
+              </div>
+              <div className="bg-base-200 p-4 rounded-xl shadow-xl">
+                <p className="text-xl font-bold font-poppins">Admin</p>
+                <div className="text-lg flex gap-4">
+                  {eventAdmin ? <Address address={eventAdmin}></Address> : "Loading admin data..."}
+                  {isVerified && (
+                    <div className="tooltip" data-tip="hello">
+                      <img
+                        src="https://first-bucket-190624.s3.eu-north-1.amazonaws.com/check.svg"
+                        alt="Verified"
+                        className="h-6 w-6"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

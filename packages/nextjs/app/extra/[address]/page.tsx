@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import ChainlinkContractManager from "~~/components/ChainlinkContractsManager";
 import ExtraTemplates from "~~/components/ExtraTemplates";
 import SimpleModal from "~~/components/SimpleModal";
@@ -57,17 +58,74 @@ const ExtraPage = ({ params }: PageProps) => {
   }, [address]);
 
   const handlePause = async () => {
-    await pauseSellingForExtra(address);
-    setIsPaused(true);
+    const pausePromise = pauseSellingForExtra(address);
+
+    toast.promise(
+      pausePromise,
+      {
+        loading: "Pausing selling...",
+        success: "Selling paused successfully!",
+        error: "Failed to pause selling.",
+      },
+      {
+        style: { minWidth: "250px" },
+        success: { duration: 5000, icon: "✅" },
+      },
+    );
+
+    try {
+      await pausePromise;
+      setIsPaused(true);
+    } catch (error) {
+      console.error("Error pausing the contract:", error);
+    }
   };
 
   const handleUnpause = async () => {
-    await unpauseSellingForExtra(address);
-    setIsPaused(false);
+    const unpausePromise = unpauseSellingForExtra(address);
+
+    toast.promise(
+      unpausePromise,
+      {
+        loading: "Unpausing selling...",
+        success: "Selling unpaused successfully!",
+        error: "Failed to unpause selling.",
+      },
+      {
+        style: { minWidth: "250px" },
+        success: { duration: 5000, icon: "✅" },
+      },
+    );
+
+    try {
+      await unpausePromise;
+      setIsPaused(false);
+    } catch (error) {
+      console.error("Error unpausing the contract:", error);
+    }
   };
 
   const handleWithdraw = async () => {
-    await withdrawFundsFromExtra(address);
+    const withdrawPromise = withdrawFundsFromExtra(address);
+
+    toast.promise(
+      withdrawPromise,
+      {
+        loading: "Withdrawing funds...",
+        success: "Funds withdrawn successfully!",
+        error: "Failed to withdraw funds.",
+      },
+      {
+        style: { minWidth: "250px" },
+        success: { duration: 5000, icon: "💰" },
+      },
+    );
+
+    try {
+      await withdrawPromise;
+    } catch (error) {
+      console.error("Error withdrawing funds:", error);
+    }
   };
 
   const handleEditClick = (field: string, chainlinkContractAddress?: string) => {

@@ -2,13 +2,16 @@
 import React, { useEffect, useState } from "react";
 import EventCreation from "../../hardhat/artifacts/contracts/EventCreation.sol/EventCreation.json";
 import ExtraCard from "./ExtraCard";
-import { useReadContract } from "wagmi";
+import toast from "react-hot-toast";
+import { useAccount, useReadContract } from "wagmi";
+import { usePriceFeedHandlerAddress } from "~~/hooks/chain-of-events/usePriceFeedHandlerAddress";
 import { ACTIONS } from "~~/utils/chain-of-events/Actions";
 import {
   addExtraToBundle,
   fetchBundleBasics,
   fetchExtraDetails,
   fetchExtraNameAndAddress,
+  mintBundle,
 } from "~~/utils/chain-of-events/deployContract";
 
 interface BundleDetailsModalProps {
@@ -17,6 +20,7 @@ interface BundleDetailsModalProps {
   bundleAddress: string;
   eventId: number;
   contractAddress: string;
+  isAdmin: boolean;
 }
 
 interface ExtraDetails {
@@ -42,6 +46,7 @@ const BundleDetailsModal: React.FC<BundleDetailsModalProps> = ({
   bundleAddress,
   eventId,
   contractAddress,
+  isAdmin,
 }) => {
   const [bundleDetails, setBundleDetails] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -50,6 +55,9 @@ const BundleDetailsModal: React.FC<BundleDetailsModalProps> = ({
   const [extraNameAndAddress, setExtraNameAndAddress] = useState<any[]>([]);
   const [selectedExtra, setSelectedExtra] = useState("");
   const [amount, setAmount] = useState(0);
+
+  const { address } = useAccount();
+  const priceFeedHandlerAddress = usePriceFeedHandlerAddress();
 
   const { data, error, isLoading } = useReadContract({
     abi: EventCreation.abi,
@@ -101,17 +109,46 @@ const BundleDetailsModal: React.FC<BundleDetailsModalProps> = ({
   }, [isOpen, data]);
   if (!isOpen) return null;
 
+  async function handleBuy(): Promise<void> {
+    if (!bundleAddress || !address) {
+      toast.error("Please provide the required address.");
+      return;
+    }
+
+    const mintPromise = mintBundle(address, Number(bundleDetails.price), bundleAddress, priceFeedHandlerAddress!);
+
+    toast.promise(
+      mintPromise,
+      {
+        loading: "⏳ Processing your purchase...",
+        success: " Thank you for your purchase!",
+        error: " Could not process sell.",
+      },
+      {
+        style: { minWidth: "250px" },
+        success: { duration: 5000, icon: "🎉" },
+      },
+    );
+
+    try {
+      await mintPromise;
+      console.log("Minting successful");
+    } catch (e) {
+      console.error("Error minting:", e);
+    }
+  }
+
   if (fetchError) return <div>Error: {fetchError}</div>;
 
   return (
     <dialog open className="modal" onClose={onClose}>
-      <div className="modal-box bg-base-200 rounded-xl text-black">
+      <div className="modal-box bg-base-200 rounded-xl text-black flex flex-col justify-center">
         <form method="dialog">
           <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
         {bundleDetails ? (
           <>
-            <h2>{bundleDetails.name}</h2>
+            <h2 className="text-lg text-center font-bold">{bundleDetails.name}</h2>
             <p className="text-lg text-center font-bold">{`$${(Number(bundleDetails.price) / 100).toFixed(2)}`}</p>
             {bundleDetails.extrasDetails && bundleDetails.extrasDetails.length > 0 ? (
               bundleDetails.extrasDetails.map(
@@ -136,39 +173,48 @@ const BundleDetailsModal: React.FC<BundleDetailsModalProps> = ({
                     action={ACTIONS.MANAGE}
                     manageUrl={`/extra/${extra.address}`}
                     extraType={Number(extra.extraType)}
+                    isBundle={true}
                   />
                 ),
               )
             ) : (
               <></>
             )}
-            <select
-              onChange={e => setSelectedExtra(e.target.value)}
-              className="select select-md select-bordered w-80 bg-secondary-content rounded text-black"
-            >
-              <option disabled selected>
-                Add an Extra to this Bundle
-              </option>
-              {extraNameAndAddress.map((item, index) => (
-                <option key={index} value={item.address}>
-                  {item.name}
-                </option>
-              ))}
-            </select>
-            <p className="self-start font-medium font-poppins">Number of Tickets</p>
-            <input
-              type="number"
-              value={amount}
-              onChange={e => setAmount(parseInt(e.target.value) || 0)}
-              className="input input-md input-bordered w-80 bg-secondary-content rounded text-black -mt-3"
-            />
-            <button
-              onClick={() => addExtraToBundle(bundleAddress, selectedExtra, amount)}
-              className="btn btn-primary rounded btn-sm w-20 mt-2"
-              disabled={selectedExtra === ""}
-            >
-              Save
-            </button>
+            {isAdmin ? (
+              <>
+                <select
+                  onChange={e => setSelectedExtra(e.target.value)}
+                  className="select select-md select-bordered w-80 bg-secondary-content rounded text-black mt-4 self-center"
+                >
+                  <option disabled selected>
+                    Add an Extra to this Bundle
+                  </option>
+                  {extraNameAndAddress.map((item, index) => (
+                    <option key={index} value={item.address}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="self-center font-medium font-poppins">Number of Tickets</p>
+                <input
+                  type="number"
+                  value={amount}
+                  onChange={e => setAmount(parseInt(e.target.value) || 0)}
+                  className="self-center input input-md input-bordered w-80 bg-secondary-content rounded text-black -mt-3"
+                />
+                <button
+                  onClick={() => addExtraToBundle(bundleAddress, selectedExtra, amount)}
+                  className="self-center btn btn-primary rounded btn-sm w-20 mt-2"
+                  disabled={selectedExtra === ""}
+                >
+                  Save
+                </button>
+              </>
+            ) : (
+              <button onClick={handleBuy} className="self-center btn btn-primary rounded-xl w-32 mt-2">
+                Buy Bundle
+              </button>
+            )}
           </>
         ) : (
           <></>

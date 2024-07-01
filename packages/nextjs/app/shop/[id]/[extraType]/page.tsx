@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import EventCreation from "../../../../../hardhat/artifacts/contracts/EventCreation.sol/EventCreation.json";
 import { useReadContract } from "wagmi";
+import BundleList from "~~/components/BundlesList";
 import ExtraCard from "~~/components/ExtraCard";
 import useContractAddress from "~~/hooks/chain-of-events/useEventCreationAddress";
 import { ACTIONS } from "~~/utils/chain-of-events/Actions";
@@ -65,7 +66,9 @@ const ShopPage = ({ params }: PageProps) => {
     <div className="container mx-auto px-11 md:px-20 xl:px-40">
       <h1 className="text-2xl my-4 font-bold">Extras for Sell</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {filteredExtras.length > 0 ? (
+        {extraType == 2 ? (
+          <BundleList eventId={id} contractAddress={contractAddress!} isAdmin={false} />
+        ) : filteredExtras.length > 0 ? (
           filteredExtras.map((extra, index) => (
             <ExtraCard
               extraName={extra.name}

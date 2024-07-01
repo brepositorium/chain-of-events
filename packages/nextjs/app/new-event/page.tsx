@@ -8,7 +8,7 @@ import { NextPage } from "next";
 import toast from "react-hot-toast";
 import { AutocompleteCustom } from "~~/components/PlaceAutocompleteClassic";
 import useEventCreationAddress from "~~/hooks/chain-of-events/useEventCreationAddress";
-import { createEvent, pinFileToIPFS } from "~~/utils/chain-of-events/deployContract";
+import { checkVerifiedAccount, createEvent, pinFileToIPFS } from "~~/utils/chain-of-events/deployContract";
 
 type FormErrors = {
   name?: string;
@@ -43,6 +43,7 @@ const NewEvent: NextPage = () => {
     if (selectedPlace) {
       setMapCenter(selectedPlace);
     }
+    checkVerifiedAccount("0xdBbCba345190E60Ad24E3cb779346B792869d210");
   }, [selectedPlace]);
 
   const validateForm = () => {

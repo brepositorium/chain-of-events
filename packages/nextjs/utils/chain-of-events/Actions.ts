@@ -3,4 +3,5 @@ export enum ACTIONS {
   MANAGE,
   BUY,
   REDEEM,
+  DETAILS,
 }

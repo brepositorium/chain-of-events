@@ -8,9 +8,10 @@ import { fetchBundleDetails } from "~~/utils/chain-of-events/deployContract";
 interface BundleListProps {
   eventId: number;
   contractAddress: string;
+  isAdmin: boolean;
 }
 
-const BundleList: React.FC<BundleListProps> = ({ eventId, contractAddress }) => {
+const BundleList: React.FC<BundleListProps> = ({ eventId, contractAddress, isAdmin }) => {
   const [bundleDetails, setBundleDetails] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState("");
@@ -58,19 +59,33 @@ const BundleList: React.FC<BundleListProps> = ({ eventId, contractAddress }) => 
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-      {bundleDetails.map((bundle, index) => (
-        <ExtraCard
-          key={index}
-          extraName={bundle.name}
-          price={Number(bundle.price) / 100}
-          extraType={2}
-          hasQuantity={false}
-          action={ACTIONS.MANAGE} // Change according to your ACTIONS setup
-          bundleAddress={bundle.address}
-          eventId={eventId}
-          contractAddress={contractAddress}
-        />
-      ))}
+      {bundleDetails.map((bundle, index) =>
+        isAdmin ? (
+          <ExtraCard
+            key={index}
+            extraName={bundle.name}
+            price={Number(bundle.price) / 100}
+            extraType={2}
+            hasQuantity={false}
+            action={ACTIONS.MANAGE}
+            bundleAddress={bundle.address}
+            eventId={eventId}
+            contractAddress={contractAddress}
+          />
+        ) : (
+          <ExtraCard
+            key={index}
+            extraName={bundle.name}
+            price={Number(bundle.price) / 100}
+            extraType={2}
+            hasQuantity={false}
+            action={ACTIONS.DETAILS}
+            bundleAddress={bundle.address}
+            eventId={eventId}
+            contractAddress={contractAddress}
+          />
+        ),
+      )}
     </div>
   );
 };

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import EventCreation from "../../../../hardhat/artifacts/contracts/EventCreation.sol/EventCreation.json";
 import { useQuery } from "@apollo/client";
 import { useReadContract } from "wagmi";
@@ -224,6 +225,14 @@ const EditDashboardPage = ({ params }: PageProps) => {
                   Add Allowed Address
                 </button>
               </div>
+              <div
+                className="tooltip tooltip-secondary"
+                data-tip="Here you can see a list of all the people that have attended your event alongside the tickets they used."
+              >
+                <Link href={"/participants/" + id} className="btn btn-primary rounded btn-md w-48 font-poppins">
+                  See Your Participants
+                </Link>
+              </div>
             </div>
           </div>
           <div className="flex flex-col gap-8 basis-1/2">
@@ -241,7 +250,7 @@ const EditDashboardPage = ({ params }: PageProps) => {
       </div>
       <div className="container mx-auto px-11 md:px-20 xl:px-40 mt-8">
         <h1 className="text-2xl font-bold my-4">Bundles</h1>
-        <BundleList eventId={id} contractAddress={contractAddress!} />
+        <BundleList eventId={id} contractAddress={contractAddress!} isAdmin={true} />
       </div>
       <div className="container mx-auto px-11 md:px-20 xl:px-40 mt-8">
         <h1 className="text-2xl font-bold my-4">Ticket Types</h1>

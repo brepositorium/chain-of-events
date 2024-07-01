@@ -24,6 +24,7 @@ interface ExtraCardProps {
   bundleAddress?: string;
   eventId?: number;
   contractAddress?: string;
+  isBundle?: boolean;
 }
 
 const ExtraCard: React.FC<ExtraCardProps> = ({
@@ -41,11 +42,14 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
   bundleAddress,
   eventId,
   contractAddress,
+  isBundle,
 }) => {
   const [quantity, setQuantity] = useState(0); // Initialize quantity with 0
   const [isSimpleModalOpen, setIsSimpleModalOpen] = useState(false);
   const [currentField, setCurrentField] = useState("");
   const [selectedBundleAddress, setSelectedBundleAddress] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const { address } = useAccount();
   const priceFeedHandlerAddress = usePriceFeedHandlerAddress();
@@ -64,15 +68,31 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
   }
 
   async function handleBuy(extraAddress: string, extraPrice: number, quantity: number): Promise<void> {
-    if (address) {
-      try {
-        await mintNft(extraAddress, address, extraPrice, quantity, priceFeedHandlerAddress!);
-        toast.success("Thank you for your purchase!");
-        console.log("Minting successful");
-      } catch (e) {
-        toast.error("Could not process sell." + e);
-        console.error("Error minting:", e);
-      }
+    if (!extraAddress || !address) {
+      toast.error("Please provide the required address.");
+      return;
+    }
+
+    const mintPromise = mintNft(extraAddress, address, extraPrice, quantity, priceFeedHandlerAddress!);
+
+    toast.promise(
+      mintPromise,
+      {
+        loading: "⏳ Processing your purchase...",
+        success: " Thank you for your purchase!",
+        error: " Could not process sell.",
+      },
+      {
+        style: { minWidth: "250px" },
+        success: { duration: 5000, icon: "🎉" },
+      },
+    );
+
+    try {
+      await mintPromise;
+      console.log("Minting successful");
+    } catch (e) {
+      console.error("Error minting:", e);
     }
   }
 
@@ -91,8 +111,9 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
     setIsSimpleModalOpen(false);
   };
 
-  const handleManageBundle = (address: string) => {
+  const handleManageBundle = (address: string, isAdmin: boolean) => {
     setSelectedBundleAddress(address);
+    setIsAdmin(isAdmin);
   };
 
   return (
@@ -103,7 +124,23 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
             <h2 className="text-center font-bold text-lg">{extraName}</h2>
             <p className="text-lg text-center font-bold">{`$${price?.toFixed(2)}`}</p>
             <div className="flex flex-wrap justify-evenly mt-4 ">
-              <button onClick={() => handleManageBundle(bundleAddress!)}>Manage</button>
+              {action === ACTIONS.MANAGE ? (
+                <button
+                  className={`btn btn-primary rounded-xl w-36 border-0`}
+                  onClick={() => handleManageBundle(bundleAddress!, true)}
+                >
+                  Manage
+                </button>
+              ) : action === ACTIONS.DETAILS ? (
+                <button
+                  className={`btn btn-primary rounded-xl w-36 border-0`}
+                  onClick={() => handleManageBundle(bundleAddress!, false)}
+                >
+                  See Details
+                </button>
+              ) : (
+                <></>
+              )}
             </div>
           </div>
           <BundleDetailsModal
@@ -112,7 +149,22 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
             bundleAddress={selectedBundleAddress}
             eventId={eventId!}
             contractAddress={contractAddress!}
+            isAdmin={isAdmin}
           />
+        </Card>
+      ) : isBundle ? (
+        <Card className={"w-full bg-neutral-content rounded-lg text-primary-content flex justify-around gap-8"}>
+          <div className="">
+            <img src={imageUrl} alt={extraName} className="h-20 w-20 object-cover rounded-lg" />
+          </div>
+          <div className="flex gap-24 mt-2">
+            <div>
+              <p className="font-bold text-lg">{extraName}</p>
+            </div>
+            <div>
+              <p className="text-lg font-bold ">{`$${price?.toFixed(2)}`}</p>
+            </div>
+          </div>
         </Card>
       ) : (
         <Card

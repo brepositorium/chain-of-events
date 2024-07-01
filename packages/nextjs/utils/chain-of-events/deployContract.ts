@@ -2,9 +2,11 @@ import BundleDiscounts from "../../../hardhat/artifacts/contracts/BundleDiscount
 import EventCreation from "../../../hardhat/artifacts/contracts/EventCreation.sol/EventCreation.json";
 import ExtraNft from "../../../hardhat/artifacts/contracts/ExtraNft.sol/ExtraNft.json";
 import MintLimitAutomatedUpdate from "../../../hardhat/artifacts/contracts/MintLimitAutomatedUpdate.sol/MintLimitAutomatedUpdate.json";
+import Participants from "../../../hardhat/artifacts/contracts/Participants.sol/Participants.json";
 import PauseAutomatedUpdate from "../../../hardhat/artifacts/contracts/PauseAutomatedUpdate.sol/PauseAutomatedUpdate.json";
 import PriceAutomatedUpdate from "../../../hardhat/artifacts/contracts/PriceAutomatedUpdate.sol/PriceAutomatedUpdate.json";
 import PriceFeedHandler from "../../../hardhat/artifacts/contracts/PriceFeedHandler.sol/PriceFeedHandler.json";
+import indexerAbi from "./indexerAbi.json";
 import axios from "axios";
 import { ethers } from "ethers";
 import toast from "react-hot-toast";
@@ -18,6 +20,24 @@ type PinataResponse = {
 let provider: any;
 if (typeof window !== "undefined") {
   provider = new ethers.BrowserProvider(window.ethereum);
+}
+
+export async function checkVerifiedAccount(userAddress: string) {
+  const verifiedAccountSchemaId = "0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9";
+  const indexerAddress = "0x2c7eE1E5f416dfF40054c27A62f7B357C4E8619C";
+
+  const attestationIndexerContract = new ethers.Contract(indexerAddress, indexerAbi, provider);
+  try {
+    const attestationUid = await attestationIndexerContract.getAttestationUid(userAddress, verifiedAccountSchemaId);
+
+    const isVerified = attestationUid !== "0x0000000000000000000000000000000000000000000000000000000000000000";
+
+    console.log(isVerified);
+    return isVerified;
+  } catch (error) {
+    console.error("Error checking verified account:", error);
+    return false;
+  }
 }
 
 const loadContractArtifacts = async (updateType: any) => {
@@ -48,6 +68,18 @@ export const createEvent = async (
   const contract = new ethers.Contract(eventCreationAddress, EventCreation.abi, signer);
   await contract.createEvent(name, description, location, logoUrl, numberOfTickets, startTimestamp, endTimestamp);
   console.log("Create event");
+};
+
+export const getEventAdmin = async (address: string, eventId: number) => {
+  const contract = new ethers.Contract(address, EventCreation.abi, provider);
+  try {
+    const admin = await contract.getAdmin(BigInt(eventId));
+
+    return { admin };
+  } catch (error) {
+    console.error("Failed to fetch event admin:", error);
+    return null;
+  }
 };
 
 export const changeDescription = async (newDescription: string, eventId: BigInt, eventCreationAddress: string) => {
@@ -275,44 +307,33 @@ export const fetchBundleBasics = async (bundleAddress: string) => {
   }
 };
 
+export const fetchParticipants = async (address: string, eventId: number) => {
+  const contract = new ethers.Contract(address, Participants.abi, provider);
+  try {
+    const participants = await contract.getParticipants(BigInt(eventId));
+    return participants;
+  } catch (error) {
+    console.error("Failed to fetch participants:", error);
+    return null;
+  }
+};
+
+export const fetchParticipantsTickets = async (contractAddress: string, participantAddress: string) => {
+  const contract = new ethers.Contract(contractAddress, Participants.abi, provider);
+  try {
+    const tickets = await contract.getReedemedTicketsOfParticipant(participantAddress);
+    return tickets;
+  } catch (error) {
+    console.error("Failed to fetch redeemed tickets:", error);
+    return null;
+  }
+};
+
 export const addExtraToBundle = async (bundleAddress: string, extraAddress: string, amount: number) => {
   const signer = await provider.getSigner();
   const contract = new ethers.Contract(bundleAddress, BundleDiscounts.abi, signer);
   await contract.addExtraToBundle(extraAddress, BigInt(amount));
   console.log("Add Extra to Bundle");
-};
-
-export const getEventParticipants = async (contractAddress: string, callerAddress: string) => {
-  const contract = new ethers.Contract(contractAddress, ExtraNft.abi, provider);
-  try {
-    const balance = await contract.getUnredeemedBalance(callerAddress);
-    return balance;
-  } catch (error) {
-    console.error("Failed to fetch balance:", error);
-    return null;
-  }
-};
-
-export const getTicketsOfParticipant = async (contractAddress: string, callerAddress: string) => {
-  const contract = new ethers.Contract(contractAddress, ExtraNft.abi, provider);
-  try {
-    const balance = await contract.getUnredeemedBalance(callerAddress);
-    return balance;
-  } catch (error) {
-    console.error("Failed to fetch balance:", error);
-    return null;
-  }
-};
-
-export const getNumberOfParticipants = async (contractAddress: string, callerAddress: string) => {
-  const contract = new ethers.Contract(contractAddress, ExtraNft.abi, provider);
-  try {
-    const balance = await contract.getUnredeemedBalance(callerAddress);
-    return balance;
-  } catch (error) {
-    console.error("Failed to fetch balance:", error);
-    return null;
-  }
 };
 
 export const getUnredeemedBalanceOf = async (contractAddress: string, callerAddress: string) => {
@@ -394,7 +415,30 @@ export const mintNft = async (
     const receipt = await txResponse.wait();
     console.log("Transaction receipt:", receipt);
   } catch (error) {
-    console.error("Error pausing the contract:", error);
+    console.error("Error minting:", error);
+    throw error;
+  }
+};
+
+export const mintBundle = async (
+  to: string,
+  bundlePrice: number,
+  bundleAddress: string,
+  priceFeedHandlerAddress: string,
+) => {
+  const signer = await provider.getSigner();
+  const contract = new ethers.Contract(bundleAddress, BundleDiscounts.abi, signer);
+  try {
+    console.log(bundlePrice * 100);
+    const valueInEth = await getEthPriceFromUsd(BigInt(Math.round(bundlePrice * 100)), priceFeedHandlerAddress);
+    console.log(valueInEth);
+    const txResponse = await contract.mintBundle(to, { value: valueInEth });
+    console.log("Transaction response:", txResponse);
+    const receipt = await txResponse.wait();
+    console.log("Transaction receipt:", receipt);
+  } catch (error) {
+    console.error("Error minting:", error);
+    throw error;
   }
 };
 
@@ -408,6 +452,7 @@ export const pauseSellingForExtra = async (address: string) => {
     console.log("Transaction receipt:", receipt);
   } catch (error) {
     console.error("Error pausing the contract:", error);
+    throw error;
   }
 };
 
@@ -421,6 +466,7 @@ export const unpauseSellingForExtra = async (address: string) => {
     console.log("Transaction receipt:", receipt);
   } catch (error) {
     console.error("Error pausing the contract:", error);
+    throw error;
   }
 };
 
@@ -434,6 +480,7 @@ export const withdrawFundsFromExtra = async (address: string) => {
     console.log("Transaction receipt:", receipt);
   } catch (error) {
     console.error("Error pausing the contract:", error);
+    throw error;
   }
 };
 
