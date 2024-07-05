@@ -429,9 +429,7 @@ export const mintBundle = async (
   const signer = await provider.getSigner();
   const contract = new ethers.Contract(bundleAddress, BundleDiscounts.abi, signer);
   try {
-    console.log(bundlePrice * 100);
-    const valueInEth = await getEthPriceFromUsd(BigInt(Math.round(bundlePrice * 100)), priceFeedHandlerAddress);
-    console.log(valueInEth);
+    const valueInEth = await getEthPriceFromUsd(BigInt(Math.round(bundlePrice)), priceFeedHandlerAddress);
     const txResponse = await contract.mintBundle(to, { value: valueInEth });
     console.log("Transaction response:", txResponse);
     const receipt = await txResponse.wait();
