@@ -65,11 +65,11 @@ const ShopPage = ({ params }: PageProps) => {
   return (
     <div className="container mx-auto px-11 md:px-20 xl:px-40">
       <h1 className="text-2xl my-4 font-bold">Extras for Sell</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {extraType == 2 ? (
-          <BundleList eventId={id} contractAddress={contractAddress!} isAdmin={false} />
-        ) : filteredExtras.length > 0 ? (
-          filteredExtras.map((extra, index) => (
+      {extraType == 2 ? (
+        <BundleList eventId={id} contractAddress={contractAddress!} isAdmin={false} />
+      ) : filteredExtras.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {filteredExtras.map((extra, index) => (
             <ExtraCard
               extraName={extra.name}
               description={extra.description}
@@ -80,11 +80,11 @@ const ShopPage = ({ params }: PageProps) => {
               action={ACTIONS.BUY}
               extraType={Number(extra.extraType)}
             />
-          ))
-        ) : (
-          <p>No extras available.</p>
-        )}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <p>No extras available.</p>
+      )}
     </div>
   );
 };
