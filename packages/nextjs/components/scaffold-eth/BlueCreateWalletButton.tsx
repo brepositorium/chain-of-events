@@ -42,7 +42,6 @@ export function BlueCreateWalletButton({ handleSuccess, handleError }: BlueCreat
         method: "eth_requestAccounts",
       })) as string[];
       const address = addresses[0];
-      console.log(address);
       handleSuccess(address);
     } catch (error: any) {
       handleError(error);
