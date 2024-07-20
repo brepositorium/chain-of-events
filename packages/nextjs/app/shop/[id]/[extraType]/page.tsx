@@ -22,6 +22,7 @@ interface ExtraDetail {
   symbol: string;
   price: bigint;
   uri: string;
+  isPaused: boolean;
 }
 
 const ShopPage = ({ params }: PageProps) => {
@@ -54,8 +55,8 @@ const ShopPage = ({ params }: PageProps) => {
       );
 
       const results = await Promise.all(promises);
-      const filteredExtras = results.filter(item => item !== null) as ExtraDetail[];
-
+      let filteredExtras = results.filter(item => item !== null) as ExtraDetail[];
+      filteredExtras = filteredExtras.filter(item => !item.isPaused) as ExtraDetail[];
       setFilteredExtras(filteredExtras);
     };
 
