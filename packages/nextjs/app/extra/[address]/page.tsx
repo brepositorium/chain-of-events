@@ -7,7 +7,7 @@ import ExtraTemplates from "~~/components/ExtraTemplates";
 import SimpleModal from "~~/components/SimpleModal";
 import {
   fetchExtraDetails,
-  getPausedStatus,
+  getExtraPausedStatus,
   pauseSellingForExtra,
   unpauseSellingForExtra,
   withdrawFundsFromExtra,
@@ -40,7 +40,7 @@ const ExtraPage = ({ params }: PageProps) => {
   useEffect(() => {
     const fetchPausedStatus = async () => {
       setLoading(true);
-      const status = await getPausedStatus(address);
+      const status = await getExtraPausedStatus(address);
       setIsPaused(status);
       const details = await fetchExtraDetails(address);
       if (details) {
@@ -120,12 +120,6 @@ const ExtraPage = ({ params }: PageProps) => {
         success: { duration: 5000, icon: "💰" },
       },
     );
-
-    try {
-      await withdrawPromise;
-    } catch (error) {
-      console.error("Error withdrawing funds:", error);
-    }
   };
 
   const handleEditClick = (field: string, chainlinkContractAddress?: string) => {

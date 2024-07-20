@@ -29,6 +29,7 @@ interface ExtraDetail {
   imageUrl: string;
   price: bigint;
   uri: string;
+  isPaused: boolean;
 }
 
 interface SaveDetails {
@@ -265,6 +266,7 @@ const EditDashboardPage = ({ params }: PageProps) => {
               action={ACTIONS.MANAGE}
               manageUrl={"/extra/" + item.address}
               extraType={Number(item.extraType)}
+              isPaused={item.isPaused}
             />
           ))}
         </div>
@@ -282,6 +284,7 @@ const EditDashboardPage = ({ params }: PageProps) => {
               action={ACTIONS.MANAGE}
               manageUrl={"/extra/" + item.address}
               extraType={Number(item.extraType)}
+              isPaused={item.isPaused}
             />
           ))}
         </div>

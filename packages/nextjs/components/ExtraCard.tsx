@@ -17,6 +17,7 @@ interface ExtraCardProps {
   noOfItems?: number;
   hasQuantity: boolean;
   extraType: number;
+  isPaused?: boolean;
   action: ACTIONS;
   manageUrl?: string;
   extraAddress?: string;
@@ -35,6 +36,7 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
   noOfItems,
   hasQuantity,
   extraType,
+  isPaused,
   action,
   manageUrl,
   extraAddress,
@@ -122,7 +124,7 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
         <Card className={"w-72 bg-green-pattern bg-cover bg-no-repeat rounded-lg text-primary-content"}>
           <div className="flex flex-col h-full p-2">
             <h2 className="text-center font-bold text-lg">{extraName}</h2>
-            <p className="text-lg text-center font-bold">{`$${price?.toFixed(2)}`}</p>
+            <p className="text-lg text-center font-bold">{!isPaused ? "SELLING PAUSED" : `$${price?.toFixed(2)}`}</p>
             <div className="flex flex-wrap justify-evenly mt-4 ">
               {action === ACTIONS.MANAGE ? (
                 <button
@@ -185,7 +187,8 @@ const ExtraCard: React.FC<ExtraCardProps> = ({
           <div className="flex flex-col h-full p-2">
             <h2 className="text-center font-bold text-lg">{extraName}</h2>
             <p className="text-sm font-poppins h-32 overflow-auto">{description}</p>
-            <p className="text-lg text-center font-bold">{`$${price?.toFixed(2)}`}</p>
+
+            <p className="text-lg text-center font-bold">{isPaused ? "BUNDLE NOT ACTIVE" : `$${price?.toFixed(2)}`}</p>
             {hasQuantity ? (
               <div className="flex items-center justify-center my-2">
                 <button className="btn text-xl" onClick={handleDecrease}>

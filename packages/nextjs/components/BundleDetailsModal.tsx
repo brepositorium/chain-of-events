@@ -1,4 +1,3 @@
-// BundleDetailsModal.js
 import React, { useEffect, useState } from "react";
 import EventCreation from "../../hardhat/artifacts/contracts/EventCreation.sol/EventCreation.json";
 import ExtraCard from "./ExtraCard";
@@ -7,11 +6,14 @@ import { useAccount, useReadContract } from "wagmi";
 import { usePriceFeedHandlerAddress } from "~~/hooks/chain-of-events/usePriceFeedHandlerAddress";
 import { ACTIONS } from "~~/utils/chain-of-events/Actions";
 import {
+  activateBundleSelling,
   addExtraToBundle,
+  deactivateBundleSelling,
   fetchBundleBasics,
   fetchExtraDetails,
   fetchExtraNameAndAddress,
   mintBundle,
+  withdrawFundsFromBundle,
 } from "~~/utils/chain-of-events/deployContract";
 
 interface BundleDetailsModalProps {
@@ -138,11 +140,74 @@ const BundleDetailsModal: React.FC<BundleDetailsModalProps> = ({
     }
   }
 
+  const handleDeactivation = async () => {
+    const deactivationPromise = deactivateBundleSelling(bundleAddress);
+
+    toast.promise(
+      deactivationPromise,
+      {
+        loading: "Deactivating bundle selling...",
+        success: "Selling deactivated successfully!",
+        error: "Failed to deactivate selling.",
+      },
+      {
+        style: { minWidth: "250px" },
+        success: { duration: 5000, icon: "✅" },
+      },
+    );
+
+    try {
+      await deactivationPromise;
+    } catch (error) {
+      console.error("Error deactivating the selling:", error);
+    }
+  };
+
+  const handleActivation = async () => {
+    const activationPromise = activateBundleSelling(bundleAddress);
+
+    toast.promise(
+      activationPromise,
+      {
+        loading: "Activating bundle selling...",
+        success: "Selling activated successfully!",
+        error: "Failed to activate selling.",
+      },
+      {
+        style: { minWidth: "250px" },
+        success: { duration: 5000, icon: "✅" },
+      },
+    );
+
+    try {
+      await activationPromise;
+    } catch (error) {
+      console.error("Error activating the selling:", error);
+    }
+  };
+
+  const handleWithdraw = async () => {
+    const withdrawPromise = withdrawFundsFromBundle(bundleAddress);
+
+    toast.promise(
+      withdrawPromise,
+      {
+        loading: "Withdrawing funds...",
+        success: "Funds withdrawn successfully!",
+        error: "Failed to withdraw funds.",
+      },
+      {
+        style: { minWidth: "250px" },
+        success: { duration: 5000, icon: "💰" },
+      },
+    );
+  };
+
   if (fetchError) return <div>Error: {fetchError}</div>;
 
   return (
     <dialog open className="modal" onClose={onClose}>
-      <div className="modal-box bg-base-200 rounded-xl text-black flex flex-col justify-center">
+      <div className="modal-box bg-base-200 rounded-xl text-black flex flex-col gap-4 justify-center">
         <form method="dialog">
           <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
         </form>
@@ -182,6 +247,23 @@ const BundleDetailsModal: React.FC<BundleDetailsModalProps> = ({
             )}
             {isAdmin ? (
               <>
+                <button
+                  className="self-center btn btn-primary rounded w-40 mt-2"
+                  disabled={bundleDetails.isActive}
+                  onClick={handleActivation}
+                >
+                  Activate
+                </button>
+                <button
+                  className="self-center btn btn-primary rounded w-40 mt-2"
+                  disabled={!bundleDetails.isActive}
+                  onClick={handleDeactivation}
+                >
+                  Deactivate
+                </button>
+                <button className="self-center btn btn-primary rounded w-40 mt-2" onClick={handleWithdraw}>
+                  Withdraw
+                </button>
                 <select
                   onChange={e => setSelectedExtra(e.target.value)}
                   className="select select-md select-bordered w-80 bg-secondary-content rounded text-black mt-4 self-center"
@@ -204,7 +286,7 @@ const BundleDetailsModal: React.FC<BundleDetailsModalProps> = ({
                 />
                 <button
                   onClick={() => addExtraToBundle(bundleAddress, selectedExtra, amount)}
-                  className="self-center btn btn-primary rounded btn-sm w-20 mt-2"
+                  className="self-center btn btn-primary rounded btn-sm w-40 mt-2"
                   disabled={selectedExtra === ""}
                 >
                   Save
