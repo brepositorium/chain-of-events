@@ -131,14 +131,24 @@ const BundleDetailsModal: React.FC<BundleDetailsModalProps> = ({
         success: { duration: 5000, icon: "🎉" },
       },
     );
-
-    try {
-      await mintPromise;
-      console.log("Minting successful");
-    } catch (e) {
-      console.error("Error minting:", e);
-    }
   }
+
+  const handleAddExtraToBundle = async (bundleAddress: string, selectedExtra: string, amount: number) => {
+    const addExtraPromise = addExtraToBundle(bundleAddress, selectedExtra, amount);
+
+    toast.promise(
+      addExtraPromise,
+      {
+        loading: "Adding extra to bundle...",
+        success: "Extra added successfully!",
+        error: "Failed to add extra to bundle.",
+      },
+      {
+        style: { minWidth: "250px" },
+        success: { duration: 5000, icon: "💰" },
+      },
+    );
+  };
 
   const handleDeactivation = async () => {
     const deactivationPromise = deactivateBundleSelling(bundleAddress);
@@ -285,7 +295,7 @@ const BundleDetailsModal: React.FC<BundleDetailsModalProps> = ({
                   className="self-center input input-md input-bordered w-80 bg-secondary-content rounded text-black -mt-3"
                 />
                 <button
-                  onClick={() => addExtraToBundle(bundleAddress, selectedExtra, amount)}
+                  onClick={() => handleAddExtraToBundle(bundleAddress, selectedExtra, amount)}
                   className="self-center btn btn-primary rounded btn-sm w-40 mt-2"
                   disabled={selectedExtra === ""}
                 >
