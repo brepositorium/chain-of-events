@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CopyToClipboard } from "react-copy-to-clipboard";
-import { Address as AddressType, getAddress, isAddress } from "viem";
+import toast from "react-hot-toast";
+import { Address as AddressType, checksumAddress, getAddress, isAddress } from "viem";
 import { hardhat } from "viem/chains";
 import { normalize } from "viem/ens";
 import { useEnsAvatar, useEnsName } from "wagmi";
@@ -36,7 +37,18 @@ export const Address = ({ address, disableAddressLink, format, size = "base" }: 
   const [ens, setEns] = useState<string | null>();
   const [ensAvatar, setEnsAvatar] = useState<string | null>();
   const [addressCopied, setAddressCopied] = useState(false);
-  const checkSumAddress = address ? getAddress(address) : undefined;
+  const [errorToastShown, setErrorToastShown] = useState(false);
+
+  let checkSumAddress: typeof address;
+  try {
+    checkSumAddress = address ? getAddress(address) : undefined;
+  } catch {
+    checkSumAddress = "0x0000000000000000000000000000000000000000";
+    if (!errorToastShown) {
+      toast.error("Please select BASE Mainnet as the network in your wallet");
+      setErrorToastShown(true);
+    }
+  }
 
   const { targetNetwork } = useTargetNetwork();
 
