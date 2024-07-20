@@ -263,10 +263,20 @@ export const fetchExtraDetails = async (address: string) => {
     const price = await contract.price();
     const extraType = await contract.EXTRA_TYPE();
     const uri = await contract.uri();
+    const isPaused = await contract.paused();
     const response = await fetch(uri);
     const jsonData = await response.json();
 
-    return { name, symbol, price, extraType, uri, description: jsonData.description, imageUrl: jsonData.image };
+    return {
+      name,
+      symbol,
+      price,
+      extraType,
+      uri,
+      description: jsonData.description,
+      imageUrl: jsonData.image,
+      isPaused,
+    };
   } catch (error) {
     console.error("Failed to fetch contract data:", error);
     return null;
@@ -278,7 +288,8 @@ export const fetchBundleDetails = async (address: string) => {
   try {
     const name = await contract.name();
     const price = await contract.price();
-    return { name, price };
+    const isActive = await contract.isActive();
+    return { name, price, isActive };
   } catch (error) {
     console.error("Failed to fetch bundle data:", error);
     return null;
@@ -290,6 +301,7 @@ export const fetchBundleBasics = async (bundleAddress: string) => {
   try {
     const name = await contract.name();
     const price = await contract.price();
+    const isActive = await contract.isActive();
     let extrasAddresses = [];
     try {
       extrasAddresses = await contract.getExtras();
@@ -299,6 +311,7 @@ export const fetchBundleBasics = async (bundleAddress: string) => {
     return {
       name,
       price,
+      isActive,
       extrasAddresses,
     };
   } catch (error) {
@@ -454,6 +467,20 @@ export const pauseSellingForExtra = async (address: string) => {
   }
 };
 
+export const deactivateBundleSelling = async (address: string) => {
+  const signer = await provider.getSigner();
+  const contract = new ethers.Contract(address, BundleDiscounts.abi, signer);
+  try {
+    const txResponse = await contract.deactivate();
+    console.log("Transaction response:", txResponse);
+    const receipt = await txResponse.wait();
+    console.log("Transaction receipt:", receipt);
+  } catch (error) {
+    console.error("Error deactivating the contract:", error);
+    throw error;
+  }
+};
+
 export const unpauseSellingForExtra = async (address: string) => {
   const signer = await provider.getSigner();
   const contract = new ethers.Contract(address, ExtraNft.abi, signer);
@@ -463,7 +490,21 @@ export const unpauseSellingForExtra = async (address: string) => {
     const receipt = await txResponse.wait();
     console.log("Transaction receipt:", receipt);
   } catch (error) {
-    console.error("Error pausing the contract:", error);
+    console.error("Error unpausing the contract:", error);
+    throw error;
+  }
+};
+
+export const activateBundleSelling = async (address: string) => {
+  const signer = await provider.getSigner();
+  const contract = new ethers.Contract(address, BundleDiscounts.abi, signer);
+  try {
+    const txResponse = await contract.activate();
+    console.log("Transaction response:", txResponse);
+    const receipt = await txResponse.wait();
+    console.log("Transaction receipt:", receipt);
+  } catch (error) {
+    console.error("Error activating the contract:", error);
     throw error;
   }
 };
@@ -477,12 +518,26 @@ export const withdrawFundsFromExtra = async (address: string) => {
     const receipt = await txResponse.wait();
     console.log("Transaction receipt:", receipt);
   } catch (error) {
-    console.error("Error pausing the contract:", error);
+    console.error("Error withdrawing funds:", error);
     throw error;
   }
 };
 
-export const getPausedStatus = async (contractAddress: string) => {
+export const withdrawFundsFromBundle = async (address: string) => {
+  const signer = await provider.getSigner();
+  const contract = new ethers.Contract(address, BundleDiscounts.abi, signer);
+  try {
+    const txResponse = await contract.withdraw();
+    console.log("Transaction response:", txResponse);
+    const receipt = await txResponse.wait();
+    console.log("Transaction receipt:", receipt);
+  } catch (error) {
+    console.error("Error withdrawing funds:", error);
+    throw error;
+  }
+};
+
+export const getExtraPausedStatus = async (contractAddress: string) => {
   const contract = new ethers.Contract(contractAddress, ExtraNft.abi, provider);
   try {
     const pausedStatus = await contract.paused();
