@@ -17,10 +17,7 @@ type PinataResponse = {
   Timestamp: string;
 };
 
-let provider: any;
-if (typeof window !== "undefined") {
-  provider = new ethers.BrowserProvider(window.ethereum);
-}
+const provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_BASE_RPC_URL);
 
 export async function checkVerifiedAccount(userAddress: string) {
   const verifiedAccountSchemaId = "0xf8b05c79f090979bf4a80270aba232dff11a10d9ca55c4f88de95317970f0de9";
@@ -32,7 +29,6 @@ export async function checkVerifiedAccount(userAddress: string) {
 
     const isVerified = attestationUid !== "0x0000000000000000000000000000000000000000000000000000000000000000";
 
-    console.log(isVerified);
     return isVerified;
   } catch (error) {
     console.error("Error checking verified account:", error);
@@ -72,6 +68,7 @@ export const createEvent = async (
 
 export const getEventAdmin = async (address: string, eventId: number) => {
   const contract = new ethers.Contract(address, EventCreation.abi, provider);
+
   try {
     const admin = await contract.getAdmin(BigInt(eventId));
 
